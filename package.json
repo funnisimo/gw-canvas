@@ -17,5 +17,22 @@
   "files": [
     "dist/*",
     "js/*"
-  ]
+  ],
+  "description": "Library for rendering colorized bitmap fonts. Very fast, suitable for applications where the whole canvas needs frequent redrawing.",
+  "dependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/funnisimo/gw-canvas.git"
+  },
+  "keywords": [
+    "webgl",
+    "roguelike",
+    "canvas"
+  ],
+  "author": "Funnisimo",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/funnisimo/gw-canvas/issues"
+  },
+  "homepage": "https://github.com/funnisimo/gw-canvas#readme"
 }
