@@ -38,7 +38,7 @@ export default class Canvas {
 	private _tileWidth:number=16;
 	private _tileHeight:number=16;
 
-  constructor(options: Options|HTMLCanvasElement|string) {
+  constructor(options: Partial<Options>|HTMLCanvasElement|string={}) {
 		let opts = options as Options;
 		if (typeof options === 'string') {
 			const el = document.getElementById(options);

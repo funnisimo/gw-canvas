@@ -22,7 +22,7 @@ export default class Canvas {
     private _height;
     private _tileWidth;
     private _tileHeight;
-    constructor(options: Options | HTMLCanvasElement | string);
+    constructor(options?: Partial<Options> | HTMLCanvasElement | string);
     get node(): HTMLCanvasElement | OffscreenCanvas;
     get width(): number;
     get height(): number;

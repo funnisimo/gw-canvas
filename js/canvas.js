@@ -4,7 +4,7 @@ import * as shaders from "./shaders.js";
 import Glyphs from './glyphs.js';
 const VERTICES_PER_TILE = 6;
 export default class Canvas {
-    constructor(options) {
+    constructor(options = {}) {
         this._data = new Uint32Array();
         this._buffers = {};
         this._attribs = {};
