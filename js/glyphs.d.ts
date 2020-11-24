@@ -18,7 +18,7 @@ export declare class Glyphs {
     needsUpdate: boolean;
     private _map;
     static fromImage(src: string | HTMLImageElement): Glyphs;
-    static forFont(src: Options | string): Glyphs;
+    static fromFont(src: Options | string): Glyphs;
     constructor(opts?: Partial<Options>);
     get width(): number;
     get height(): number;

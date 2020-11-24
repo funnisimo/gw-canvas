@@ -112,7 +112,7 @@ void main() {
             glyph.needsUpdate = true;
             return glyph;
         }
-        static forFont(src) {
+        static fromFont(src) {
             if (typeof src === 'string') {
                 src = { font: src };
             }
@@ -246,7 +246,7 @@ void main() {
         _configure(options) {
             let glyphs = options.glyphs;
             if (!glyphs) {
-                glyphs = Glyphs.forFont(options); // use defaults
+                glyphs = Glyphs.fromFont(options); // use defaults
             }
             this._width = options.width || this._width;
             this._height = options.height || this._height;
@@ -409,7 +409,7 @@ void main() {
         if (typeof src === 'string') {
             src = { font: src };
         }
-        const glyphs = Glyphs.forFont(src);
+        const glyphs = Glyphs.fromFont(src);
         src.glyphs = glyphs;
         return new Canvas(src);
     }

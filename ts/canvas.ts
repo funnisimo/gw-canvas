@@ -75,7 +75,7 @@ export class Canvas {
 	private _configure(options: Options) {
 		let glyphs = options.glyphs;
 		if (!glyphs) {
-			glyphs = Glyphs.forFont(options);	// use defaults
+			glyphs = Glyphs.fromFont(options);	// use defaults
 		}
 
 		this._width = options.width || this._width;

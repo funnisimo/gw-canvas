@@ -47,7 +47,7 @@ export class Glyphs {
     return glyph;
   }
 
-  static forFont(src: Options|string) {
+  static fromFont(src: Options|string) {
     if (typeof src === 'string') {
       src = { font: src } as Options;
     }

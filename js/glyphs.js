@@ -25,7 +25,7 @@ export class Glyphs {
         glyph.needsUpdate = true;
         return glyph;
     }
-    static forFont(src) {
+    static fromFont(src) {
         if (typeof src === 'string') {
             src = { font: src };
         }

@@ -43,7 +43,7 @@ export function withFont(src: Options|string) {
   if (typeof src === 'string') {
     src = { font: src };
   }
-  const glyphs = Glyphs.forFont(src);
+  const glyphs = Glyphs.fromFont(src);
   src.glyphs = glyphs;
   return new Canvas(src);
 }
