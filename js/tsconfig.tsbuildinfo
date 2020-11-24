@@ -187,18 +187,18 @@
         "affectsGlobalScope": false
       },
       "../ts/glyphs.ts": {
-        "version": "47aae99098282d8c0881ec27a1a0d206c6642c8a194f83219824c5b25fd16f6d",
-        "signature": "d59238ff33d7592e4c99d26b338ee1d662fc8e08882926f49cf20ea733ae126d",
+        "version": "94423dfd4c709626978cfa8958934819b02919151d65fcbaa8fe80312c8747fd",
+        "signature": "944687b4a965341440383a864caaff8ec19760fbc8b9f75a5443814455506c5c",
         "affectsGlobalScope": false
       },
       "../ts/canvas.ts": {
-        "version": "713043686ce0cf87ed015df97021f2b33e12e4df736aead77b048933d6e0d1d3",
-        "signature": "e1b1718c6167d1f25c6dc0559980a8fbeadf126f79ced25dbfa7151a74fc7355",
+        "version": "f407f0a1fb395b6e3b2967fbc2acdd84745ab9b4eae67269952eb697838471de",
+        "signature": "354703d107791a2cd1896df739718f8bda300e17bb4692e0792ee1e41845a73c",
         "affectsGlobalScope": false
       },
       "../ts/index.ts": {
-        "version": "5a3187f8e88f51ab6834e6de9916c1e33fbbef8748236de20b41909fb82f0f14",
-        "signature": "5a3187f8e88f51ab6834e6de9916c1e33fbbef8748236de20b41909fb82f0f14",
+        "version": "514de12bae2dff75c0f00efca4011f3d35507fc32194403679d2ecb0a8d2877a",
+        "signature": "ec2451f62c3ba28157aa855b04f762f484727fe81b3b9daee18a3bc7af6a144f",
         "affectsGlobalScope": false
       }
     },

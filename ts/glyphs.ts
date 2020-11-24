@@ -3,27 +3,24 @@
 type CTX = CanvasRenderingContext2D;
 type DrawFunction = (ctx: CTX, x: number, y: number, width: number, height: number) => void;
 type DrawType = string|DrawFunction;
-type CustomGlyphs = Record<number, DrawType>;
 
 export interface Options {
-  font: string;
+  font?: string;
 
-  fontSize: number;
-  size: number; // alias for fontSize
+  fontSize?: number;
+  size?: number; // alias for fontSize
 
-  tileWidth: number;
-  width: number;  // alias for tileWidth
+  tileWidth?: number;
+  // width?: number;  // alias for tileWidth
 
-  tileHeight: number;
-  height: number; // alias for tileHeight
+  tileHeight?: number;
+  // height?: number; // alias for tileHeight
 
-  glyphs?: CustomGlyphs;
-
-  basicOnly: boolean;
-  basic: boolean; // alias for basicOnly
+  basicOnly?: boolean;
+  basic?: boolean; // alias for basicOnly
 }
 
-export default class Glyphs {
+export class Glyphs {
   public node!: HTMLCanvasElement;
   private _ctx!: CanvasRenderingContext2D;
   private _tileWidth: number=12;
@@ -50,13 +47,20 @@ export default class Glyphs {
     return glyph;
   }
 
+  static forFont(src: Options|string) {
+    if (typeof src === 'string') {
+      src = { font: src } as Options;
+    }
+    
+    const glyphs = new this(src);
+    const basicOnly = src.basicOnly || src.basic || false;
+    glyphs._initGlyphs(basicOnly);
+    return glyphs;
+  }
   
 	constructor(opts: Partial<Options>={}) {
 		opts.font = opts.font || 'monospace';
-    opts.basicOnly = opts.basicOnly || opts.basic || false;
-    
 		this._configure(opts as Options);
-    this._initGlyphs(opts.glyphs, opts.basicOnly);
   }
   
   get width() { return 16; }
@@ -72,8 +76,8 @@ export default class Glyphs {
 		this.node = document.createElement('canvas');
     this._ctx = this.node.getContext('2d') as CanvasRenderingContext2D;
 
-    this._tileWidth = opts.tileWidth || opts.width || this.tileWidth;
-    this._tileHeight = opts.tileHeight || opts.height || this.tileHeight;
+    this._tileWidth = opts.tileWidth || this.tileWidth;
+    this._tileHeight = opts.tileHeight || this.tileHeight;
     
     this.node.width = this.width * this.tileWidth;
     this.node.height = this.height * this.tileHeight;
@@ -112,28 +116,20 @@ export default class Glyphs {
     this.needsUpdate = true;
 	}
   
-  _initGlyphs(glyphs: Record<number,DrawType>={}, basicOnly=false) {
+  _initGlyphs(basicOnly=false) {
 
     for(let i = 32; i < 127; ++i) {
-      this.draw(i, glyphs[i] || String.fromCharCode(i));
+      this.draw(i, String.fromCharCode(i));
     }
 
-		if (basicOnly) {
-    	if (Array.isArray(glyphs)) {
-      	glyphs.forEach( (ch, i) => this.draw(i, ch) );
-      }
-      else {
-      	Object.entries(glyphs).forEach( ([i,ch]) => this.draw(Number.parseInt(i), ch) );
-      }
-   	}
-    else {
+		if (!basicOnly) {
 
       [' ', '\u263a', '\u263b', '\u2665', '\u2666', '\u2663', '\u2660', '\u263c', 
       '\u2600', '\u2605', '\u2606', '\u2642', '\u2640', '\u266a', '\u266b', '\u2638',
       '\u25b6', '\u25c0', '\u2195', '\u203c', '\u204b', '\u262f', '\u2318', '\u2616',
       '\u2191', '\u2193', '\u2192', '\u2190', '\u2126', '\u2194', '\u25b2', '\u25bc',
       ].forEach( (ch, i) => {
-        this.draw(i, glyphs[i] || ch);
+        this.draw(i, ch);
       });
 
       [
@@ -155,7 +151,7 @@ export default class Glyphs {
       '\u039e', '\u00b1', '\u2265', '\u2264', '\u2234', '\u2237', '\u00f7', '\u2248',
       '\u22c4', '\u22c5', '\u2217', '\u27b5', '\u2620', '\u2625', '\u25fc', '\u25fb'
       ].forEach( (ch, i) => {
-        this.draw(i + 127, glyphs[i] || ch); 
+        this.draw(i + 127, ch); 
       });
 
     }

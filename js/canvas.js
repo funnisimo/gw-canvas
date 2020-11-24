@@ -1,9 +1,9 @@
 // Based on: https://github.com/ondras/fastiles/blob/master/ts/scene.ts (v2.1.0)
 import { createProgram, createTexture, QUAD } from "./utils.js";
 import * as shaders from "./shaders.js";
-import Glyphs from './glyphs.js';
+import { Glyphs } from './glyphs.js';
 const VERTICES_PER_TILE = 6;
-export default class Canvas {
+export class Canvas {
     constructor(options = {}) {
         this._data = new Uint32Array();
         this._buffers = {};
@@ -13,55 +13,22 @@ export default class Canvas {
         this._autoRender = true;
         this._width = 50;
         this._height = 25;
-        this._tileWidth = 16;
-        this._tileHeight = 16;
-        let opts = options;
         if (typeof options === 'string') {
-            const el = document.getElementById(options);
-            if (!el)
-                throw new Error('Failed to find canvas with id=' + options);
-            if (!(el instanceof HTMLCanvasElement))
-                throw new Error('id must be a canvas element.');
-            options = el;
+            options = { node: options };
         }
-        if (options instanceof HTMLCanvasElement) {
-            opts = { node: options, width: this._width, height: this._height };
+        else if (options instanceof HTMLCanvasElement) {
+            options = { node: options };
         }
-        this._gl = this._initGL(opts.node);
-        this._configure(opts);
+        this._gl = this._initGL(options.node);
+        this._configure(options);
     }
     get node() { return this._gl.canvas; }
     get width() { return this._width; }
     get height() { return this._height; }
-    get tileWidth() { return this._tileWidth; }
-    get tileHeight() { return this._tileHeight; }
+    get tileWidth() { return this._glyphs.tileWidth; }
+    get tileHeight() { return this._glyphs.tileHeight; }
     get pxWidth() { return this.node.width; }
     get pxHeight() { return this.node.height; }
-    _configure(options) {
-        this._width = options.width || this._width;
-        this._height = options.height || this._height;
-        this._tileWidth = options.tileWidth || this._tileWidth;
-        this._tileHeight = options.tileHeight || this._tileHeight;
-        this._autoRender = (options.render !== false);
-        let glyphs = options.glyphs;
-        if (!glyphs) {
-            glyphs = new Glyphs({ tileWidth: this._tileWidth, tileHeight: this._tileHeight }); // use defaults
-        }
-        this.glyphs = glyphs;
-    }
-    resize(width, height) {
-        this._width = width;
-        this._height = height;
-        const node = this.node;
-        node.width = this._width * this._tileWidth;
-        node.height = this._height * this._tileHeight;
-        const gl = this._gl;
-        const uniforms = this._uniforms;
-        gl.viewport(0, 0, node.width, node.height);
-        gl.uniform2ui(uniforms["viewportSize"], node.width, node.height);
-        this._createGeometry();
-        this._createData();
-    }
     get glyphs() { return this._glyphs; }
     set glyphs(glyphs) {
         const gl = this._gl;
@@ -73,12 +40,33 @@ export default class Canvas {
             return;
         if (glyphs !== this._glyphs) {
             this._glyphs = glyphs;
-            this._tileWidth = glyphs.tileWidth;
-            this._tileHeight = glyphs.tileHeight;
             this.resize(this._width, this._height);
-            gl.uniform2uiv(uniforms["tileSize"], [this._tileWidth, this._tileHeight]);
+            gl.uniform2uiv(uniforms["tileSize"], [this.tileWidth, this.tileHeight]);
         }
         this._uploadGlyphs();
+    }
+    _configure(options) {
+        let glyphs = options.glyphs;
+        if (!glyphs) {
+            glyphs = Glyphs.forFont(options); // use defaults
+        }
+        this._width = options.width || this._width;
+        this._height = options.height || this._height;
+        this._autoRender = (options.render !== false);
+        this.glyphs = glyphs;
+    }
+    resize(width, height) {
+        this._width = width;
+        this._height = height;
+        const node = this.node;
+        node.width = this._width * this.tileWidth;
+        node.height = this._height * this.tileHeight;
+        const gl = this._gl;
+        const uniforms = this._uniforms;
+        gl.viewport(0, 0, node.width, node.height);
+        gl.uniform2ui(uniforms["viewportSize"], node.width, node.height);
+        this._createGeometry();
+        this._createData();
     }
     draw(x, y, glyph, fg, bg) {
         let index = y * this._width + x;
@@ -93,7 +81,12 @@ export default class Canvas {
     }
     _initGL(node) {
         if (typeof node === 'string') {
-            node = document.getElementById(node);
+            const el = document.getElementById(node);
+            if (!el)
+                throw new Error('Failed to find canvas with id:' + node);
+            if (!(el instanceof HTMLCanvasElement))
+                throw new Error('Canvas: node must be a canvas element.');
+            node = el;
         }
         else if (!node) {
             node = document.createElement("canvas");

@@ -1,14 +1,14 @@
-import Glyphs from './glyphs.js';
+import { Glyphs } from './glyphs.js';
 export interface Options {
-    width: number;
-    height: number;
+    width?: number;
+    height?: number;
     tileWidth?: number;
     tileHeight?: number;
     glyphs?: HTMLImageElement | Glyphs | string;
     node?: HTMLCanvasElement | string;
     render?: boolean;
 }
-export default class Canvas {
+export declare class Canvas {
     private _gl;
     private _data;
     private _buffers;
@@ -20,9 +20,7 @@ export default class Canvas {
     private _autoRender;
     private _width;
     private _height;
-    private _tileWidth;
-    private _tileHeight;
-    constructor(options?: Partial<Options> | HTMLCanvasElement | string);
+    constructor(options?: Options | HTMLCanvasElement | string);
     get node(): HTMLCanvasElement | OffscreenCanvas;
     get width(): number;
     get height(): number;
@@ -30,10 +28,10 @@ export default class Canvas {
     get tileHeight(): number;
     get pxWidth(): number;
     get pxHeight(): number;
-    private _configure;
-    resize(width: number, height: number): void;
     get glyphs(): Glyphs | HTMLImageElement | string;
     set glyphs(glyphs: Glyphs | HTMLImageElement | string);
+    private _configure;
+    resize(width: number, height: number): void;
     draw(x: number, y: number, glyph: number, fg: number, bg: number): void;
     private _initGL;
     private _createGeometry;

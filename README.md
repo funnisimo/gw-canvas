@@ -1,6 +1,6 @@
 # gw-canvas
 
-Library for rendering colorized bitmap fonts. Very fast, suitable for applications where the whole canvas needs frequent redrawing.
+Library for fast rendering colorized bitmap fonts. 
 
 ## Features
 
@@ -9,11 +9,11 @@ Library for rendering colorized bitmap fonts. Very fast, suitable for applicatio
   - Updates are batched via `requestAnimationFrame`
   - Uses 4096 colors
   - Written in TypeScript
-  - Can generate glyph images from a font
+  - Can generate bitmap font images
 
 ## Speed
 
-  - WebGL (WebGL 2, to be precise)
+  - WebGL2
   - No per-render memory allocations
   - Only one GL draw call for the whole canvas
   - Minimized JS data transfer (data set only for [Provoking vertices](https://www.khronos.org/opengl/wiki/Primitive#Provoking_vertex))
@@ -41,10 +41,10 @@ const glyphs = new Image();
 glyphs.src = 'url | data';
 await glyphs.decode();
 
-const canvas = new Canvas({ glyphs, width: 50, height: 38 });
+const canvas = GWCanvas.withImage({ image: glyphs, width: 50, height: 38 });
 document.body.appendChild(canvas.node);
 
-canvas.draw(0, 0, 97, 0xF00, 0xFFF); // usually a red 'A' on white background.
+canvas.draw(0, 0, 97, 0xF00, 0xFFF); // usually a red 'a' on white background.
 ```
 
 ## Canvas
@@ -64,14 +64,14 @@ If you want to resize the Canvas, use the `resize` method.  If you want to chang
 ## Example
 
 ```js
-import { Canvas } from "gw-canvas";
+import { withImage } from "gw-canvas";
 
 async function init() {
   const glyphs = new Image();
   glyphs.src = './font.png';
   await glyphs.decode();
 
-  const canvas = new Canvas({ glyphs, width: 24, height: 18 });
+  const canvas = withImage({ image: glyphs, width: 24, height: 18 });
   document.body.appendChild(canvas.node)
 
   // basic drawing
@@ -98,8 +98,7 @@ The options available for the creation of the glyph are:
 * basic - A boolean to indicate that you want only the basic ascii text characters (32-127) drawn
 
 ```js
-const glyphs = new Glyphs({ tileWidth: 12, tileHeight: 12, fontSize: 14, font: 'monospace' });
-const canvas = new Canvas({ glyphs: glyphs, width: 30, height: 30 });
+const canvas = GWCanvas.withFont({ width: 30, height: 30, tileWidth: 12, tileHeight: 12, fontSize: 14, font: 'monospace' });
 ```
 
 Once you have a glyph object, you can modify it by using the draw method in one of 2 ways:
