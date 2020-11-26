@@ -34,7 +34,8 @@ export declare class Canvas {
     private _configure;
     resize(width: number, height: number): void;
     draw(x: number, y: number, glyph: number, fg: number, bg: number): void;
-    overlay(buffer: Buffer): void;
+    allocBuffer(): Buffer;
+    copy(buffer: Buffer): void;
     copyTo(buffer: Buffer): void;
     private _initGL;
     private _createGeometry;

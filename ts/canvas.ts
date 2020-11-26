@@ -114,7 +114,9 @@ export class Canvas {
       this._requestRender();
   }
 	
-	overlay(buffer: Buffer) {
+	allocBuffer() { return new Buffer(this); }
+	
+	copy(buffer: Buffer) {
 		buffer.data.forEach( (style, i) => {
 			const index = i * VERTICES_PER_TILE;
 			this._data[index + 2] = style;

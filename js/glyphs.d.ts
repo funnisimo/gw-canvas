@@ -20,8 +20,6 @@ export declare class Glyphs {
     static fromImage(src: string | HTMLImageElement): Glyphs;
     static fromFont(src: Options | string): Glyphs;
     constructor(opts?: Partial<Options>);
-    get width(): number;
-    get height(): number;
     get tileWidth(): number;
     get tileHeight(): number;
     get pxWidth(): number;

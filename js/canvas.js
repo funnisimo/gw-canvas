@@ -2,6 +2,7 @@
 import { createProgram, createTexture, QUAD } from "./utils";
 import * as shaders from "./shaders";
 import { Glyphs } from './glyphs';
+import { Buffer } from './buffer';
 const VERTICES_PER_TILE = 6;
 export class Canvas {
     constructor(options = {}) {
@@ -79,7 +80,8 @@ export class Canvas {
         this._data[index + 5] = style;
         this._requestRender();
     }
-    overlay(buffer) {
+    allocBuffer() { return new Buffer(this); }
+    copy(buffer) {
         buffer.data.forEach((style, i) => {
             const index = i * VERTICES_PER_TILE;
             this._data[index + 2] = style;

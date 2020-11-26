@@ -63,14 +63,14 @@ export class Glyphs {
 		this._configure(opts as Options);
   }
   
-  get width() { return 16; }
-  get height() { return 16; }
+  // get width() { return 16; }
+  // get height() { return 16; }
   get tileWidth() { return this._tileWidth; }
   get tileHeight() { return this._tileHeight; }
   get pxWidth() { return this.node.width; }
   get pxHeight() { return this.node.height; }
 
-  forChar(ch: string) { return this._map[ch] || -1; }
+  forChar(ch: string) { return this._map[ch] || 0; }
 
   private _configure(opts: Options) {
 		this.node = document.createElement('canvas');
@@ -79,8 +79,8 @@ export class Glyphs {
     this._tileWidth = opts.tileWidth || this.tileWidth;
     this._tileHeight = opts.tileHeight || this.tileHeight;
     
-    this.node.width = this.width * this.tileWidth;
-    this.node.height = this.height * this.tileHeight;
+    this.node.width = 16 * this.tileWidth;
+    this.node.height = 16 * this.tileHeight;
 
     this._ctx.fillStyle = 'black';
     this._ctx.fillRect(0, 0, this.pxWidth, this.pxHeight);
@@ -93,8 +93,8 @@ export class Glyphs {
 	}
   
   draw(n: number, ch: DrawType) {
-  	const x = (n % this.width) * this.tileWidth;
-    const y = Math.floor(n / this.width) * this.tileHeight;
+  	const x = (n % 16) * this.tileWidth;
+    const y = Math.floor(n / 16) * this.tileHeight;
     const cx = x + Math.floor(this.tileWidth/2);
     const cy = y + Math.floor(this.tileHeight/2);
 

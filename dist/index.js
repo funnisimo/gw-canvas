@@ -121,20 +121,20 @@ void main() {
             glyphs._initGlyphs(basicOnly);
             return glyphs;
         }
-        get width() { return 16; }
-        get height() { return 16; }
+        // get width() { return 16; }
+        // get height() { return 16; }
         get tileWidth() { return this._tileWidth; }
         get tileHeight() { return this._tileHeight; }
         get pxWidth() { return this.node.width; }
         get pxHeight() { return this.node.height; }
-        forChar(ch) { return this._map[ch] || -1; }
+        forChar(ch) { return this._map[ch] || 0; }
         _configure(opts) {
             this.node = document.createElement('canvas');
             this._ctx = this.node.getContext('2d');
             this._tileWidth = opts.tileWidth || this.tileWidth;
             this._tileHeight = opts.tileHeight || this.tileHeight;
-            this.node.width = this.width * this.tileWidth;
-            this.node.height = this.height * this.tileHeight;
+            this.node.width = 16 * this.tileWidth;
+            this.node.height = 16 * this.tileHeight;
             this._ctx.fillStyle = 'black';
             this._ctx.fillRect(0, 0, this.pxWidth, this.pxHeight);
             const size = opts.fontSize || opts.size || Math.max(this.tileWidth, this.tileHeight);
@@ -144,8 +144,8 @@ void main() {
             this._ctx.fillStyle = 'white';
         }
         draw(n, ch) {
-            const x = (n % this.width) * this.tileWidth;
-            const y = Math.floor(n / this.width) * this.tileHeight;
+            const x = (n % 16) * this.tileWidth;
+            const y = Math.floor(n / 16) * this.tileHeight;
             const cx = x + Math.floor(this.tileWidth / 2);
             const cy = y + Math.floor(this.tileHeight / 2);
             this._ctx.save();
@@ -196,6 +196,39 @@ void main() {
                     this.draw(i + 127, ch);
                 });
             }
+        }
+    }
+
+    class Buffer {
+        constructor(canvas) {
+            this._canvas = canvas;
+            this._data = new Uint32Array(canvas.width * canvas.height);
+        }
+        get data() { return this._data; }
+        get width() { return this._canvas.width; }
+        get height() { return this._canvas.height; }
+        draw(x, y, glyph, fg, bg) {
+            let index = y * this.width + x;
+            glyph = glyph & 0xFF;
+            bg = bg & 0xFFF;
+            fg = fg & 0xFFF;
+            const style = (glyph << 24) + (bg << 12) + fg;
+            this._data[index] = style;
+        }
+        drawChar(x, y, ch, fg, bg) {
+            const glyphs = this._canvas.glyphs;
+            const glyph = glyphs.forChar(ch);
+            this.draw(x, y, glyph, fg, bg);
+        }
+        fill(glyph = 0, fg = 0xFFF, bg = 0) {
+            glyph = glyph & 0xFF;
+            bg = bg & 0xFFF;
+            fg = fg & 0xFFF;
+            const style = (glyph << 24) + (bg << 12) + fg;
+            this._data.fill(style);
+        }
+        copy(other) {
+            this._data.set(other._data);
         }
     }
 
@@ -277,7 +310,8 @@ void main() {
             this._data[index + 5] = style;
             this._requestRender();
         }
-        overlay(buffer) {
+        allocBuffer() { return new Buffer(this); }
+        copy(buffer) {
             buffer.data.forEach((style, i) => {
                 const index = i * VERTICES_PER_TILE;
                 this._data[index + 2] = style;
@@ -393,32 +427,6 @@ void main() {
         gl.vertexAttribIPointer(attribs["uv"], 2, gl.UNSIGNED_BYTE, 0, 0);
         gl.bufferData(gl.ARRAY_BUFFER, uvData, gl.STATIC_DRAW);
         return { position, uv };
-    }
-
-    class Buffer {
-        constructor(width, height) {
-            this._width = width;
-            this._data = new Uint32Array(width * height);
-        }
-        get data() { return this._data; }
-        draw(x, y, glyph, fg, bg) {
-            let index = y * this._width + x;
-            glyph = glyph & 0xFF;
-            bg = bg & 0xFFF;
-            fg = fg & 0xFFF;
-            const style = (glyph << 24) + (bg << 12) + fg;
-            this._data[index] = style;
-        }
-        fill(glyph = 0, fg = 0xFFF, bg = 0) {
-            glyph = glyph & 0xFF;
-            bg = bg & 0xFFF;
-            fg = fg & 0xFFF;
-            const style = (glyph << 24) + (bg << 12) + fg;
-            this._data.fill(style);
-        }
-        copy(other) {
-            this._data.set(other._data);
-        }
     }
 
     function withImage(image) {
