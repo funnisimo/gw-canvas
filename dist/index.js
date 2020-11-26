@@ -199,39 +199,6 @@ void main() {
         }
     }
 
-    class Buffer {
-        constructor(canvas) {
-            this._canvas = canvas;
-            this._data = new Uint32Array(canvas.width * canvas.height);
-        }
-        get data() { return this._data; }
-        get width() { return this._canvas.width; }
-        get height() { return this._canvas.height; }
-        draw(x, y, glyph, fg, bg) {
-            let index = y * this.width + x;
-            glyph = glyph & 0xFF;
-            bg = bg & 0xFFF;
-            fg = fg & 0xFFF;
-            const style = (glyph << 24) + (bg << 12) + fg;
-            this._data[index] = style;
-        }
-        drawChar(x, y, ch, fg, bg) {
-            const glyphs = this._canvas.glyphs;
-            const glyph = glyphs.forChar(ch);
-            this.draw(x, y, glyph, fg, bg);
-        }
-        fill(glyph = 0, fg = 0xFFF, bg = 0) {
-            glyph = glyph & 0xFF;
-            bg = bg & 0xFFF;
-            fg = fg & 0xFFF;
-            const style = (glyph << 24) + (bg << 12) + fg;
-            this._data.fill(style);
-        }
-        copy(other) {
-            this._data.set(other._data);
-        }
-    }
-
     // Based on: https://github.com/ondras/fastiles/blob/master/ts/scene.ts (v2.1.0)
     const VERTICES_PER_TILE = 6;
     class Canvas {
@@ -310,7 +277,6 @@ void main() {
             this._data[index + 5] = style;
             this._requestRender();
         }
-        allocBuffer() { return new Buffer(this); }
         copy(buffer) {
             buffer.data.forEach((style, i) => {
                 const index = i * VERTICES_PER_TILE;
@@ -427,6 +393,39 @@ void main() {
         gl.vertexAttribIPointer(attribs["uv"], 2, gl.UNSIGNED_BYTE, 0, 0);
         gl.bufferData(gl.ARRAY_BUFFER, uvData, gl.STATIC_DRAW);
         return { position, uv };
+    }
+
+    class Buffer {
+        constructor(canvas) {
+            this._canvas = canvas;
+            this._data = new Uint32Array(canvas.width * canvas.height);
+        }
+        get data() { return this._data; }
+        get width() { return this._canvas.width; }
+        get height() { return this._canvas.height; }
+        draw(x, y, glyph, fg, bg) {
+            let index = y * this.width + x;
+            glyph = glyph & 0xFF;
+            bg = bg & 0xFFF;
+            fg = fg & 0xFFF;
+            const style = (glyph << 24) + (bg << 12) + fg;
+            this._data[index] = style;
+        }
+        drawChar(x, y, ch, fg, bg) {
+            const glyphs = this._canvas.glyphs;
+            const glyph = glyphs.forChar(ch);
+            this.draw(x, y, glyph, fg, bg);
+        }
+        fill(glyph = 0, fg = 0xFFF, bg = 0) {
+            glyph = glyph & 0xFF;
+            bg = bg & 0xFFF;
+            fg = fg & 0xFFF;
+            const style = (glyph << 24) + (bg << 12) + fg;
+            this._data.fill(style);
+        }
+        copy(other) {
+            this._data.set(other._data);
+        }
     }
 
     function withImage(image) {
