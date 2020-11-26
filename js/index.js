@@ -1,6 +1,7 @@
-import { Canvas } from "./canvas.js";
-import { Glyphs } from "./glyphs.js";
-export { Canvas, Glyphs };
+import { Canvas } from "./canvas";
+import { Glyphs } from "./glyphs";
+import { Buffer } from './buffer';
+export { Canvas, Glyphs, Buffer };
 export function withImage(image) {
     let el;
     let opts = image;

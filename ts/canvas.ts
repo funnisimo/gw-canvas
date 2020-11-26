@@ -1,9 +1,9 @@
 // Based on: https://github.com/ondras/fastiles/blob/master/ts/scene.ts (v2.1.0)
 
-import { createProgram, createTexture, QUAD } from "./utils.js";
-import * as shaders from "./shaders.js";
-import { Glyphs } from './glyphs.js'; 
-
+import { createProgram, createTexture, QUAD } from "./utils";
+import * as shaders from "./shaders";
+import { Glyphs } from './glyphs'; 
+import { Buffer } from './buffer';
 
 type GL = WebGL2RenderingContext;
 const VERTICES_PER_TILE = 6;
@@ -113,6 +113,24 @@ export class Canvas {
       this._data[index + 5] = style;
       this._requestRender();
   }
+	
+	overlay(buffer: Buffer) {
+		buffer.data.forEach( (style, i) => {
+			const index = i * VERTICES_PER_TILE;
+			this._data[index + 2] = style;
+			this._data[index + 5] = style;
+		});
+		this._requestRender();
+	}
+
+	copyTo(buffer: Buffer) {
+		const n = this.width * this.height;
+		const dest = buffer.data;
+		for(let i = 0; i < n; ++i) {
+			const index = i * VERTICES_PER_TILE;
+			dest[i] = this._data[index + 2];
+		}
+	}
 	
   private _initGL(node?: HTMLCanvasElement|string) {
 			if (typeof node === 'string') {

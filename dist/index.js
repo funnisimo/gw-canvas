@@ -127,7 +127,7 @@ void main() {
         get tileHeight() { return this._tileHeight; }
         get pxWidth() { return this.node.width; }
         get pxHeight() { return this.node.height; }
-        toIndex(ch) { return this._map[ch] || -1; }
+        forChar(ch) { return this._map[ch] || -1; }
         _configure(opts) {
             this.node = document.createElement('canvas');
             this._ctx = this.node.getContext('2d');
@@ -277,6 +277,22 @@ void main() {
             this._data[index + 5] = style;
             this._requestRender();
         }
+        overlay(buffer) {
+            buffer.data.forEach((style, i) => {
+                const index = i * VERTICES_PER_TILE;
+                this._data[index + 2] = style;
+                this._data[index + 5] = style;
+            });
+            this._requestRender();
+        }
+        copyTo(buffer) {
+            const n = this.width * this.height;
+            const dest = buffer.data;
+            for (let i = 0; i < n; ++i) {
+                const index = i * VERTICES_PER_TILE;
+                dest[i] = this._data[index + 2];
+            }
+        }
         _initGL(node) {
             if (typeof node === 'string') {
                 const el = document.getElementById(node);
@@ -379,6 +395,32 @@ void main() {
         return { position, uv };
     }
 
+    class Buffer {
+        constructor(width, height) {
+            this._width = width;
+            this._data = new Uint32Array(width * height);
+        }
+        get data() { return this._data; }
+        draw(x, y, glyph, fg, bg) {
+            let index = y * this._width + x;
+            glyph = glyph & 0xFF;
+            bg = bg & 0xFFF;
+            fg = fg & 0xFFF;
+            const style = (glyph << 24) + (bg << 12) + fg;
+            this._data[index] = style;
+        }
+        fill(glyph = 0, fg = 0xFFF, bg = 0) {
+            glyph = glyph & 0xFF;
+            bg = bg & 0xFFF;
+            fg = fg & 0xFFF;
+            const style = (glyph << 24) + (bg << 12) + fg;
+            this._data.fill(style);
+        }
+        copy(other) {
+            this._data.set(other._data);
+        }
+    }
+
     function withImage(image) {
         let el;
         let opts = image;
@@ -414,6 +456,7 @@ void main() {
         return new Canvas(src);
     }
 
+    exports.Buffer = Buffer;
     exports.Canvas = Canvas;
     exports.Glyphs = Glyphs;
     exports.withFont = withFont;

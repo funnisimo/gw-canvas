@@ -70,7 +70,7 @@ export class Glyphs {
   get pxWidth() { return this.node.width; }
   get pxHeight() { return this.node.height; }
 
-  toIndex(ch: string) { return this._map[ch] || -1; }
+  forChar(ch: string) { return this._map[ch] || -1; }
 
   private _configure(opts: Options) {
 		this.node = document.createElement('canvas');

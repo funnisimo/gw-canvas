@@ -176,6 +176,11 @@
         "signature": "1f03b495671c3a1bd24510f38b8947f0991dfd6bf0278c68eca14af15b306e1f",
         "affectsGlobalScope": false
       },
+      "../ts/buffer.ts": {
+        "version": "4b318cbd8efb75f7e9dd030cc526c4942133c619fdfb68a504b06c737565a95f",
+        "signature": "1eea5c6311fa6389ddf687616ad43ad36ebdd2d5b3a67d83427af0eb6d4d6269",
+        "affectsGlobalScope": false
+      },
       "../ts/utils.ts": {
         "version": "ba64f04783c8d945d28a60c14aae8bf4aab748dcd31e9f582638f3795913faf8",
         "signature": "4e7feb1cc46eb344ec9639bd612f52e9c8b45a045b8d131da21412543319dec1",
@@ -187,18 +192,18 @@
         "affectsGlobalScope": false
       },
       "../ts/glyphs.ts": {
-        "version": "a91a6d019e3ca37aea97e1415266400bb9f5a3bcf4b5863e91e58d1051e825af",
-        "signature": "753adbc61b719415ad4e826870727c2308566d77e4df3624f84102b5b5a1fa70",
+        "version": "67413e2e43b3befb8775f66fa7406b25f9e2f93428576aad2a0f9a5875d6330f",
+        "signature": "2c2b600163fe7d812d45585ace53e1ddd9f5d2aef22345c63217daa8b01b162e",
         "affectsGlobalScope": false
       },
       "../ts/canvas.ts": {
-        "version": "95a2ab45c371da2f82c77275f055f7a05f94776ba8a665d704b349c3077820e8",
-        "signature": "354703d107791a2cd1896df739718f8bda300e17bb4692e0792ee1e41845a73c",
+        "version": "f482769452c3854dd1ccdfd30749c8551385bf79e0057af36b960534592e02a2",
+        "signature": "dad0b8e52337c4f1d877e8571a5ceb6a2b5b0fd05a2784586a9511a0ec14baee",
         "affectsGlobalScope": false
       },
       "../ts/index.ts": {
-        "version": "9b17b596054afe7399d57422727789b0dd443cfbd70b3987adf68b65ceeca8ce",
-        "signature": "ec2451f62c3ba28157aa855b04f762f484727fe81b3b9daee18a3bc7af6a144f",
+        "version": "2e2f3af1673bce7537660545b9d6f94f397c428d9ca26d7b6f9f195d92a0e9b6",
+        "signature": "21da5a5ce628a85ac476e33e3517e4e7a82379e9a7338664f1b1cc022b8ce838",
         "affectsGlobalScope": false
       }
     },
@@ -215,20 +220,24 @@
     },
     "referencedMap": {
       "../ts/canvas.ts": [
+        "../ts/buffer.ts",
         "../ts/glyphs.ts",
         "../ts/shaders.ts",
         "../ts/utils.ts"
       ],
       "../ts/index.ts": [
+        "../ts/buffer.ts",
         "../ts/canvas.ts",
         "../ts/glyphs.ts"
       ]
     },
     "exportedModulesMap": {
       "../ts/canvas.ts": [
+        "../ts/buffer.ts",
         "../ts/glyphs.ts"
       ],
       "../ts/index.ts": [
+        "../ts/buffer.ts",
         "../ts/canvas.ts",
         "../ts/glyphs.ts"
       ]
@@ -269,6 +278,7 @@
       "../node_modules/typescript/lib/lib.es5.d.ts",
       "../node_modules/typescript/lib/lib.scripthost.d.ts",
       "../node_modules/typescript/lib/lib.webworker.importscripts.d.ts",
+      "../ts/buffer.ts",
       "../ts/canvas.ts",
       "../ts/glyphs.ts",
       "../ts/index.ts",

@@ -1,4 +1,5 @@
-import { Glyphs } from './glyphs.js';
+import { Glyphs } from './glyphs';
+import { Buffer } from './buffer';
 export interface Options {
     width?: number;
     height?: number;
@@ -33,6 +34,8 @@ export declare class Canvas {
     private _configure;
     resize(width: number, height: number): void;
     draw(x: number, y: number, glyph: number, fg: number, bg: number): void;
+    overlay(buffer: Buffer): void;
+    copyTo(buffer: Buffer): void;
     private _initGL;
     private _createGeometry;
     private _createData;

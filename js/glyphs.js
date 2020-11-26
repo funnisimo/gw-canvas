@@ -40,7 +40,7 @@ export class Glyphs {
     get tileHeight() { return this._tileHeight; }
     get pxWidth() { return this.node.width; }
     get pxHeight() { return this.node.height; }
-    toIndex(ch) { return this._map[ch] || -1; }
+    forChar(ch) { return this._map[ch] || -1; }
     _configure(opts) {
         this.node = document.createElement('canvas');
         this._ctx = this.node.getContext('2d');

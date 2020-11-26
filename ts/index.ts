@@ -1,5 +1,6 @@
-import { Canvas, Options as CanvasOptions } from "./canvas.js";
-import { Glyphs, Options as GlyphOptions } from "./glyphs.js";
+import { Canvas, Options as CanvasOptions } from "./canvas";
+import { Glyphs, Options as GlyphOptions } from "./glyphs";
+import { Buffer } from './buffer';
 
 interface ImageOptions {
   image?: HTMLImageElement|string;
@@ -7,7 +8,7 @@ interface ImageOptions {
 
 type Options = CanvasOptions & GlyphOptions & ImageOptions;
 
-export { Canvas, Glyphs, Options };
+export { Canvas, Glyphs, Options, Buffer };
 
 
 export function withImage(image: Options|HTMLImageElement|string) {

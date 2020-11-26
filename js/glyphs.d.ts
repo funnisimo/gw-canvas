@@ -26,7 +26,7 @@ export declare class Glyphs {
     get tileHeight(): number;
     get pxWidth(): number;
     get pxHeight(): number;
-    toIndex(ch: string): number;
+    forChar(ch: string): number;
     private _configure;
     draw(n: number, ch: DrawType): void;
     _initGlyphs(basicOnly?: boolean): void;
