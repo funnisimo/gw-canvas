@@ -116,7 +116,7 @@ glyphs.draw(35, '\u2302');
 glyphs.draw(32, (ctx, x, y, w, h) => ctx.fillText('-', x, y) );
 
 // manually
-canvas.glyphs = glyphs;
+canvas.uploadGlyphs();
 
 // automatically
 // happens during render process

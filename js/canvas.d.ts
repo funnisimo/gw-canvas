@@ -39,5 +39,5 @@ export declare class Canvas {
     private _createData;
     private _requestRender;
     private _render;
-    private _uploadGlyphs;
+    uploadGlyphs(): void;
 }

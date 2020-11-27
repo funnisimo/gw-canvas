@@ -39,7 +39,7 @@ export class Canvas {
             this.resize(this._width, this._height);
             gl.uniform2uiv(uniforms["tileSize"], [this.tileWidth, this.tileHeight]);
         }
-        this._uploadGlyphs();
+        this.uploadGlyphs();
     }
     _configure(options) {
         this._width = options.width || this._width;
@@ -148,14 +148,16 @@ export class Canvas {
     _render() {
         const gl = this._gl;
         if (this._glyphs.needsUpdate) { // auto keep glyphs up to date
-            this._uploadGlyphs();
+            this.uploadGlyphs();
         }
         this._renderRequested = false;
         gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.style);
         gl.bufferData(gl.ARRAY_BUFFER, this._data, gl.DYNAMIC_DRAW);
         gl.drawArrays(gl.TRIANGLES, 0, this._width * this._height * VERTICES_PER_TILE);
     }
-    _uploadGlyphs() {
+    uploadGlyphs() {
+        if (!this._glyphs.needsUpdate)
+            return;
         const gl = this._gl;
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, this._texture);
