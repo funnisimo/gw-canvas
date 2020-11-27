@@ -187,13 +187,13 @@
         "affectsGlobalScope": false
       },
       "../ts/glyphs.ts": {
-        "version": "78f62b89520a7e2bcb676cee373d90aa76ce6592a4d9a00833e9af2b567b7664",
-        "signature": "9852097676a64223d9f8f9a9ee7ab0c39b977e8619b231c68332e0edf8a4a6e2",
+        "version": "2bf1901f95157ef60ddc9fc7c6e96e22a186828b13785ee55662276a29f74e6f",
+        "signature": "b40dc56ca317c7767697b52810d92a5a74ee371038086f10b7fb5c6a001eb037",
         "affectsGlobalScope": false
       },
       "../ts/canvas.ts": {
-        "version": "957a3125f38acc3a70f596005b3f669fa0d109baf109d0a638f38e6f464756f1",
-        "signature": "aa7416a0cdc366a6a9bcc9da609e9ac38a9015c6d40a2302fb377b137c826f45",
+        "version": "d1ffb9ef44f295135484a95655fd34e75787f4f949daa345a937bfa9d583de6e",
+        "signature": "0cb995375897aa04b9f25e540f522b25c20a75656a677f3926491b4bc6eb2861",
         "affectsGlobalScope": false
       },
       "../ts/buffer.ts": {
@@ -202,8 +202,8 @@
         "affectsGlobalScope": false
       },
       "../ts/index.ts": {
-        "version": "2e2f3af1673bce7537660545b9d6f94f397c428d9ca26d7b6f9f195d92a0e9b6",
-        "signature": "21da5a5ce628a85ac476e33e3517e4e7a82379e9a7338664f1b1cc022b8ce838",
+        "version": "8db1d839ae69b578c3503544fed3cf7edcf79fe720c9b14f4432a961e2e6ec0c",
+        "signature": "6c6091e9e1c353a9ad3fe007261af5b373cc993a5ba88c2ed874fe871c27d386",
         "affectsGlobalScope": false
       }
     },

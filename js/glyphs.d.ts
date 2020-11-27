@@ -3,6 +3,7 @@ declare type DrawFunction = (ctx: CTX, x: number, y: number, width: number, heig
 declare type DrawType = string | DrawFunction;
 export interface Options {
     font?: string;
+    image?: HTMLImageElement | string;
     fontSize?: number;
     size?: number;
     tileWidth?: number;

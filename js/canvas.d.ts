@@ -3,9 +3,7 @@ import { Buffer } from './buffer';
 export interface Options {
     width?: number;
     height?: number;
-    tileWidth?: number;
-    tileHeight?: number;
-    glyphs?: HTMLImageElement | Glyphs | string;
+    glyphs: Glyphs;
     node?: HTMLCanvasElement | string;
     render?: boolean;
 }
@@ -21,7 +19,7 @@ export declare class Canvas {
     private _autoRender;
     private _width;
     private _height;
-    constructor(options?: Options | HTMLCanvasElement | string);
+    constructor(options: Options);
     get node(): HTMLCanvasElement | OffscreenCanvas;
     get width(): number;
     get height(): number;

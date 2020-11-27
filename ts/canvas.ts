@@ -11,9 +11,7 @@ const VERTICES_PER_TILE = 6;
 export interface Options {
 	width?: number;
 	height?: number;
-	tileWidth?: number;
-	tileHeight?: number;
-	glyphs?: HTMLImageElement|Glyphs|string;
+	glyphs: Glyphs;
 	node?: HTMLCanvasElement|string;
 	render?: boolean;
 }
@@ -36,10 +34,8 @@ export class Canvas {
 	private _width:number=50;
 	private _height:number=25;
 
-  constructor(options: Options|HTMLCanvasElement|string={}) {
-		if (typeof options === 'string') { options = { node: options }; }
-		else if (options instanceof HTMLCanvasElement) { options = { node: options }; }
-
+  constructor(options: Options) {
+		if (!options.glyphs) throw new Error('You must supply glyphs for the canvas.');
     this._gl = this._initGL(options.node);
     this._configure(options);
   }
@@ -73,16 +69,11 @@ export class Canvas {
 	}
 		
 	private _configure(options: Options) {
-		let glyphs = options.glyphs;
-		if (!glyphs) {
-			glyphs = Glyphs.fromFont(options);	// use defaults
-		}
-
 		this._width = options.width || this._width;
 		this._height = options.height || this._height;
 		this._autoRender = (options.render !== false);
 
-		this.glyphs = glyphs;
+		this.glyphs = options.glyphs;
 	}
 
 	resize(width: number, height: number) {

@@ -4,7 +4,7 @@ import * as shaders from "./shaders";
 import { Glyphs } from './glyphs';
 const VERTICES_PER_TILE = 6;
 export class Canvas {
-    constructor(options = {}) {
+    constructor(options) {
         this._data = new Uint32Array();
         this._buffers = {};
         this._attribs = {};
@@ -13,12 +13,8 @@ export class Canvas {
         this._autoRender = true;
         this._width = 50;
         this._height = 25;
-        if (typeof options === 'string') {
-            options = { node: options };
-        }
-        else if (options instanceof HTMLCanvasElement) {
-            options = { node: options };
-        }
+        if (!options.glyphs)
+            throw new Error('You must supply glyphs for the canvas.');
         this._gl = this._initGL(options.node);
         this._configure(options);
     }
@@ -46,14 +42,10 @@ export class Canvas {
         this._uploadGlyphs();
     }
     _configure(options) {
-        let glyphs = options.glyphs;
-        if (!glyphs) {
-            glyphs = Glyphs.fromFont(options); // use defaults
-        }
         this._width = options.width || this._width;
         this._height = options.height || this._height;
         this._autoRender = (options.render !== false);
-        this.glyphs = glyphs;
+        this.glyphs = options.glyphs;
     }
     resize(width, height) {
         this._width = width;

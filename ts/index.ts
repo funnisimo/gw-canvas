@@ -2,49 +2,33 @@ import { Canvas, Options as CanvasOptions } from "./canvas";
 import { Glyphs, Options as GlyphOptions } from "./glyphs";
 import { Buffer } from './buffer';
 
-interface ImageOptions {
-  image?: HTMLImageElement|string;
-}
-
-type Options = CanvasOptions & GlyphOptions & ImageOptions;
+type Options = CanvasOptions & GlyphOptions;
 
 export { Canvas, Glyphs, Options, Buffer };
 
 
 export function withImage(image: Options|HTMLImageElement|string) {
-  let el;
-  let opts = image as Options;
-  if (opts.image) {
-    image = opts.image;
-  }
-  else {
-    opts = {};
-  }
+  let opts = {} as CanvasOptions;
   if (typeof image === 'string') {
-    if (image.startsWith('data:')) {
-      throw new Error('Load data into an Image element first.');
-    }
-    else {
-      el = document.getElementById(image);
-      if (!el) {
-        throw new Error('Could not find element with id:' + image);
-      }
-    }
+    opts.glyphs = Glyphs.fromImage(image);
   }
   else if (image instanceof HTMLImageElement) {
-    el = image;
+    opts.glyphs = Glyphs.fromImage(image);
+  }
+  else {
+    if (!image.image) throw new Error('You must supply the image.');
+    Object.assign(opts, image);
+    opts.glyphs = Glyphs.fromImage(image.image);
   }
 
-  opts.glyphs = Glyphs.fromImage(el as HTMLImageElement);
   return new Canvas(opts);
 }
 
 
 export function withFont(src: Options|string) {
   if (typeof src === 'string') {
-    src = { font: src };
+    src = { font: src } as Options;
   }
-  const glyphs = Glyphs.fromFont(src);
-  src.glyphs = glyphs;
+  src.glyphs = Glyphs.fromFont(src);
   return new Canvas(src);
 }

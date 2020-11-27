@@ -6,6 +6,7 @@ type DrawType = string|DrawFunction;
 
 export interface Options {
   font?: string;
+  image?: HTMLImageElement|string;
 
   fontSize?: number;
   size?: number; // alias for fontSize
@@ -30,7 +31,7 @@ export class Glyphs {
   
   static fromImage(src: string|HTMLImageElement) {
     if (typeof src === 'string') {
-      if (src.startsWith('data:')) throw new Error('Glyph: Cannot load image data string directly, see examples.');
+      if (src.startsWith('data:')) throw new Error('Glyph: You must load a data string into an image element and use that.');
       
       const el = document.getElementById(src);
       if (!el) throw new Error('Glyph: Failed to find image element with id:' + src);

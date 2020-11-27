@@ -97,7 +97,7 @@ void main() {
         static fromImage(src) {
             if (typeof src === 'string') {
                 if (src.startsWith('data:'))
-                    throw new Error('Glyph: Cannot load image data string directly, see examples.');
+                    throw new Error('Glyph: You must load a data string into an image element and use that.');
                 const el = document.getElementById(src);
                 if (!el)
                     throw new Error('Glyph: Failed to find image element with id:' + src);
@@ -202,7 +202,7 @@ void main() {
     // Based on: https://github.com/ondras/fastiles/blob/master/ts/scene.ts (v2.1.0)
     const VERTICES_PER_TILE = 6;
     class Canvas {
-        constructor(options = {}) {
+        constructor(options) {
             this._data = new Uint32Array();
             this._buffers = {};
             this._attribs = {};
@@ -211,12 +211,8 @@ void main() {
             this._autoRender = true;
             this._width = 50;
             this._height = 25;
-            if (typeof options === 'string') {
-                options = { node: options };
-            }
-            else if (options instanceof HTMLCanvasElement) {
-                options = { node: options };
-            }
+            if (!options.glyphs)
+                throw new Error('You must supply glyphs for the canvas.');
             this._gl = this._initGL(options.node);
             this._configure(options);
         }
@@ -244,14 +240,10 @@ void main() {
             this._uploadGlyphs();
         }
         _configure(options) {
-            let glyphs = options.glyphs;
-            if (!glyphs) {
-                glyphs = Glyphs.fromFont(options); // use defaults
-            }
             this._width = options.width || this._width;
             this._height = options.height || this._height;
             this._autoRender = (options.render !== false);
-            this.glyphs = glyphs;
+            this.glyphs = options.glyphs;
         }
         resize(width, height) {
             this._width = width;
@@ -429,37 +421,26 @@ void main() {
     }
 
     function withImage(image) {
-        let el;
-        let opts = image;
-        if (opts.image) {
-            image = opts.image;
-        }
-        else {
-            opts = {};
-        }
+        let opts = {};
         if (typeof image === 'string') {
-            if (image.startsWith('data:')) {
-                throw new Error('Load data into an Image element first.');
-            }
-            else {
-                el = document.getElementById(image);
-                if (!el) {
-                    throw new Error('Could not find element with id:' + image);
-                }
-            }
+            opts.glyphs = Glyphs.fromImage(image);
         }
         else if (image instanceof HTMLImageElement) {
-            el = image;
+            opts.glyphs = Glyphs.fromImage(image);
         }
-        opts.glyphs = Glyphs.fromImage(el);
+        else {
+            if (!image.image)
+                throw new Error('You must supply the image.');
+            Object.assign(opts, image);
+            opts.glyphs = Glyphs.fromImage(image.image);
+        }
         return new Canvas(opts);
     }
     function withFont(src) {
         if (typeof src === 'string') {
             src = { font: src };
         }
-        const glyphs = Glyphs.fromFont(src);
-        src.glyphs = glyphs;
+        src.glyphs = Glyphs.fromFont(src);
         return new Canvas(src);
     }
 
