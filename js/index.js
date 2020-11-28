@@ -24,10 +24,4 @@ function withFont(src) {
     src.glyphs = Glyphs.fromFont(src);
     return new Canvas(src);
 }
-export var canvas = {
-    Canvas,
-    Glyphs,
-    Buffer,
-    withImage,
-    withFont,
-};
+export { Canvas, Glyphs, Buffer, withImage, withFont, };

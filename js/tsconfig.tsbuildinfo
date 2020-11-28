@@ -202,8 +202,13 @@
         "affectsGlobalScope": false
       },
       "../ts/index.ts": {
-        "version": "b95debb6f9f114cd577daadf032f6aacbb9191d5ebd668d26e883399c3c11a78",
-        "signature": "79c1d0460a3b68695a18810db1fdb671476b6f0f88fc261c68c6400722687611",
+        "version": "203e33f1d75cedff389cdb78fb0b18d1e4b889b9388013afcd9915a66d16c183",
+        "signature": "ff57b80d6d4fe1b0b033fe45536b738d42efdd27baa84fdc7b5f361c046449b2",
+        "affectsGlobalScope": false
+      },
+      "../ts/gw.ts": {
+        "version": "d74f10fd81a9141eb4f1b0592f6a00d8aedfd01d75bf14a63f677cfeed2c73bd",
+        "signature": "feedccc6186ee3cf2c3e5d4fac5b4c297b3e560dd202be7c49d55f5915b45691",
         "affectsGlobalScope": false
       }
     },
@@ -229,6 +234,9 @@
         "../ts/shaders.ts",
         "../ts/utils.ts"
       ],
+      "../ts/gw.ts": [
+        "../ts/index.ts"
+      ],
       "../ts/index.ts": [
         "../ts/buffer.ts",
         "../ts/canvas.ts",
@@ -242,6 +250,9 @@
       "../ts/canvas.ts": [
         "../ts/buffer.ts",
         "../ts/glyphs.ts"
+      ],
+      "../ts/gw.ts": [
+        "../ts/index.ts"
       ],
       "../ts/index.ts": [
         "../ts/buffer.ts",
@@ -288,6 +299,7 @@
       "../ts/buffer.ts",
       "../ts/canvas.ts",
       "../ts/glyphs.ts",
+      "../ts/gw.ts",
       "../ts/index.ts",
       "../ts/shaders.ts",
       "../ts/utils.ts"

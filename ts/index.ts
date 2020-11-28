@@ -31,7 +31,7 @@ function withFont(src: Options|string) {
   return new Canvas(src);
 }
 
-export var canvas = { 
+export { 
   Canvas, 
   Glyphs, 
   Buffer,

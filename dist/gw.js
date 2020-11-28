@@ -445,15 +445,17 @@ void main() {
         src.glyphs = Glyphs.fromFont(src);
         return new Canvas(src);
     }
-    var canvas = {
-        Canvas,
-        Glyphs,
-        Buffer,
-        withImage,
-        withFont,
+
+    var index = {
+        __proto__: null,
+        Canvas: Canvas,
+        Glyphs: Glyphs,
+        Buffer: Buffer,
+        withImage: withImage,
+        withFont: withFont
     };
 
-    exports.canvas = canvas;
+    exports.canvas = index;
 
     Object.defineProperty(exports, '__esModule', { value: true });
 
