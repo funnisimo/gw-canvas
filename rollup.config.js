@@ -7,7 +7,7 @@ import { terser } from "rollup-plugin-terser";
 export default [{
   input: 'js/gw.js',
   output: {
-    file: 'dist/gw-canvas-min.js',
+    file: 'dist/gw-canvas.min.js',
     format: 'umd',
     name: 'GW',
     freeze: false,

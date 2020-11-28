@@ -1,6 +1,6 @@
 {
   "name": "gw-canvas",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "browser": "dist/gw-canvas.min.js",
   "main": "dist/gw-canvas.js",
   "module": "js/index.js",
