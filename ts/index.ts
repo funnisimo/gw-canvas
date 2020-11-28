@@ -4,10 +4,8 @@ import { Buffer } from './buffer';
 
 type Options = CanvasOptions & GlyphOptions;
 
-export { Canvas, Glyphs, Options, Buffer };
 
-
-export function withImage(image: Options|HTMLImageElement|string) {
+function withImage(image: Options|HTMLImageElement|string) {
   let opts = {} as CanvasOptions;
   if (typeof image === 'string') {
     opts.glyphs = Glyphs.fromImage(image);
@@ -25,10 +23,18 @@ export function withImage(image: Options|HTMLImageElement|string) {
 }
 
 
-export function withFont(src: Options|string) {
+function withFont(src: Options|string) {
   if (typeof src === 'string') {
     src = { font: src } as Options;
   }
   src.glyphs = Glyphs.fromFont(src);
   return new Canvas(src);
 }
+
+export var canvas = { 
+  Canvas, 
+  Glyphs, 
+  Buffer,
+  withImage,
+  withFont,
+};

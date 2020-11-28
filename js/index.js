@@ -1,8 +1,7 @@
 import { Canvas } from "./canvas";
 import { Glyphs } from "./glyphs";
 import { Buffer } from './buffer';
-export { Canvas, Glyphs, Buffer };
-export function withImage(image) {
+function withImage(image) {
     let opts = {};
     if (typeof image === 'string') {
         opts.glyphs = Glyphs.fromImage(image);
@@ -18,10 +17,17 @@ export function withImage(image) {
     }
     return new Canvas(opts);
 }
-export function withFont(src) {
+function withFont(src) {
     if (typeof src === 'string') {
         src = { font: src };
     }
     src.glyphs = Glyphs.fromFont(src);
     return new Canvas(src);
 }
+export var canvas = {
+    Canvas,
+    Glyphs,
+    Buffer,
+    withImage,
+    withFont,
+};

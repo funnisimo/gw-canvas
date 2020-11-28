@@ -4,8 +4,10 @@
 export default {
   input: 'js/index.js',
   output: {
-    file: 'dist/index.js',
+    file: 'dist/canvas.js',
     format: 'umd',
-    name: 'GWCanvas'
+    name: 'GW',
+    freeze: false,
+    extend: true,
   }
 };

@@ -1,7 +1,7 @@
 (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
     typeof define === 'function' && define.amd ? define(['exports'], factory) :
-    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.GWCanvas = {}));
+    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.GW = global.GW || {}));
 }(this, (function (exports) { 'use strict';
 
     // Copy of: https://github.com/ondras/fastiles/blob/master/ts/utils.ts (v2.1.0)
@@ -445,12 +445,15 @@ void main() {
         src.glyphs = Glyphs.fromFont(src);
         return new Canvas(src);
     }
+    var canvas = {
+        Canvas,
+        Glyphs,
+        Buffer,
+        withImage,
+        withFont,
+    };
 
-    exports.Buffer = Buffer;
-    exports.Canvas = Canvas;
-    exports.Glyphs = Glyphs;
-    exports.withFont = withFont;
-    exports.withImage = withImage;
+    exports.canvas = canvas;
 
     Object.defineProperty(exports, '__esModule', { value: true });
 

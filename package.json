@@ -1,8 +1,8 @@
 {
   "name": "gw-canvas",
-  "version": "1.0.6",
-  "browser": "dist/index.js",
-  "main": "dist/index.js",
+  "version": "1.0.7",
+  "browser": "dist/canvas.js",
+  "main": "dist/canvas.js",
   "module": "js/index.js",
   "devDependencies": {
     "rollup": "^2.33.3",
