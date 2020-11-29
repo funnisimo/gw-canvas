@@ -10,3 +10,6 @@ On each page, click on any example to modify its source and re-run it by clickin
 
 **Note:** Examples in this manual use the `SHOW()` function, which is not a part of `gw-text`. This helper function is available only to interactive examples and is thankfully copied from **rot.js**.
 
+## Github
+
+The project code can be found [Here](https://github.com/funnisimo/gw-canvas).
