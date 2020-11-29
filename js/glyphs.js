@@ -5,6 +5,8 @@ export class Glyphs {
         this.needsUpdate = true;
         this._map = {};
         opts.font = opts.font || 'monospace';
+        this._node = document.createElement('canvas');
+        this._ctx = this.node.getContext('2d');
         this._configure(opts);
     }
     static fromImage(src) {
@@ -16,13 +18,8 @@ export class Glyphs {
                 throw new Error('Glyph: Failed to find image element with id:' + src);
             src = el;
         }
-        const glyph = new this();
-        glyph.node.width = src.width;
-        glyph.node.height = src.height;
-        glyph._tileWidth = src.width / 16;
-        glyph._tileHeight = src.height / 16;
+        const glyph = new this({ tileWidth: src.width / 16, tileHeight: src.height / 16 });
         glyph._ctx.drawImage(src, 0, 0);
-        glyph.needsUpdate = true;
         return glyph;
     }
     static fromFont(src) {
@@ -34,16 +31,13 @@ export class Glyphs {
         glyphs._initGlyphs(basicOnly);
         return glyphs;
     }
-    // get width() { return 16; }
-    // get height() { return 16; }
+    get node() { return this._node; }
     get tileWidth() { return this._tileWidth; }
     get tileHeight() { return this._tileHeight; }
-    get pxWidth() { return this.node.width; }
-    get pxHeight() { return this.node.height; }
-    forChar(ch) { return this._map[ch] || 0; }
+    get pxWidth() { return this._node.width; }
+    get pxHeight() { return this._node.height; }
+    forChar(ch) { return this._map[ch] || (ch.charCodeAt(0) % 256); }
     _configure(opts) {
-        this.node = document.createElement('canvas');
-        this._ctx = this.node.getContext('2d');
         this._tileWidth = opts.tileWidth || this.tileWidth;
         this._tileHeight = opts.tileHeight || this.tileHeight;
         this.node.width = 16 * this.tileWidth;

@@ -1,6 +1,6 @@
 // Based on: https://github.com/ondras/fastiles/blob/master/ts/scene.ts (v2.1.0)
 
-import { createProgram, createTexture, QUAD } from "./utils";
+import { createProgram, createTexture, createGeometry } from "./utils";
 import * as shaders from "./shaders";
 import { Glyphs } from './glyphs'; 
 import { Buffer } from './buffer';
@@ -48,14 +48,10 @@ export class Canvas {
 	get pxWidth() { return this.node.width; }
 	get pxHeight() { return this.node.height; }
 
-	get glyphs() { return this._glyphs; }
-	set glyphs(glyphs: Glyphs|HTMLImageElement|string) {
+	get glyphs():Glyphs { return this._glyphs; }
+	set glyphs(glyphs: Glyphs) {
 		const gl = this._gl;
 		const uniforms = this._uniforms;
-
-		if (!(glyphs instanceof Glyphs)) {
-			glyphs = Glyphs.fromImage(glyphs);
-		}
 
 		if (glyphs === this._glyphs && !glyphs.needsUpdate) return;
 
@@ -65,7 +61,7 @@ export class Canvas {
 			gl.uniform2uiv(uniforms["tileSize"], [this.tileWidth, this.tileHeight]);
 		}
 
-		this.uploadGlyphs();
+		this._uploadGlyphs();
 	}
 		
 	private _configure(options: Options) {
@@ -181,14 +177,14 @@ export class Canvas {
           return;
       }
       this._renderRequested = true;
-      requestAnimationFrame(() => this._render());
+      requestAnimationFrame(() => this.render());
   }
 	
-  private _render() {
+  render() {
       const gl = this._gl;
 			
 			if (this._glyphs.needsUpdate) {	// auto keep glyphs up to date
-				this.uploadGlyphs();
+				this._uploadGlyphs();
 			}
 			
       this._renderRequested = false;
@@ -197,7 +193,7 @@ export class Canvas {
       gl.drawArrays(gl.TRIANGLES, 0, this._width * this._height * VERTICES_PER_TILE);
   }
 	
-  uploadGlyphs() {
+  _uploadGlyphs() {
 		if (!this._glyphs.needsUpdate) return;
 
     const gl = this._gl;
@@ -209,31 +205,4 @@ export class Canvas {
   }
 }
 
-function createGeometry(gl: GL, attribs: Record<string, number>, width: number, height: number) {
-	let tileCount = width * height;
-	let positionData = new Uint16Array(tileCount * QUAD.length);
-	let uvData = new Uint8Array(tileCount * QUAD.length);
-	let i=0;
 
-	for (let y=0; y<height; y++) {
-		for (let x=0; x<width; x++) {
-			QUAD.forEach(value => {
-				positionData[i] = (i % 2 ? y : x) + value;
-				uvData[i] = value;
-				i++;
-			});
-		}
-	}
-
-	const position = gl.createBuffer();
-	gl.bindBuffer(gl.ARRAY_BUFFER, position);
-	gl.vertexAttribIPointer(attribs["position"], 2, gl.UNSIGNED_SHORT, 0, 0);
-	gl.bufferData(gl.ARRAY_BUFFER, positionData, gl.STATIC_DRAW);
-
-	const uv = gl.createBuffer();
-	gl.bindBuffer(gl.ARRAY_BUFFER, uv);
-	gl.vertexAttribIPointer(attribs["uv"], 2, gl.UNSIGNED_BYTE, 0, 0);
-	gl.bufferData(gl.ARRAY_BUFFER, uvData, gl.STATIC_DRAW);
-
-	return {position, uv};
-}

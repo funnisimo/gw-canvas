@@ -1,6 +1,6 @@
 {
   "name": "gw-canvas",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "browser": "dist/gw-canvas.min.js",
   "main": "dist/gw-canvas.js",
   "module": "js/index.js",
@@ -12,7 +12,8 @@
   "scripts": {
     "compile": "tsc --build tsconfig.json",
     "bundle": "rollup -c",
-    "build": "npm run compile && npm run bundle",
+    "copy": "cp dist/gw-canvas.min.js docs/js",
+    "build": "npm run compile && npm run bundle && npm run copy",
     "serve": "python -m SimpleHTTPServer"
   },
   "files": [

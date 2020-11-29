@@ -44,7 +44,7 @@ void main() {
 	vec3 fgRgb = vec3(fr, fg, fb) / s;
   
 	uint br = (fsStyle & uint(0xF00000)) >> 20;
-	uint bg = (fsStyle & uint(0x0F0000)) >> 26;
+	uint bg = (fsStyle & uint(0x0F0000)) >> 16;
 	uint bb = (fsStyle & uint(0x00F000)) >> 12;
 	vec3 bgRgb = vec3(br, bg, bb) / s;
   

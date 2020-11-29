@@ -6,8 +6,14 @@ export declare class Buffer {
     get data(): Uint32Array;
     get width(): number;
     get height(): number;
-    draw(x: number, y: number, glyph: number, fg: number, bg: number): void;
-    drawChar(x: number, y: number, ch: string, fg: number, bg: number): void;
-    fill(glyph?: number, fg?: number, bg?: number): void;
+    get(x: number, y: number): {
+        glyph: number;
+        fg: number;
+        bg: number;
+    };
+    draw(x: number, y: number, glyph?: number | string, fg?: number, bg?: number): void;
+    fill(bg?: number, glyph?: number | string, fg?: number): void;
     copy(other: Buffer): void;
+    render(): void;
+    copyFromCanvas(): void;
 }
