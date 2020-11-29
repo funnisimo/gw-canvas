@@ -2,7 +2,11 @@ import { Canvas, Options as CanvasOptions } from "./canvas";
 import { Glyphs, Options as GlyphOptions } from "./glyphs";
 import { Buffer } from './buffer';
 
-type Options = CanvasOptions & GlyphOptions;
+interface ImageOptions {
+  image?: HTMLImageElement|string;
+}
+
+type Options = CanvasOptions & GlyphOptions & ImageOptions;
 
 
 function withImage(image: Options|HTMLImageElement|string) {

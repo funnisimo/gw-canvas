@@ -3,7 +3,6 @@ declare type DrawFunction = (ctx: CTX, x: number, y: number, width: number, heig
 declare type DrawType = string | DrawFunction;
 export interface Options {
     font?: string;
-    image?: HTMLImageElement | string;
     fontSize?: number;
     size?: number;
     tileWidth?: number;
@@ -12,7 +11,7 @@ export interface Options {
     basic?: boolean;
 }
 export declare class Glyphs {
-    node: HTMLCanvasElement;
+    private _node;
     private _ctx;
     private _tileWidth;
     private _tileHeight;
@@ -20,7 +19,8 @@ export declare class Glyphs {
     private _map;
     static fromImage(src: string | HTMLImageElement): Glyphs;
     static fromFont(src: Options | string): Glyphs;
-    constructor(opts?: Partial<Options>);
+    private constructor();
+    get node(): HTMLCanvasElement;
     get tileWidth(): number;
     get tileHeight(): number;
     get pxWidth(): number;

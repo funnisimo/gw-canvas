@@ -197,8 +197,8 @@
         "affectsGlobalScope": false
       },
       "../ts/glyphs.ts": {
-        "version": "2bf1901f95157ef60ddc9fc7c6e96e22a186828b13785ee55662276a29f74e6f",
-        "signature": "b40dc56ca317c7767697b52810d92a5a74ee371038086f10b7fb5c6a001eb037",
+        "version": "9f10c3563418be57380fe65033ae2c1792df4dead9ea7007afddbacafee92fa6",
+        "signature": "f35f75a1fd6d92b66d6d5c30dbcc8a097ef7a371b245bf8150a7b4982d5df12e",
         "affectsGlobalScope": false
       },
       "../ts/canvas.ts": {
@@ -212,8 +212,8 @@
         "affectsGlobalScope": false
       },
       "../ts/index.ts": {
-        "version": "203e33f1d75cedff389cdb78fb0b18d1e4b889b9388013afcd9915a66d16c183",
-        "signature": "ff57b80d6d4fe1b0b033fe45536b738d42efdd27baa84fdc7b5f361c046449b2",
+        "version": "56a804b3ab27bf73682b4bfd0e294a39388cb7f9ce902ca2d83a01db29e6a8eb",
+        "signature": "a4ad85a2b9f807cd15c4f15d35dd39c370cbcc13e29983c01a1127cb66bd2533",
         "affectsGlobalScope": false
       },
       "../ts/gw.ts": {
