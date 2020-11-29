@@ -2,10 +2,14 @@ import { Canvas, Options as CanvasOptions } from "./canvas";
 import { Glyphs, Options as GlyphOptions } from "./glyphs";
 import { Buffer } from './buffer';
 
-type Options = CanvasOptions & GlyphOptions;
+interface ImageOptions extends CanvasOptions {
+  image: HTMLImageElement|string;
+}
+
+type FontOptions = CanvasOptions & GlyphOptions;
 
 
-function withImage(image: Options|HTMLImageElement|string) {
+function withImage(image: ImageOptions|HTMLImageElement|string) {
   let opts = {} as CanvasOptions;
   if (typeof image === 'string') {
     opts.glyphs = Glyphs.fromImage(image);
@@ -23,9 +27,9 @@ function withImage(image: Options|HTMLImageElement|string) {
 }
 
 
-function withFont(src: Options|string) {
+function withFont(src: FontOptions|string) {
   if (typeof src === 'string') {
-    src = { font: src } as Options;
+    src = { font: src } as FontOptions;
   }
   src.glyphs = Glyphs.fromFont(src);
   return new Canvas(src);

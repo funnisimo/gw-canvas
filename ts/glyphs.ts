@@ -6,7 +6,6 @@ type DrawType = string|DrawFunction;
 
 export interface Options {
   font?: string;
-  image?: HTMLImageElement|string;
 
   fontSize?: number;
   size?: number; // alias for fontSize
@@ -22,8 +21,8 @@ export interface Options {
 }
 
 export class Glyphs {
-  public node!: HTMLCanvasElement;
-  private _ctx!: CanvasRenderingContext2D;
+  private _node: HTMLCanvasElement;
+  private _ctx: CanvasRenderingContext2D;
   private _tileWidth: number=12;
   private _tileHeight: number=16;
   public needsUpdate: boolean=true;
@@ -38,13 +37,8 @@ export class Glyphs {
       src = el as HTMLImageElement;
     }
     
-    const glyph = new this();
-    glyph.node.width = src.width;
-    glyph.node.height = src.height;
-    glyph._tileWidth = src.width / 16;
-    glyph._tileHeight = src.height / 16;
+    const glyph = new this({ tileWidth: src.width / 16, tileHeight: src.height / 16 });
     glyph._ctx.drawImage(src, 0, 0);
-    glyph.needsUpdate = true;
     return glyph;
   }
 
@@ -59,24 +53,24 @@ export class Glyphs {
     return glyphs;
   }
   
-	constructor(opts: Partial<Options>={}) {
+	private constructor(opts: Options={}) {
 		opts.font = opts.font || 'monospace';
+
+    this._node = document.createElement('canvas');
+    this._ctx = this.node.getContext('2d') as CanvasRenderingContext2D;
+
 		this._configure(opts as Options);
   }
   
-  // get width() { return 16; }
-  // get height() { return 16; }
+  get node() { return this._node; }
   get tileWidth() { return this._tileWidth; }
   get tileHeight() { return this._tileHeight; }
-  get pxWidth() { return this.node.width; }
-  get pxHeight() { return this.node.height; }
+  get pxWidth() { return this._node.width; }
+  get pxHeight() { return this._node.height; }
 
-  forChar(ch: string) { return this._map[ch] || 0; }
+  forChar(ch: string) { return this._map[ch] || (ch.charCodeAt(0) % 256); }
 
   private _configure(opts: Options) {
-		this.node = document.createElement('canvas');
-    this._ctx = this.node.getContext('2d') as CanvasRenderingContext2D;
-
     this._tileWidth = opts.tileWidth || this.tileWidth;
     this._tileHeight = opts.tileHeight || this.tileHeight;
     

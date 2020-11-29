@@ -187,33 +187,33 @@
         "affectsGlobalScope": false
       },
       "../ts/utils.ts": {
-        "version": "ba64f04783c8d945d28a60c14aae8bf4aab748dcd31e9f582638f3795913faf8",
-        "signature": "4e7feb1cc46eb344ec9639bd612f52e9c8b45a045b8d131da21412543319dec1",
+        "version": "4ab7e1962142e3acef6ebd9548d5d4023afc4d4334872772da5f586d8bf3413a",
+        "signature": "6ef96a54618bfbddf053b52d61395220008295feee9634df7b53e8523e8d9ab1",
         "affectsGlobalScope": false
       },
       "../ts/shaders.ts": {
-        "version": "80d502ccc0e549acff6174a022cbf5d1854405f82690d48bdd9dc6c0faa64f99",
+        "version": "94507129f43a60c24d809e9a21d648eccf790174fae98103ce7fb9741889de6f",
         "signature": "a5929b0b6a4ad6c34b60702d28c531f21757ce1b8dc3307abe2ffa873cd1f4c0",
         "affectsGlobalScope": false
       },
       "../ts/glyphs.ts": {
-        "version": "2bf1901f95157ef60ddc9fc7c6e96e22a186828b13785ee55662276a29f74e6f",
-        "signature": "b40dc56ca317c7767697b52810d92a5a74ee371038086f10b7fb5c6a001eb037",
+        "version": "9f10c3563418be57380fe65033ae2c1792df4dead9ea7007afddbacafee92fa6",
+        "signature": "f35f75a1fd6d92b66d6d5c30dbcc8a097ef7a371b245bf8150a7b4982d5df12e",
         "affectsGlobalScope": false
       },
       "../ts/canvas.ts": {
-        "version": "35c961f0b1612e9c8f639e48c25ccd342a64ccc17421a4d97f650420ef40e281",
-        "signature": "caf590de822e16b2da66a16f4ff0fe78b4c3a91dc49a77e2db38d5ae70f70620",
+        "version": "fa5571f4402f8a091c4e1d2980704e0321fd1bb4f3e633732185a5654df8c004",
+        "signature": "92aabdd517d31ff7f7491fe738a4bcea0334015d24b649e8b5139f7330d8bb0d",
         "affectsGlobalScope": false
       },
       "../ts/buffer.ts": {
-        "version": "0eafbc3b2f56c05cca0c3b50436de58d16639ff145e77e06e3a23c29980df535",
-        "signature": "3462a5ec29789540b450fc8f910299c35ff642a9b324bcf9786839274553eb43",
+        "version": "a95529e1861744c8bde8b3d8d7dfa9301b4e029e0f74d4a0bace86be5a1153f6",
+        "signature": "d0def521f86bfc4ce3363dcdbe6e001b67b2b07ca3781de97e6335bd7445b502",
         "affectsGlobalScope": false
       },
       "../ts/index.ts": {
-        "version": "203e33f1d75cedff389cdb78fb0b18d1e4b889b9388013afcd9915a66d16c183",
-        "signature": "ff57b80d6d4fe1b0b033fe45536b738d42efdd27baa84fdc7b5f361c046449b2",
+        "version": "848ebef9769194ac758c0561b6d693b931aecd2d34f41443e026025693028951",
+        "signature": "9bb420fde358edab1dcb08615cb48109cb192d3d0e6c8c8e89fcc0b45523a527",
         "affectsGlobalScope": false
       },
       "../ts/gw.ts": {
@@ -637,8 +637,7 @@
         "../node_modules/@types/node/stream.d.ts"
       ],
       "../ts/buffer.ts": [
-        "../ts/canvas.ts",
-        "../ts/glyphs.ts"
+        "../ts/canvas.ts"
       ],
       "../ts/canvas.ts": [
         "../ts/buffer.ts",
