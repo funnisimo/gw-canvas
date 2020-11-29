@@ -38,6 +38,6 @@ export declare class Canvas {
     private _createGeometry;
     private _createData;
     private _requestRender;
-    private _render;
-    uploadGlyphs(): void;
+    render(): void;
+    _uploadGlyphs(): void;
 }

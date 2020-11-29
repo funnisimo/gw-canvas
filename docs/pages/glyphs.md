@@ -14,8 +14,18 @@ If you want to more easily use text, then I recommend aligning the font with the
 
 If you make a bitmap font image that is 16 x 16 tiles, then you can load it as a Glyph.
 
+Using an Image element:
+
 ```js
-const glyphs = GW.canvas.Glyphs.fromImage(document.getElementById('font'));
+const image = document.getElementById('font');
+const glyphs = GW.canvas.Glyphs.fromImage(image);
+SHOW(glyphs.node);
+```
+
+Using an element ID:
+
+```js
+const glyphs = GW.canvas.Glyphs.fromImage('font');
 SHOW(glyphs.node);
 ```
 
