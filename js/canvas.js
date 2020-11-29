@@ -1,7 +1,6 @@
 // Based on: https://github.com/ondras/fastiles/blob/master/ts/scene.ts (v2.1.0)
 import { createProgram, createTexture, QUAD } from "./utils";
 import * as shaders from "./shaders";
-import { Glyphs } from './glyphs';
 const VERTICES_PER_TILE = 6;
 export class Canvas {
     constructor(options) {
@@ -29,9 +28,6 @@ export class Canvas {
     set glyphs(glyphs) {
         const gl = this._gl;
         const uniforms = this._uniforms;
-        if (!(glyphs instanceof Glyphs)) {
-            glyphs = Glyphs.fromImage(glyphs);
-        }
         if (glyphs === this._glyphs && !glyphs.needsUpdate)
             return;
         if (glyphs !== this._glyphs) {

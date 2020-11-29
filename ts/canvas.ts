@@ -48,14 +48,10 @@ export class Canvas {
 	get pxWidth() { return this.node.width; }
 	get pxHeight() { return this.node.height; }
 
-	get glyphs() { return this._glyphs; }
-	set glyphs(glyphs: Glyphs|HTMLImageElement|string) {
+	get glyphs():Glyphs { return this._glyphs; }
+	set glyphs(glyphs: Glyphs) {
 		const gl = this._gl;
 		const uniforms = this._uniforms;
-
-		if (!(glyphs instanceof Glyphs)) {
-			glyphs = Glyphs.fromImage(glyphs);
-		}
 
 		if (glyphs === this._glyphs && !glyphs.needsUpdate) return;
 

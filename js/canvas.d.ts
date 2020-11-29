@@ -27,8 +27,8 @@ export declare class Canvas {
     get tileHeight(): number;
     get pxWidth(): number;
     get pxHeight(): number;
-    get glyphs(): Glyphs | HTMLImageElement | string;
-    set glyphs(glyphs: Glyphs | HTMLImageElement | string);
+    get glyphs(): Glyphs;
+    set glyphs(glyphs: Glyphs);
     private _configure;
     resize(width: number, height: number): void;
     draw(x: number, y: number, glyph: number, fg: number, bg: number): void;

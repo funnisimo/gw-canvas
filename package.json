@@ -12,7 +12,8 @@
   "scripts": {
     "compile": "tsc --build tsconfig.json",
     "bundle": "rollup -c",
-    "build": "npm run compile && npm run bundle",
+    "copy": "cp dist/gw-canvas.min.js docs/js",
+    "build": "npm run compile && npm run bundle && npm run copy",
     "serve": "python -m SimpleHTTPServer"
   },
   "files": [
