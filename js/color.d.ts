@@ -3,17 +3,17 @@ export declare class Color {
     r: number;
     g: number;
     b: number;
-    static fromArray(vals: ColorData): Color;
+    static fromArray(vals: ColorData, base256?: boolean): Color;
     static fromString(css: string): Color;
-    static fromNumber(val: number, is24bit?: boolean): Color;
+    static fromNumber(val: number, base256?: boolean): Color;
     constructor(r?: number, g?: number, b?: number);
     equals(other: Color | ColorData): boolean;
     copy(other: Color | ColorData): this;
     clone(): Color;
     set(r?: number, g?: number, b?: number): this;
     clear(): this;
-    toInt(is24bit?: boolean): number;
-    fromInt(val: number, is24bit?: boolean): this;
+    toInt(base256?: boolean): number;
+    fromInt(val: number, base256?: boolean): this;
     clamp(): this;
     mix(other: Color | ColorData, percent: number): this;
     lighten(percent: number): this;
@@ -22,6 +22,7 @@ export declare class Color {
     add(other: Color | ColorData, percent?: number): this;
     scale(percent: number): this;
     multiply(other: Color | ColorData): this;
+    toString(base256?: boolean): string;
 }
-export declare function make(arg: ColorData | string | number, is24bit?: boolean): Color;
+export declare function make(arg: ColorData | string | number, base256?: boolean): Color;
 export {};

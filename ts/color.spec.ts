@@ -98,6 +98,33 @@ describe('Color', () => {
         expect(a.equals([50,50,50])).toBeFalsy();
     });
 
+    test('copy', () => {
+      const a = new Color();
+      const b = new Color(100, 50, 0);
+      expect(a.equals(b)).toBeFalsy();
+      a.copy(b);
+      expect(a.equals(b)).toBeTruthy();
+    });
+    
+    test('clone', () => {
+      const a = new Color(100, 50, 0);
+      const b = a.clone();
+      expect(a.equals(b)).toBeTruthy();
+    });
+
+    test('set', () => {
+      const a = new Color();
+      a.set(100, 50, 0);
+      expect(a.equals([100, 50, 0])).toBeTruthy();
+    });
+
+    test('clear', () => {
+      const a = new Color(100, 50, 0);
+      expect(a.toInt()).toEqual(0xF80);
+      a.clear();
+      expect(a.toInt()).toEqual(0x000);
+    });
+
     test('toInt', () => {
         const c = new Color(100, 47, 0);
         expect(c.toInt()).toEqual(0xF70);
@@ -118,6 +145,71 @@ describe('Color', () => {
         expect(d.r).toEqual(100);
         expect(d.g).toEqual(50);
         expect(d.b).toEqual(0);
+    });
+
+    test('clamp', () => {
+      const c = new Color();
+      c.set(200, -100, 50);
+      c.clamp();
+      expect(c.equals([100,0,50])).toBeTruthy();
+    });
+    
+    test('mix', () => {
+      const c = new Color();
+      const white = new Color(100,100,100);
+      const black = new Color(0,0,0);
+      const red = new Color(100,0,0);
+      const blue = new Color(0,0,100);
+      
+      c.mix(white, 50);
+      expect(c.equals([50,50,50])).toBeTruthy();
+      c.mix(red, 50);
+      expect(c.toString()).toEqual('#b44');
+      expect(c.toString(true)).toEqual('#bf4040');
+      c.mix(black, 50);
+      expect(c.toString()).toEqual('#622');
+      c.mix(blue, 50);
+      expect(c.toString()).toEqual('#319');
+    });
+
+    test('lighten', () => {
+      const c = Color.fromNumber(0x840)
+      c.lighten(50);
+      expect(c.toString()).toEqual('#ca8');
+    });
+    
+    test('darken', () => {
+      const c = Color.fromNumber(0x8BF);
+      c.darken(50);
+      expect(c.toString()).toEqual('#468');
+    });
+
+    test('add', () => {
+      const c = Color.fromNumber(0x444);
+      expect(c.toString()).toEqual('#444');
+
+      const d = Color.fromNumber(0x222);
+      c.add(d);
+      expect(c.toString()).toEqual('#666');
+      
+      c.add([47,47,47]);
+      expect(c.toString()).toEqual('#ddd');
+    });
+
+    test('scale', () => {
+      const c = Color.fromNumber(0x222);
+      c.scale(200);
+      expect(c.toString()).toEqual('#444');
+    });
+    
+    test('multiply', () => {
+      const c = Color.fromNumber(0x222);
+      c.multiply([200,50,100]);
+      expect(c.toString()).toEqual('#412');
+      
+      const d = new Color(100,200,50);
+      c.multiply(d);
+      expect(c.toString()).toEqual('#421')
     });
 
 });

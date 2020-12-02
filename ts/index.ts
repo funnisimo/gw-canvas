@@ -1,6 +1,8 @@
 import { Canvas, Options as CanvasOptions } from "./canvas";
 import { Glyphs, Options as GlyphOptions } from "./glyphs";
 import { Buffer } from './buffer';
+import { Color } from './color';
+
 
 interface ImageOptions extends CanvasOptions {
   image: HTMLImageElement|string;
@@ -39,6 +41,7 @@ export {
   Canvas, 
   Glyphs, 
   Buffer,
+  Color,
   withImage,
   withFont,
 };

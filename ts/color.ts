@@ -8,9 +8,9 @@ export class Color {
     public g:number=0;
     public b:number=0;
 
-    static fromArray(vals:ColorData, is24bit=false) {
+    static fromArray(vals:ColorData, base256=false) {
         if (vals.length < 3) throw new Error('Colors must have 3 values.');
-        if (is24bit) {
+        if (base256) {
             vals = vals.map( (v) => Math.round(v * 100 / 255) ) as ColorData;
         }
         return new this(vals[0], vals[1], vals[2]);
@@ -33,9 +33,9 @@ export class Color {
         return new this(r, g, b);
     }
 
-    static fromNumber(val:number, is24bit=false) {
+    static fromNumber(val:number, base256=false) {
         const c = new this();
-        c.fromInt(val, is24bit);
+        c.fromInt(val, base256);
         return c;
     }
 
@@ -79,8 +79,8 @@ export class Color {
         return this.set(0,0,0);
     }
 
-    toInt(is24bit=false) {
-        if (is24bit) {
+    toInt(base256=false) {
+        if (base256) {
             const r = Math.round(this.r / 100 * 255) & 0xFF;
             const g = Math.round(this.g / 100 * 255) & 0xFF;
             const b = Math.round(this.b / 100 * 255) & 0xFF;
@@ -92,8 +92,8 @@ export class Color {
         return (r << 8) + (g << 4) + b;
     }
 
-    fromInt(val:number, is24bit=false) {
-        if (is24bit) {
+    fromInt(val:number, base256=false) {
+        if (base256) {
             this.r = Math.round((val >> 16) * 100 / 255);
             this.g = Math.round(((val & 0xFF00) >> 8) * 100 / 255);
             this.b = Math.round((val & 0xFF) * 100 / 255);
@@ -167,19 +167,22 @@ export class Color {
         return this;
     }
 
+    toString(base256=false) {
+      return '#' + this.toInt(base256).toString(16);
+    }
 }
 
 const TEMP_COLOR = new Color();
 
-export function make(arg:ColorData|string|number, is24bit=false) {
+export function make(arg:ColorData|string|number, base256=false) {
     if (typeof arg === 'string') {
         return Color.fromString(arg);
     }
     else if (Array.isArray(arg)) {
-        return Color.fromArray(arg, is24bit);
+        return Color.fromArray(arg, base256);
     }
     else if (typeof arg === 'number') {
-        return Color.fromNumber(arg, is24bit);
+        return Color.fromNumber(arg, base256);
     }
     throw new Error('Failed to make color - unknown argument: ' + JSON.stringify(arg));
 }
