@@ -8,6 +8,9 @@
 		"noUnusedParameters": true,
 		"noEmitOnError": true,
 		"incremental": true,
-		"declaration": true
-	}
+		"declaration": true,
+        "moduleResolution": "node",
+        "esModuleInterop": true,
+		"types": ["jest", "jest-extended"]
+    }
 }

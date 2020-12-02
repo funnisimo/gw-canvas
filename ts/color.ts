@@ -8,9 +8,11 @@ export class Color {
     public g:number=0;
     public b:number=0;
 
-    static fromArray(vals:ColorData) {
+    static fromArray(vals:ColorData, is24bit=false) {
         if (vals.length < 3) throw new Error('Colors must have 3 values.');
-        vals = vals.map( (v) => Math.max(0, Math.min(100, v || 0)) ) as ColorData;
+        if (is24bit) {
+            vals = vals.map( (v) => Math.round(v * 100 / 255) ) as ColorData;
+        }
         return new this(vals[0], vals[1], vals[2]);
     }
 
@@ -174,7 +176,7 @@ export function make(arg:ColorData|string|number, is24bit=false) {
         return Color.fromString(arg);
     }
     else if (Array.isArray(arg)) {
-        return Color.fromArray(arg);
+        return Color.fromArray(arg, is24bit);
     }
     else if (typeof arg === 'number') {
         return Color.fromNumber(arg, is24bit);
