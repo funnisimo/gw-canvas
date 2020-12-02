@@ -2,6 +2,7 @@ import { Canvas, Options as CanvasOptions } from "./canvas";
 import { Glyphs, Options as GlyphOptions } from "./glyphs";
 import { Buffer } from './buffer';
 import { Color } from './color';
+import { Mixer } from './mixer';
 import { configure } from './config';
 
 
@@ -43,6 +44,7 @@ export {
   Glyphs, 
   Buffer,
   Color,
+  Mixer,
   withImage,
   withFont,
   configure,

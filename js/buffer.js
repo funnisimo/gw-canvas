@@ -1,3 +1,4 @@
+;
 export class Buffer {
     constructor(canvas) {
         this._canvas = canvas;
@@ -26,6 +27,17 @@ export class Buffer {
         fg = (fg >= 0) ? (fg & 0xFFF) : (current & 0xFFF);
         const style = (glyph << 24) + (bg << 12) + fg;
         this._data[index] = style;
+        return this;
+    }
+    // This is without opacity - opacity is more work...
+    drawSprite(x, y, sprite) {
+        const glyph = sprite.ch ? sprite.ch : -1;
+        const fg = sprite.fg ? sprite.fg.toInt() : -1;
+        const bg = sprite.bg ? sprite.bg.toInt() : -1;
+        return this.draw(x, y, glyph, fg, bg);
+    }
+    blackOut(x, y) {
+        return this.draw(x, y, 0, 0, 0);
     }
     fill(bg = 0, glyph = 0, fg = 0xFFF) {
         if (typeof glyph == 'string') {
@@ -36,14 +48,18 @@ export class Buffer {
         fg = fg & 0xFFF;
         const style = (glyph << 24) + (bg << 12) + fg;
         this._data.fill(style);
+        return this;
     }
     copy(other) {
         this._data.set(other._data);
+        return this;
     }
     render() {
         this._canvas.copy(this);
+        return this;
     }
     copyFromCanvas() {
         this._canvas.copyTo(this);
+        return this;
     }
 }

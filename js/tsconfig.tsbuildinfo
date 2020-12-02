@@ -196,24 +196,29 @@
         "signature": "92aabdd517d31ff7f7491fe738a4bcea0334015d24b649e8b5139f7330d8bb0d",
         "affectsGlobalScope": false
       },
-      "../ts/buffer.ts": {
-        "version": "a95529e1861744c8bde8b3d8d7dfa9301b4e029e0f74d4a0bace86be5a1153f6",
-        "signature": "d0def521f86bfc4ce3363dcdbe6e001b67b2b07ca3781de97e6335bd7445b502",
-        "affectsGlobalScope": false
-      },
       "../ts/config.ts": {
         "version": "32f5624c1bf10734c302685477b7a5bcb5647961ebe25d80354ee2fb78f0bbb1",
         "signature": "0027c52ed063b06cc4a867f3f2b6bc03b92ba54457e37d82a1cd21bbfcd98c97",
         "affectsGlobalScope": false
       },
       "../ts/color.ts": {
-        "version": "fc8d8b6df06ed984922cffb5568a7ffd3fbd3804531d2b82231cef8cb9434680",
-        "signature": "b08936b23265718ac653358584721979143d19ba7125628c3481846147b8b762",
+        "version": "5dbbb3cb7fb747d09891d75fbf16ccd4bc76c9f93d1e7aea6cd5676c5fcdab84",
+        "signature": "1748577dc828e2d2e5e99bc064967a6714b1540f800fecfbe7c0b5e039ed65cd",
+        "affectsGlobalScope": false
+      },
+      "../ts/buffer.ts": {
+        "version": "af86ca621681090fdaa86571b5299e5e2627c36b3831ef90262e023267af6253",
+        "signature": "9599a6b527f635e39466ce911fdfc388c85c7b6c68a923b74b26c13603b7a484",
+        "affectsGlobalScope": false
+      },
+      "../ts/mixer.ts": {
+        "version": "957acd0efe55fc6589dedb2d968bfe3c46fc61431adf0bac34b9c9e716ed047f",
+        "signature": "02563ebb0b2810d0bb69101aa5282c49f8cace95a35a7a01ced69f63438a687e",
         "affectsGlobalScope": false
       },
       "../ts/index.ts": {
-        "version": "670e23bb94d85ba44e90d36ce9c4c3e21d3e4dd00056592cfc9ec951ecf3d4bf",
-        "signature": "d4c5475de7080a2ba0651e195b8b1721174db879ab5102310e590e0b6992309c",
+        "version": "b983ca604ad9ad5ebc25cbec10177dd959bf1d87b24af8dd623c92478dab0597",
+        "signature": "df2f35a46394457cee125dc1e32dbeace26c8b515ff2cc431f9a728e8fe40e9e",
         "affectsGlobalScope": false
       },
       "../ts/gw.ts": {
@@ -310,7 +315,8 @@
         "../node_modules/pretty-format/build/types.d.ts"
       ],
       "../ts/buffer.ts": [
-        "../ts/canvas.ts"
+        "../ts/canvas.ts",
+        "../ts/color.ts"
       ],
       "../ts/canvas.ts": [
         "../ts/buffer.ts",
@@ -329,7 +335,12 @@
         "../ts/canvas.ts",
         "../ts/color.ts",
         "../ts/config.ts",
-        "../ts/glyphs.ts"
+        "../ts/glyphs.ts",
+        "../ts/mixer.ts"
+      ],
+      "../ts/mixer.ts": [
+        "../ts/buffer.ts",
+        "../ts/color.ts"
       ]
     },
     "exportedModulesMap": {
@@ -358,7 +369,8 @@
         "../node_modules/pretty-format/build/types.d.ts"
       ],
       "../ts/buffer.ts": [
-        "../ts/canvas.ts"
+        "../ts/canvas.ts",
+        "../ts/color.ts"
       ],
       "../ts/canvas.ts": [
         "../ts/buffer.ts",
@@ -372,7 +384,12 @@
         "../ts/canvas.ts",
         "../ts/color.ts",
         "../ts/config.ts",
-        "../ts/glyphs.ts"
+        "../ts/glyphs.ts",
+        "../ts/mixer.ts"
+      ],
+      "../ts/mixer.ts": [
+        "../ts/buffer.ts",
+        "../ts/color.ts"
       ]
     },
     "semanticDiagnosticsPerFile": [
@@ -427,6 +444,7 @@
       "../ts/glyphs.ts",
       "../ts/gw.ts",
       "../ts/index.ts",
+      "../ts/mixer.ts",
       "../ts/shaders.ts",
       "../ts/utils.ts"
     ]

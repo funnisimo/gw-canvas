@@ -1,4 +1,10 @@
 import { Canvas } from './canvas';
+import { Color } from './color';
+export interface DrawInfo {
+    ch?: string | number;
+    fg?: Color;
+    bg?: Color;
+}
 export declare class Buffer {
     private _data;
     private _canvas;
@@ -11,9 +17,11 @@ export declare class Buffer {
         fg: number;
         bg: number;
     };
-    draw(x: number, y: number, glyph?: number | string, fg?: number, bg?: number): void;
-    fill(bg?: number, glyph?: number | string, fg?: number): void;
-    copy(other: Buffer): void;
-    render(): void;
-    copyFromCanvas(): void;
+    draw(x: number, y: number, glyph?: number | string, fg?: number, bg?: number): this;
+    drawSprite(x: number, y: number, sprite: DrawInfo): this;
+    blackOut(x: number, y: number): this;
+    fill(bg?: number, glyph?: number | string, fg?: number): this;
+    copy(other: Buffer): this;
+    render(): this;
+    copyFromCanvas(): this;
 }

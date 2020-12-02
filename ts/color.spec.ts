@@ -1,7 +1,14 @@
 
-import { Color, make } from './color';
+import { Color } from './color';
 
 describe('Color', () => {
+
+    test('make - color', () => {
+      const c = new Color(100,50,0);
+      const d = Color.make(c);
+      expect(c).not.toBe(d);
+      expect(c.equals(d)).toBeTruthy();
+    });
 
     test('fromArray', () => {
         const c = Color.fromArray([0,50, 100]);
@@ -19,10 +26,10 @@ describe('Color', () => {
     });
 
     test('make - array', () => {
-        const c = make([0,50,100]);
+        const c = Color.make([0,50,100]);
         expect(c.toString()).toEqual('#08f');
 
-        const d = make([0,128,255], true);
+        const d = Color.make([0,128,255], true);
         expect(d.toString()).toEqual('#08f');
     });
 
@@ -35,10 +42,10 @@ describe('Color', () => {
     });
 
     test('make - string', () => {
-        const c = make('#07F');
+        const c = Color.make('#07F');
         expect(c.equals([0,47,100])).toBeTruthy();
 
-        const d = make('#0080FF');
+        const d = Color.make('#0080FF');
         expect(d.equals([0,50,100])).toBeTruthy();
     });
 
@@ -51,10 +58,10 @@ describe('Color', () => {
     });
 
     test('make - number', () => {
-        const c = make(0x07F);
+        const c = Color.make(0x07F);
         expect(c.equals([0,47,100])).toBeTruthy();
 
-        const d = make(0x0080FF, true);
+        const d = Color.make(0x0080FF, true);
         expect(d.equals([0,50,100])).toBeTruthy();
     });
 
@@ -89,10 +96,10 @@ describe('Color', () => {
       expect(a.equals([100, 50, 0])).toBeTruthy();
     });
 
-    test('clear', () => {
+    test('blackOut', () => {
       const a = new Color(100, 50, 0);
       expect(a.toInt()).toEqual(0xF80);
-      a.clear();
+      a.blackOut();
       expect(a.toInt()).toEqual(0x000);
     });
 

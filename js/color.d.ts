@@ -1,9 +1,12 @@
 declare type ColorData = number[];
+export declare type ColorRoots = Color | ColorData | string | number;
 export declare class Color {
     private _data;
     static fromArray(vals: ColorData, base256?: boolean): Color;
     static fromString(css: string): Color;
     static fromNumber(val: number, base256?: boolean): Color;
+    static make(arg: ColorRoots, base256?: boolean): Color;
+    static from(arg: ColorRoots, base256?: boolean): Color;
     constructor(r?: number, g?: number, b?: number, rand?: number, redRand?: number, greenRand?: number, blueRand?: number);
     private get _r();
     private set _r(value);
@@ -15,22 +18,23 @@ export declare class Color {
     private get _redRand();
     private get _greenRand();
     private get _blueRand();
-    equals(other: Color | ColorData): boolean;
-    copy(other: Color | ColorData): this;
+    isNull(): boolean;
+    equals(other: ColorRoots): boolean;
+    copy(other: ColorRoots): this;
     clone(): Color;
     set(_r?: number, _g?: number, _b?: number, _rand?: number, _redRand?: number, _greenRand?: number, _blueRand?: number): this;
-    clear(): this;
+    nullify(): this;
+    blackOut(): this;
     toInt(base256?: boolean): number;
     fromInt(val: number, base256?: boolean): this;
-    clamp(): this;
-    mix(other: Color | ColorData, percent: number): this;
-    lighten(percent: number): this;
-    darken(percent: number): this;
-    bake(): void;
-    add(other: Color | ColorData, percent?: number): this;
+    clamp(): this | undefined;
+    mix(other: ColorRoots, percent: number): this;
+    lighten(percent: number): this | undefined;
+    darken(percent: number): this | undefined;
+    bake(): this;
+    add(other: ColorRoots, percent?: number): this;
     scale(percent: number): this;
-    multiply(other: Color | ColorData): this;
+    multiply(other: ColorRoots): this;
     toString(base256?: boolean): string;
 }
-export declare function make(arg: ColorData | string | number, base256?: boolean): Color;
 export {};

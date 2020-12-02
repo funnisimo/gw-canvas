@@ -406,6 +406,17 @@ class Buffer {
         fg = (fg >= 0) ? (fg & 0xFFF) : (current & 0xFFF);
         const style = (glyph << 24) + (bg << 12) + fg;
         this._data[index] = style;
+        return this;
+    }
+    // This is without opacity - opacity is more work...
+    drawSprite(x, y, sprite) {
+        const glyph = sprite.ch ? sprite.ch : -1;
+        const fg = sprite.fg ? sprite.fg.toInt() : -1;
+        const bg = sprite.bg ? sprite.bg.toInt() : -1;
+        return this.draw(x, y, glyph, fg, bg);
+    }
+    blackOut(x, y) {
+        return this.draw(x, y, 0, 0, 0);
     }
     fill(bg = 0, glyph = 0, fg = 0xFFF) {
         if (typeof glyph == 'string') {
@@ -416,15 +427,19 @@ class Buffer {
         fg = fg & 0xFFF;
         const style = (glyph << 24) + (bg << 12) + fg;
         this._data.fill(style);
+        return this;
     }
     copy(other) {
         this._data.set(other._data);
+        return this;
     }
     render() {
         this._canvas.copy(this);
+        return this;
     }
     copyFromCanvas() {
         this._canvas.copyTo(this);
+        return this;
     }
 }
 
@@ -436,7 +451,7 @@ function configure(opts = {}) {
 }
 
 class Color {
-    constructor(r = 0, g = 0, b = 0, rand = 0, redRand = 0, greenRand = 0, blueRand = 0) {
+    constructor(r = -1, g = 0, b = 0, rand = 0, redRand = 0, greenRand = 0, blueRand = 0) {
         this._data = [r, g, b, rand, redRand, greenRand, blueRand];
     }
     static fromArray(vals, base256 = false) {
@@ -469,6 +484,26 @@ class Color {
         c.fromInt(val, base256);
         return c;
     }
+    static make(arg, base256 = false) {
+        if (arg instanceof this) {
+            return arg.clone();
+        }
+        if (typeof arg === 'string') {
+            return this.fromString(arg);
+        }
+        else if (Array.isArray(arg)) {
+            return this.fromArray(arg, base256);
+        }
+        else if (typeof arg === 'number') {
+            return this.fromNumber(arg, base256);
+        }
+        throw new Error('Failed to make color - unknown argument: ' + JSON.stringify(arg));
+    }
+    static from(arg, base256 = false) {
+        if (arg instanceof this)
+            return arg;
+        return this.make(arg, base256);
+    }
     get _r() { return this._data[0]; }
     set _r(v) { this._data[0] = v; }
     get _g() { return this._data[1]; }
@@ -479,7 +514,11 @@ class Color {
     get _redRand() { return this._data[4]; }
     get _greenRand() { return this._data[5]; }
     get _blueRand() { return this._data[6]; }
+    isNull() { return this._r < 0; }
     equals(other) {
+        if (typeof other === 'string' || typeof other === 'number') {
+            other = Color.from(other);
+        }
         if (other instanceof Color) {
             other = other._data;
         }
@@ -489,6 +528,9 @@ class Color {
         });
     }
     copy(other) {
+        if (typeof other === 'string' || typeof other === 'number') {
+            other = Color.from(other);
+        }
         if (other instanceof Color) {
             other = other._data;
         }
@@ -505,10 +547,15 @@ class Color {
         }
         return this;
     }
-    clear() {
+    nullify() {
+        return this.set(-1, 0, 0);
+    }
+    blackOut() {
         return this.set(0, 0, 0);
     }
     toInt(base256 = false) {
+        if (this.isNull())
+            return -1;
         if (base256) {
             const r = Math.round(this._r / 100 * 255) & 0xFF;
             const g = Math.round(this._g / 100 * 255) & 0xFF;
@@ -536,12 +583,20 @@ class Color {
         return this;
     }
     clamp() {
+        if (this.isNull())
+            return;
         this._r = Math.min(100, Math.max(0, this._r));
         this._g = Math.min(100, Math.max(0, this._g));
         this._b = Math.min(100, Math.max(0, this._b));
         return this;
     }
     mix(other, percent) {
+        if (this.isNull()) {
+            this.blackOut();
+        }
+        if (typeof other === 'string' || typeof other === 'number') {
+            other = Color.from(other);
+        }
         if (other instanceof Color) {
             other = other._data;
         }
@@ -554,7 +609,11 @@ class Color {
     }
     // Only adjusts r,g,b
     lighten(percent) {
+        if (this.isNull())
+            return this;
         percent = Math.min(100, Math.max(0, percent));
+        if (percent == 0)
+            return;
         const keepPct = 100 - percent;
         for (let i = 0; i < 3; ++i) {
             this._data[i] = Math.round(((this._data[i] * keepPct) + (100 * percent)) / 100);
@@ -563,7 +622,11 @@ class Color {
     }
     // Only adjusts r,g,b
     darken(percent) {
+        if (this.isNull())
+            return this;
         percent = Math.min(100, Math.max(0, percent));
+        if (percent == 0)
+            return;
         const keepPct = 100 - percent;
         for (let i = 0; i < 3; ++i) {
             this._data[i] = Math.round(((this._data[i] * keepPct) + (0 * percent)) / 100);
@@ -571,6 +634,8 @@ class Color {
         return this;
     }
     bake() {
+        if (this.isNull())
+            return this;
         const rand = this._rand ? Math.floor(options.random() * this._rand) : 0;
         const redRand = this._redRand ? Math.floor(options.random() * this._redRand) : 0;
         const greenRand = this._greenRand ? Math.floor(options.random() * this._greenRand) : 0;
@@ -581,9 +646,16 @@ class Color {
         for (let i = 3; i < this._data.length; ++i) {
             this._data[i] = 0;
         }
+        return this;
     }
     // Adds a color to this one
     add(other, percent = 100) {
+        if (this.isNull()) {
+            this.blackOut();
+        }
+        if (typeof other === 'string' || typeof other === 'number') {
+            other = Color.from(other);
+        }
         if (other instanceof Color) {
             other = other._data;
         }
@@ -593,6 +665,8 @@ class Color {
         return this;
     }
     scale(percent) {
+        if (this.isNull())
+            return this;
         percent = Math.max(0, percent);
         for (let i = 0; i < this._data.length; ++i) {
             this._data[i] = Math.round(this._data[i] * percent / 100);
@@ -600,6 +674,11 @@ class Color {
         return this;
     }
     multiply(other) {
+        if (this.isNull())
+            return this;
+        if (typeof other === 'string' || typeof other === 'number') {
+            other = Color.from(other);
+        }
         if (other instanceof Color) {
             other = other._data;
         }
@@ -609,7 +688,55 @@ class Color {
         return this;
     }
     toString(base256 = false) {
+        if (this.isNull())
+            return 'null color';
         return '#' + this.toInt(base256).toString(16).padStart(base256 ? 6 : 3, '0');
+    }
+}
+
+class Mixer {
+    constructor() {
+        this.ch = 0;
+        this.fg = new Color();
+        this.bg = new Color();
+    }
+    copy(other) {
+        this.ch = other.ch;
+        this.fg.copy(other.fg);
+        this.bg.copy(other.bg);
+        return this;
+    }
+    clone() {
+        const other = new Mixer();
+        other.copy(this);
+        return other;
+    }
+    nullify() {
+        this.ch = 0;
+        this.fg.nullify();
+        this.bg.nullify();
+        return this;
+    }
+    blackOut() {
+        this.ch = 0;
+        this.fg.blackOut();
+        this.bg.blackOut();
+        return this;
+    }
+    draw(info, opacity = 100) {
+        if (opacity <= 0)
+            return;
+        if (info.ch)
+            this.ch = info.ch;
+        if (info.fg)
+            this.fg.mix(info.fg, opacity);
+        if (info.bg)
+            this.bg.mix(info.bg, opacity);
+        return this;
+    }
+    swapColors() {
+        [this.bg, this.fg] = [this.fg, this.bg];
+        return this;
     }
 }
 
@@ -641,6 +768,7 @@ exports.Buffer = Buffer;
 exports.Canvas = Canvas;
 exports.Color = Color;
 exports.Glyphs = Glyphs;
+exports.Mixer = Mixer;
 exports.configure = configure;
 exports.withFont = withFont;
 exports.withImage = withImage;
