@@ -5,86 +5,57 @@ describe('Color', () => {
 
     test('fromArray', () => {
         const c = Color.fromArray([0,50, 100]);
-        expect(c.r).toEqual(0);
-        expect(c.g).toEqual(50);
-        expect(c.b).toEqual(100);
+        expect(c.toString()).toEqual('#08f');
 
         const d = Color.fromArray([0, 128, 255], true);
-        expect(d.r).toEqual(0);
-        expect(d.g).toEqual(50);
-        expect(d.b).toEqual(100);
+        expect(d.toString()).toEqual('#08f');
 
         const e = Color.fromArray([-10, 200, 50]);
-        expect(e.r).toEqual(-10);
-        expect(e.g).toEqual(200);
-        expect(e.b).toEqual(50);
+        expect(e.equals([-10,200,50])).toBeTruthy();
 
         const f = Color.fromArray([-50, 510, 255], true);
-        expect(f.r).toEqual(-20);
-        expect(f.g).toEqual(200);
-        expect(f.b).toEqual(100);
+        expect(f.equals([-20,200,100])).toBeTruthy();
 
     });
 
     test('make - array', () => {
         const c = make([0,50,100]);
-        expect(c.r).toEqual(0);
-        expect(c.g).toEqual(50);
-        expect(c.b).toEqual(100);
+        expect(c.toString()).toEqual('#08f');
 
         const d = make([0,128,255], true);
-        expect(d.r).toEqual(0);
-        expect(d.g).toEqual(50);
-        expect(d.b).toEqual(100);
-
+        expect(d.toString()).toEqual('#08f');
     });
 
     test('fromString', () => {
         const c = Color.fromString('#07F');
-        expect(c.r).toEqual(0);
-        expect(c.g).toEqual(47);
-        expect(c.b).toEqual(100);
+        expect(c.equals([0,47,100])).toBeTruthy();
 
         const d = Color.fromString('#0080FF');
-        expect(d.r).toEqual(0);
-        expect(d.g).toEqual(50);
-        expect(d.b).toEqual(100);
+        expect(d.equals([0,50,100])).toBeTruthy();
     });
 
     test('make - string', () => {
         const c = make('#07F');
-        expect(c.r).toEqual(0);
-        expect(c.g).toEqual(47);
-        expect(c.b).toEqual(100);
+        expect(c.equals([0,47,100])).toBeTruthy();
 
         const d = make('#0080FF');
-        expect(d.r).toEqual(0);
-        expect(d.g).toEqual(50);
-        expect(d.b).toEqual(100);
+        expect(d.equals([0,50,100])).toBeTruthy();
     });
 
     test('fromNumber', () => {
         const c = Color.fromNumber(0x07F);
-        expect(c.r).toEqual(0);
-        expect(c.g).toEqual(47);
-        expect(c.b).toEqual(100);
+        expect(c.equals([0,47,100])).toBeTruthy();
 
         const d = Color.fromNumber(0x0080FF, true);
-        expect(d.r).toEqual(0);
-        expect(d.g).toEqual(50);
-        expect(d.b).toEqual(100);
+        expect(d.equals([0,50,100])).toBeTruthy();
     });
 
     test('make - number', () => {
         const c = make(0x07F);
-        expect(c.r).toEqual(0);
-        expect(c.g).toEqual(47);
-        expect(c.b).toEqual(100);
+        expect(c.equals([0,47,100])).toBeTruthy();
 
         const d = make(0x0080FF, true);
-        expect(d.r).toEqual(0);
-        expect(d.g).toEqual(50);
-        expect(d.b).toEqual(100);
+        expect(d.equals([0,50,100])).toBeTruthy();
     });
 
     test('equals', () => {
@@ -137,14 +108,10 @@ describe('Color', () => {
 
     test('fromInt', () => {
         const c = new Color().fromInt(0xF70);
-        expect(c.r).toEqual(100);
-        expect(c.g).toEqual(47);
-        expect(c.b).toEqual(0);
+        expect(c.toString()).toEqual('#f70')
 
         const d = new Color().fromInt(0xFF8000, true);
-        expect(d.r).toEqual(100);
-        expect(d.g).toEqual(50);
-        expect(d.b).toEqual(0);
+        expect(d.toString()).toEqual('#f80');
     });
 
     test('clamp', () => {

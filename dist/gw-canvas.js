@@ -428,14 +428,16 @@ class Buffer {
     }
 }
 
+var options = {
+    random: Math.random.bind(Math),
+};
+function configure(opts = {}) {
+    Object.assign(options, opts);
+}
+
 class Color {
-    constructor(r = 0, g = 0, b = 0) {
-        this.r = 0;
-        this.g = 0;
-        this.b = 0;
-        this.r = r;
-        this.g = g;
-        this.b = b;
+    constructor(r = 0, g = 0, b = 0, rand = 0, redRand = 0, greenRand = 0, blueRand = 0) {
+        this._data = [r, g, b, rand, redRand, greenRand, blueRand];
     }
     static fromArray(vals, base256 = false) {
         if (vals.length < 3)
@@ -467,30 +469,40 @@ class Color {
         c.fromInt(val, base256);
         return c;
     }
+    get _r() { return this._data[0]; }
+    set _r(v) { this._data[0] = v; }
+    get _g() { return this._data[1]; }
+    set _g(v) { this._data[1] = v; }
+    get _b() { return this._data[2]; }
+    set _b(v) { this._data[2] = v; }
+    get _rand() { return this._data[3]; }
+    get _redRand() { return this._data[4]; }
+    get _greenRand() { return this._data[5]; }
+    get _blueRand() { return this._data[6]; }
     equals(other) {
-        if (Array.isArray(other)) {
-            other = TEMP_COLOR.set(other[0], other[1], other[2]);
+        if (other instanceof Color) {
+            other = other._data;
         }
-        return (this.r == other.r) && (this.g == other.g) && (this.b == other.b);
+        const data = other;
+        return this._data.every((v, i) => {
+            return v == (data[i] || 0);
+        });
     }
     copy(other) {
-        if (Array.isArray(other)) {
-            other = TEMP_COLOR.set(other[0], other[1], other[2]);
+        if (other instanceof Color) {
+            other = other._data;
         }
-        this.r = other.r;
-        this.g = other.g;
-        this.b = other.b;
-        return this;
+        return this.set(...other);
     }
     clone() {
         const other = new Color(); // Object.create(this.__proto__);
         other.copy(this);
         return other;
     }
-    set(r = 0, g = 0, b = 0) {
-        this.r = r;
-        this.g = g;
-        this.b = b;
+    set(_r = 0, _g = 0, _b = 0, _rand = 0, _redRand = 0, _greenRand = 0, _blueRand = 0) {
+        for (let i = 0; i < this._data.length; ++i) {
+            this._data[i] = arguments[i] || 0;
+        }
         return this;
     }
     clear() {
@@ -498,87 +510,108 @@ class Color {
     }
     toInt(base256 = false) {
         if (base256) {
-            const r = Math.round(this.r / 100 * 255) & 0xFF;
-            const g = Math.round(this.g / 100 * 255) & 0xFF;
-            const b = Math.round(this.b / 100 * 255) & 0xFF;
+            const r = Math.round(this._r / 100 * 255) & 0xFF;
+            const g = Math.round(this._g / 100 * 255) & 0xFF;
+            const b = Math.round(this._b / 100 * 255) & 0xFF;
             return (r << 16) + (g << 8) + b;
         }
-        const r = Math.round(this.r / 100 * 15) & 0xF;
-        const g = Math.round(this.g / 100 * 15) & 0xF;
-        const b = Math.round(this.b / 100 * 15) & 0xF;
+        const r = Math.round(this._r / 100 * 15) & 0xF;
+        const g = Math.round(this._g / 100 * 15) & 0xF;
+        const b = Math.round(this._b / 100 * 15) & 0xF;
         return (r << 8) + (g << 4) + b;
     }
     fromInt(val, base256 = false) {
+        for (let i = 0; i < this._data.length; ++i) {
+            this._data[i] = 0;
+        }
         if (base256) {
-            this.r = Math.round((val >> 16) * 100 / 255);
-            this.g = Math.round(((val & 0xFF00) >> 8) * 100 / 255);
-            this.b = Math.round((val & 0xFF) * 100 / 255);
+            this._r = Math.round((val >> 16) * 100 / 255);
+            this._g = Math.round(((val & 0xFF00) >> 8) * 100 / 255);
+            this._b = Math.round((val & 0xFF) * 100 / 255);
             return this;
         }
-        this.r = Math.round((val >> 8) * 100 / 15);
-        this.g = Math.round(((val & 0xF0) >> 4) * 100 / 15);
-        this.b = Math.round((val & 0xF) * 100 / 15);
+        this._r = Math.round((val >> 8) * 100 / 15);
+        this._g = Math.round(((val & 0xF0) >> 4) * 100 / 15);
+        this._b = Math.round((val & 0xF) * 100 / 15);
         return this;
     }
     clamp() {
-        this.r = Math.min(100, Math.max(0, this.r));
-        this.g = Math.min(100, Math.max(0, this.g));
-        this.b = Math.min(100, Math.max(0, this.b));
+        this._r = Math.min(100, Math.max(0, this._r));
+        this._g = Math.min(100, Math.max(0, this._g));
+        this._b = Math.min(100, Math.max(0, this._b));
         return this;
     }
     mix(other, percent) {
-        if (Array.isArray(other)) {
-            other = TEMP_COLOR.set(other[0], other[1], other[2]);
+        if (other instanceof Color) {
+            other = other._data;
         }
-        this._mix(other.r, other.g, other.b, percent);
-        return this;
-    }
-    lighten(percent) {
-        this._mix(100, 100, 100, percent);
-        return this;
-    }
-    darken(percent) {
-        this._mix(0, 0, 0, percent);
-        return this;
-    }
-    _mix(r, g, b, percent) {
         percent = Math.min(100, Math.max(0, percent));
         const keepPct = 100 - percent;
-        this.r = Math.round(((this.r * keepPct) + (r * percent)) / 100);
-        this.g = Math.round(((this.g * keepPct) + (g * percent)) / 100);
-        this.b = Math.round(((this.b * keepPct) + (b * percent)) / 100);
+        for (let i = 0; i < this._data.length; ++i) {
+            this._data[i] = Math.round(((this._data[i] * keepPct) + (other[i] * percent)) / 100);
+        }
+        return this;
+    }
+    // Only adjusts r,g,b
+    lighten(percent) {
+        percent = Math.min(100, Math.max(0, percent));
+        const keepPct = 100 - percent;
+        for (let i = 0; i < 3; ++i) {
+            this._data[i] = Math.round(((this._data[i] * keepPct) + (100 * percent)) / 100);
+        }
+        return this;
+    }
+    // Only adjusts r,g,b
+    darken(percent) {
+        percent = Math.min(100, Math.max(0, percent));
+        const keepPct = 100 - percent;
+        for (let i = 0; i < 3; ++i) {
+            this._data[i] = Math.round(((this._data[i] * keepPct) + (0 * percent)) / 100);
+        }
+        return this;
+    }
+    bake() {
+        const rand = this._rand ? Math.floor(options.random() * this._rand) : 0;
+        const redRand = this._redRand ? Math.floor(options.random() * this._redRand) : 0;
+        const greenRand = this._greenRand ? Math.floor(options.random() * this._greenRand) : 0;
+        const blueRand = this._blueRand ? Math.floor(options.random() * this._blueRand) : 0;
+        this._r += (rand + redRand);
+        this._g += (rand + greenRand);
+        this._b += (rand + blueRand);
+        for (let i = 3; i < this._data.length; ++i) {
+            this._data[i] = 0;
+        }
     }
     // Adds a color to this one
     add(other, percent = 100) {
-        if (Array.isArray(other)) {
-            other = TEMP_COLOR.set(other[0], other[1], other[2]);
+        if (other instanceof Color) {
+            other = other._data;
         }
-        this.r += Math.round(other.r * percent / 100);
-        this.g += Math.round(other.g * percent / 100);
-        this.b += Math.round(other.b * percent / 100);
+        for (let i = 0; i < this._data.length; ++i) {
+            this._data[i] += Math.round(other[i] * percent / 100);
+        }
         return this;
     }
     scale(percent) {
         percent = Math.max(0, percent);
-        this.r = Math.round(this.r * percent / 100);
-        this.g = Math.round(this.g * percent / 100);
-        this.b = Math.round(this.b * percent / 100);
+        for (let i = 0; i < this._data.length; ++i) {
+            this._data[i] = Math.round(this._data[i] * percent / 100);
+        }
         return this;
     }
     multiply(other) {
-        if (Array.isArray(other)) {
-            other = TEMP_COLOR.set(other[0], other[1], other[2]);
+        if (other instanceof Color) {
+            other = other._data;
         }
-        this.r = Math.round(this.r * other.r / 100);
-        this.g = Math.round(this.g * other.g / 100);
-        this.b = Math.round(this.b * other.b / 100);
+        for (let i = 0; i < this._data.length; ++i) {
+            this._data[i] = Math.round(this._data[i] * other[i] / 100);
+        }
         return this;
     }
     toString(base256 = false) {
-        return '#' + this.toInt(base256).toString(16);
+        return '#' + this.toInt(base256).toString(16).padStart(base256 ? 6 : 3, '0');
     }
 }
-const TEMP_COLOR = new Color();
 
 function withImage(image) {
     let opts = {};
@@ -608,5 +641,6 @@ exports.Buffer = Buffer;
 exports.Canvas = Canvas;
 exports.Color = Color;
 exports.Glyphs = Glyphs;
+exports.configure = configure;
 exports.withFont = withFont;
 exports.withImage = withImage;

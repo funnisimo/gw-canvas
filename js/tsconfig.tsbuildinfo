@@ -201,19 +201,19 @@
         "signature": "d0def521f86bfc4ce3363dcdbe6e001b67b2b07ca3781de97e6335bd7445b502",
         "affectsGlobalScope": false
       },
-      "../ts/color.ts": {
-        "version": "f40966a3a07eb28c95d30777c6b51776034d92aa5359cb4fde6b7bc4ac3090a0",
-        "signature": "ac69f2dfd5c50062887a282a20a308f7b9dcbc9ab5ea5985c8276eeb4faa4ba3",
+      "../ts/config.ts": {
+        "version": "32f5624c1bf10734c302685477b7a5bcb5647961ebe25d80354ee2fb78f0bbb1",
+        "signature": "0027c52ed063b06cc4a867f3f2b6bc03b92ba54457e37d82a1cd21bbfcd98c97",
         "affectsGlobalScope": false
       },
-      "../ts/color.spec.ts": {
-        "version": "9b18b56a2508f099c3ee9060c2ac14c27169b0ac3c6a18052a5dbba3e8a3b3f7",
-        "signature": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+      "../ts/color.ts": {
+        "version": "fc8d8b6df06ed984922cffb5568a7ffd3fbd3804531d2b82231cef8cb9434680",
+        "signature": "b08936b23265718ac653358584721979143d19ba7125628c3481846147b8b762",
         "affectsGlobalScope": false
       },
       "../ts/index.ts": {
-        "version": "bc46f286bc0de4e2e06fb2b1c611632de07931872a4a10882a17cc4cca487d1f",
-        "signature": "082ddcc3cb4c0de822db8b811d032035be93c65457fcd4d4318ae790f2794a5a",
+        "version": "670e23bb94d85ba44e90d36ce9c4c3e21d3e4dd00056592cfc9ec951ecf3d4bf",
+        "signature": "d4c5475de7080a2ba0651e195b8b1721174db879ab5102310e590e0b6992309c",
         "affectsGlobalScope": false
       },
       "../ts/gw.ts": {
@@ -318,8 +318,8 @@
         "../ts/shaders.ts",
         "../ts/utils.ts"
       ],
-      "../ts/color.spec.ts": [
-        "../ts/color.ts"
+      "../ts/color.ts": [
+        "../ts/config.ts"
       ],
       "../ts/gw.ts": [
         "../ts/index.ts"
@@ -328,6 +328,7 @@
         "../ts/buffer.ts",
         "../ts/canvas.ts",
         "../ts/color.ts",
+        "../ts/config.ts",
         "../ts/glyphs.ts"
       ]
     },
@@ -370,6 +371,7 @@
         "../ts/buffer.ts",
         "../ts/canvas.ts",
         "../ts/color.ts",
+        "../ts/config.ts",
         "../ts/glyphs.ts"
       ]
     },
@@ -420,8 +422,8 @@
       "../node_modules/typescript/lib/lib.webworker.importscripts.d.ts",
       "../ts/buffer.ts",
       "../ts/canvas.ts",
-      "../ts/color.spec.ts",
       "../ts/color.ts",
+      "../ts/config.ts",
       "../ts/glyphs.ts",
       "../ts/gw.ts",
       "../ts/index.ts",
