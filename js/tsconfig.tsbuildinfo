@@ -211,6 +211,11 @@
         "signature": "d0def521f86bfc4ce3363dcdbe6e001b67b2b07ca3781de97e6335bd7445b502",
         "affectsGlobalScope": false
       },
+      "../ts/color.ts": {
+        "version": "30df5b5d0c77b36b4bf60188b8332c69154989c4b75403ff1824fe720a62c092",
+        "signature": "3ce8c5afe58c60b0e335cce8a26a76d21d9e26d461e37f3334d3e3b8fe347477",
+        "affectsGlobalScope": false
+      },
       "../ts/index.ts": {
         "version": "848ebef9769194ac758c0561b6d693b931aecd2d34f41443e026025693028951",
         "signature": "9bb420fde358edab1dcb08615cb48109cb192d3d0e6c8c8e89fcc0b45523a527",
@@ -925,6 +930,7 @@
       "../node_modules/typescript/lib/lib.webworker.importscripts.d.ts",
       "../ts/buffer.ts",
       "../ts/canvas.ts",
+      "../ts/color.ts",
       "../ts/glyphs.ts",
       "../ts/gw.ts",
       "../ts/index.ts",
