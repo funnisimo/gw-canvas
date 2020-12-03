@@ -1,7 +1,7 @@
 import { Color } from './color';
 export class Mixer {
     constructor() {
-        this.ch = 0;
+        this.ch = -1;
         this.fg = new Color();
         this.bg = new Color();
     }
@@ -17,7 +17,7 @@ export class Mixer {
         return other;
     }
     nullify() {
-        this.ch = 0;
+        this.ch = -1;
         this.fg.nullify();
         this.bg.nullify();
         return this;
@@ -40,12 +40,15 @@ export class Mixer {
             bg = Color.from(bg);
             this.bg.copy(bg);
         }
+        return this;
     }
     drawSprite(info, opacity = 100) {
         if (opacity <= 0)
             return;
         if (info.ch)
             this.ch = info.ch;
+        else if (info.glyph !== undefined)
+            this.ch = info.glyph;
         if (info.fg)
             this.fg.mix(info.fg, opacity);
         if (info.bg)
@@ -66,7 +69,7 @@ export class Mixer {
         }
         return this;
     }
-    mix(color, fg = 100, bg = fg) {
+    mix(color, fg = 50, bg = fg) {
         color = Color.from(color);
         if (fg > 0) {
             this.fg.mix(color, fg);

@@ -202,7 +202,7 @@
         "affectsGlobalScope": false
       },
       "../ts/color.ts": {
-        "version": "2fa152a87f4582942b5c71207904bd2868f353eab69c94a31d4f46297ba87316",
+        "version": "56e26f9bc070e651c2c3f3d918a9d4cc1e5ca7211b6b0a6d120fcdce7079034a",
         "signature": "d366d99d49293c68530126c5794a958a262a8e3c0bded429cdc4f8d42e84e4af",
         "affectsGlobalScope": false
       },
@@ -212,8 +212,8 @@
         "affectsGlobalScope": false
       },
       "../ts/mixer.ts": {
-        "version": "37fab64ebd86567c2ad4d0d7d1b807484f1a5cabe92092b5ca8384b8f15f1059",
-        "signature": "6887260cdce279bf729570005de4f81e7b0c80548a65475c56121315cea2aea1",
+        "version": "a3497b99a908aafa6a802c4097302bf292a84bddb4eacc4b8e13076ea055a49c",
+        "signature": "ded5ea15c8ab6d343e5cb091efa3da3d9c885c6eccae227c68ad03858318b981",
         "affectsGlobalScope": false
       },
       "../ts/index.ts": {

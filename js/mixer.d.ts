@@ -9,7 +9,7 @@ export declare class Mixer {
     clone(): Mixer;
     nullify(): this;
     blackOut(): this;
-    draw(ch?: string | number, fg?: ColorBase, bg?: ColorBase): void;
+    draw(ch?: string | number, fg?: ColorBase, bg?: ColorBase): this;
     drawSprite(info: DrawInfo, opacity?: number): this | undefined;
     invert(): this;
     multiply(color: ColorBase, fg?: boolean, bg?: boolean): this;

@@ -9,7 +9,7 @@ export class Color {
         if (base256) {
             vals = vals.map((v) => Math.round(v * 100 / 255));
         }
-        return new this(vals[0], vals[1], vals[2]);
+        return new this(...vals);
     }
     static fromString(css) {
         if (!css.startsWith('#'))
@@ -51,17 +51,17 @@ export class Color {
     static from(arg, base256 = false) {
         if (arg instanceof this)
             return arg;
-        if (arg == -1)
+        if (arg < 0)
             return new this();
         return this.make(arg, base256);
     }
-    get r() { return Math.round(this._data[0] * 2.55); }
+    get r() { return Math.round(this._data[0] * 2.550001); }
     get _r() { return this._data[0]; }
     set _r(v) { this._data[0] = v; }
-    get g() { return Math.round(this._data[1] * 2.55); }
+    get g() { return Math.round(this._data[1] * 2.550001); }
     get _g() { return this._data[1]; }
     set _g(v) { this._data[1] = v; }
-    get b() { return Math.round(this._data[2] * 2.55); }
+    get b() { return Math.round(this._data[2] * 2.550001); }
     get _b() { return this._data[2]; }
     set _b(v) { this._data[2] = v; }
     get _rand() { return this._data[3]; }
@@ -99,7 +99,7 @@ export class Color {
         else if (B > R && R >= G) {
             H = 60 * (4 + (R - G) / (B - G));
         }
-        else if (R >= B && B > G) {
+        else {
             H = 60 * (6 - (B - G) / (R - G));
         }
         return Math.round(H);
@@ -143,14 +143,14 @@ export class Color {
         if (this.isNull())
             return -1;
         if (base256) {
-            const r = Math.round(this._r / 100 * 255) & 0xFF;
-            const g = Math.round(this._g / 100 * 255) & 0xFF;
-            const b = Math.round(this._b / 100 * 255) & 0xFF;
+            const r = Math.max(0, Math.min(255, this.r));
+            const g = Math.max(0, Math.min(255, this.g));
+            const b = Math.max(0, Math.min(255, this.b));
             return (r << 16) + (g << 8) + b;
         }
-        const r = Math.round(this._r / 100 * 15) & 0xF;
-        const g = Math.round(this._g / 100 * 15) & 0xF;
-        const b = Math.round(this._b / 100 * 15) & 0xF;
+        const r = Math.max(0, Math.min(15, Math.round(this._r / 100 * 15)));
+        const g = Math.max(0, Math.min(15, Math.round(this._g / 100 * 15)));
+        const b = Math.max(0, Math.min(15, Math.round(this._b / 100 * 15)));
         return (r << 8) + (g << 4) + b;
     }
     fromInt(val, base256 = false) {
@@ -201,7 +201,7 @@ export class Color {
         if (this.isNull())
             return this;
         percent = Math.min(100, Math.max(0, percent));
-        if (percent == 0)
+        if (percent <= 0)
             return;
         const keepPct = 100 - percent;
         for (let i = 0; i < 3; ++i) {
@@ -214,7 +214,7 @@ export class Color {
         if (this.isNull())
             return this;
         percent = Math.min(100, Math.max(0, percent));
-        if (percent == 0)
+        if (percent <= 0)
             return;
         const keepPct = 100 - percent;
         for (let i = 0; i < 3; ++i) {
