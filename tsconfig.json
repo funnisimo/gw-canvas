@@ -1,5 +1,6 @@
 {
 	"include": ["ts"],
+	"exclude": ["ts/**/*.spec.ts"],
 	"compilerOptions": {
 		"strict": true,
 		"outDir": "js",
@@ -8,6 +9,9 @@
 		"noUnusedParameters": true,
 		"noEmitOnError": true,
 		"incremental": true,
-		"declaration": true
-	}
+		"declaration": true,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+		"types": ["jest", "jest-extended"]
+    }
 }

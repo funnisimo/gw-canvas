@@ -9,12 +9,15 @@ body {
 
 h1 {
 	text-align: center;
-	color: goldenrod;
 }
 
 h1 span {
 	font-size: 50%;
 	margin-left: 1em;
+}
+
+h1, h2, h3, h4 {
+	color: goldenrod;
 }
 
 a {

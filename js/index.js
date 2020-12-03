@@ -1,6 +1,9 @@
 import { Canvas } from "./canvas";
 import { Glyphs } from "./glyphs";
 import { Buffer } from './buffer';
+import { Color } from './color';
+import { Mixer } from './mixer';
+import { configure } from './config';
 function withImage(image) {
     let opts = {};
     if (typeof image === 'string') {
@@ -24,4 +27,4 @@ function withFont(src) {
     src.glyphs = Glyphs.fromFont(src);
     return new Canvas(src);
 }
-export { Canvas, Glyphs, Buffer, withImage, withFont, };
+export { Canvas, Glyphs, Buffer, Color, Mixer, withImage, withFont, configure, };
