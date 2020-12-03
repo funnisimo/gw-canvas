@@ -1,7 +1,21 @@
 
 import { Color } from './color';
+import { options } from './config';
+
 
 describe('Color', () => {
+
+  let random: () => number;
+  
+  beforeAll(() => {
+    random = options.random;
+    options.random = jest.fn().mockReturnValue(0.5);
+  });
+  
+  afterAll(() => {
+    options.random = random;
+  });
+
 
     test('make - color', () => {
       const c = new Color(100,50,0);

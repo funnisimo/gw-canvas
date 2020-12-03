@@ -28,7 +28,7 @@ export class Mixer {
   }
 
   nullify() {
-    this.ch = 0;
+    this.ch = -1;
     this.fg.nullify();
     this.bg.nullify();
     return this;
@@ -59,6 +59,8 @@ export class Mixer {
   drawSprite(info:DrawInfo, opacity=100) {
     if (opacity <= 0) return;
     if (info.ch) this.ch = info.ch;
+    else if (info.glyph !== undefined) this.ch = info.glyph;
+    
     if (info.fg) this.fg.mix(info.fg, opacity);
     if (info.bg) this.bg.mix(info.bg, opacity);
     return this;
@@ -80,7 +82,7 @@ export class Mixer {
     return this;
   }
   
-  mix(color:ColorBase, fg=100, bg=fg) {
+  mix(color:ColorBase, fg=50, bg=fg) {
     color = Color.from(color);
     if (fg > 0) {
       this.fg.mix(color, fg);
