@@ -3,17 +3,86 @@
 
 Color objects allow you to easily manipulate colors.  They hold information about the Red, Green, and Blue values of the color as well as data about any random variance the color should have.
 
-By default, Colors are created with a null color - no color.
+By default, Colors are created with a null color - no color.  A null color will not draw into a canvas.  Any existing color will be unchanged.
 
 ```js
+const canvas = GW.canvas.withFont({ font: 'arial', width: 40, height: 10, tileWidth: 12, tileHeight: 12 });
+SHOW(canvas.node);
+const buffer = new GW.canvas.Buffer(canvas);
+buffer.fill(' ', 0x00F, 0x660);
+buffer.render();
+
 const c = new GW.canvas.Color();
-SHOW(c.isNull());
+SHOW(c.isNull(), c.toInt());
+
+buffer.draw(2, 2, '@', c);  // @ in null which means the original blue will stay
+buffer.render();
 ```
 
-Colors can also be created with RGB values:
+Notice that the '@' is drawn in Blue - which is the color from the fill.
+
+### Underlying Data
+
+Color objects do not expose their components.  (It is Javascript, so they are there for you in the _r, _g, _b properties if you want to mess with them, but you should resist the temptation)  Instead, they are designed so that you combine them using simple proportions (mix), add them (add), and multiply them (multiply).  Using these methods on a Color, you can create lots of nice effects - like lighting and gasses.
+
+#### Creating Color Objects
+
+Colors can be created many ways:
+
+* From percentages
+* From CSS strings (not names)
+* From RGB integer values
+* From RGB component arrays
+* From percentage component arrays
 
 ```js
-const c = new GW.canvas.Color(100,100,100);
-SHOW(c.toString(), c.isNull());
+const a = new GW.canvas.Color(100,50,21);
+SHOW(a.toString(true));
+
+// css strings
+const b = GW.canvas.Color.fromString('#ff33aa');
+SHOW(b.toString(true));
+const b2 = GW.canvas.Color.fromString('#f3a');
+SHOW(b2.toString(true));
+
+// rgb integer values
+const c = GW.canvas.Color.fromNumber(0x3af295);
+SHOW(c.toString(true));
+
+// RGB component array
+const d = GW.canvas.Color.fromArray([100, 50, 0], true);
+SHOW(d.toString(true));
+
+// Percentage component array
+const e = GW.canvas.Color.fromArray([100, 50, 0]);
+SHOW(e.toString(true));
 ```
 
+All of these coerce their parameters into the same underlying dataset.  You will notice that in some of the values that there is some variance between the values supplied and the values printed.  This is because under the covers we are converting everything into percentages and that causes some rounding.  Not to worry, we are eventually going to be converting to the 4096 color spectrum for drawing so there will be a lot of rounding for that.
+
+#### Separating Colors
+
+Sometimes you need to ensure that the foreground and background colors are distinct, or that 2 colors in a palette are distinct.  You can do that with the `Color.separate(a,b)` function.
+
+```js
+const canvas = GW.canvas.withFont({ font: 'arial', width: 40, height: 10, tileWidth: 12, tileHeight: 12, size:10 });
+SHOW(canvas.node);
+const buffer = new GW.canvas.Buffer(canvas);
+buffer.fill(' ', 0x000, 0x000);
+buffer.render();
+
+const fg = GW.canvas.Color.fromNumber(0xFF0);
+const bg = GW.canvas.Color.fromNumber(0xD94);
+
+buffer.draw(1, 1, -1, -1, fg);
+buffer.draw(1, 2, '@', fg, bg);
+buffer.draw(1, 3, -1, -1, bg);
+
+GW.canvas.Color.separate(fg, bg);
+
+buffer.draw(3, 1, -1, -1, fg);
+buffer.draw(3, 2, '@', fg, bg);
+buffer.draw(3, 3, -1, -1, bg);
+
+buffer.render();
+```

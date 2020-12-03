@@ -31,7 +31,7 @@ You can fill a buffer with glyph+colors.
 const canvas = GW.canvas.withFont({ width: 20, height: 5 });
 SHOW(canvas);
 const buffer = new GW.canvas.Buffer(canvas);
-buffer.fill(0x333); //  bg, glyph, fg
+buffer.fill(0, 0, 0x333); //  glyph, fg, bg
 buffer.draw(2, 2, 65, 0xF00);
 buffer.draw(3, 2, 66, 0x0F0);
 buffer.draw(4, 2, 67, 0x00F);
@@ -49,7 +49,7 @@ Buffers allow you to draw based on chars that are converted to glyphs via the ca
 const canvas = GW.canvas.withFont({ width: 20, height: 5 });
 SHOW(canvas);
 const buffer = new GW.canvas.Buffer(canvas);
-buffer.fill(0x333);
+buffer.fill(0, 0, 0x333);
 buffer.draw(2, 2, 't', 0xF00);
 buffer.draw(3, 2, 'e', 0x0F0);
 buffer.draw(4, 2, 's', 0x00F);
@@ -68,7 +68,7 @@ SHOW(canvas);
 canvas.draw(2, 2, 70, 0xF00, 0x333);
 
 const buffer = new GW.canvas.Buffer(canvas);
-buffer.fill(0x333);
+buffer.fill(0, 0, 0x333);
 buffer.draw(2, 2, 't', 0xF00);
 SHOW(buffer.get(2, 2));
 

@@ -1,3 +1,4 @@
+import { Color } from './color';
 ;
 export class Buffer {
     constructor(canvas) {
@@ -22,6 +23,12 @@ export class Buffer {
         if (typeof glyph == 'string') {
             glyph = this._canvas.glyphs.forChar(glyph);
         }
+        if (fg instanceof Color) {
+            fg = fg.toInt();
+        }
+        if (bg instanceof Color) {
+            bg = bg.toInt();
+        }
         glyph = (glyph >= 0) ? (glyph & 0xFF) : (current >> 24);
         bg = (bg >= 0) ? (bg & 0xFFF) : ((current >> 12) & 0xFFF);
         fg = (fg >= 0) ? (fg & 0xFFF) : (current & 0xFFF);
@@ -31,21 +38,21 @@ export class Buffer {
     }
     // This is without opacity - opacity is more work...
     drawSprite(x, y, sprite) {
-        const glyph = sprite.ch ? sprite.ch : -1;
-        const fg = sprite.fg ? sprite.fg.toInt() : -1;
-        const bg = sprite.bg ? sprite.bg.toInt() : -1;
-        return this.draw(x, y, glyph, fg, bg);
+        const glyph = sprite.ch ? sprite.ch : sprite.glyph;
+        // const fg = sprite.fg ? sprite.fg.toInt() : -1;
+        // const bg = sprite.bg ? sprite.bg.toInt() : -1;
+        return this.draw(x, y, glyph, sprite.fg, sprite.bg);
     }
     blackOut(x, y) {
         return this.draw(x, y, 0, 0, 0);
     }
-    fill(bg = 0, glyph = 0, fg = 0xFFF) {
+    fill(glyph = 0, fg = 0xFFF, bg = 0) {
         if (typeof glyph == 'string') {
             glyph = this._canvas.glyphs.forChar(glyph);
         }
         glyph = glyph & 0xFF;
-        bg = bg & 0xFFF;
         fg = fg & 0xFFF;
+        bg = bg & 0xFFF;
         const style = (glyph << 24) + (bg << 12) + fg;
         this._data.fill(style);
         return this;

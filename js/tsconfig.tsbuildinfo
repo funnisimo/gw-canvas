@@ -202,18 +202,18 @@
         "affectsGlobalScope": false
       },
       "../ts/color.ts": {
-        "version": "5dbbb3cb7fb747d09891d75fbf16ccd4bc76c9f93d1e7aea6cd5676c5fcdab84",
-        "signature": "1748577dc828e2d2e5e99bc064967a6714b1540f800fecfbe7c0b5e039ed65cd",
+        "version": "2fa152a87f4582942b5c71207904bd2868f353eab69c94a31d4f46297ba87316",
+        "signature": "d366d99d49293c68530126c5794a958a262a8e3c0bded429cdc4f8d42e84e4af",
         "affectsGlobalScope": false
       },
       "../ts/buffer.ts": {
-        "version": "af86ca621681090fdaa86571b5299e5e2627c36b3831ef90262e023267af6253",
-        "signature": "9599a6b527f635e39466ce911fdfc388c85c7b6c68a923b74b26c13603b7a484",
+        "version": "fadf3f2bcf22644ed417b907e77d070d9676943f148e086ea84407ab1d8a9af1",
+        "signature": "844fbe1309086c8faafbaa15a397d8243301b2fd960e209d505fa95ad764bb0c",
         "affectsGlobalScope": false
       },
       "../ts/mixer.ts": {
-        "version": "957acd0efe55fc6589dedb2d968bfe3c46fc61431adf0bac34b9c9e716ed047f",
-        "signature": "02563ebb0b2810d0bb69101aa5282c49f8cace95a35a7a01ced69f63438a687e",
+        "version": "37fab64ebd86567c2ad4d0d7d1b807484f1a5cabe92092b5ca8384b8f15f1059",
+        "signature": "6887260cdce279bf729570005de4f81e7b0c80548a65475c56121315cea2aea1",
         "affectsGlobalScope": false
       },
       "../ts/index.ts": {
