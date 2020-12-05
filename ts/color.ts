@@ -6,11 +6,26 @@ type ColorData = number[];
 export type ColorBase = Color|ColorData|string|number;
 
 
+function toColorInt(r=0, g=0, b=0, base256=false) {
+  if (base256) {
+      r = Math.max(0, Math.min(255, Math.round(r * 2.550001)));
+      g = Math.max(0, Math.min(255, Math.round(g * 2.550001)));
+      b = Math.max(0, Math.min(255, Math.round(b * 2.550001)));
+      return (r << 16) + (g << 8) + b;
+  }
+  r = Math.max(0, Math.min(15, Math.round(r / 100 * 15)));
+  g = Math.max(0, Math.min(15, Math.round(g / 100 * 15)));
+  b = Math.max(0, Math.min(15, Math.round(b / 100 * 15)));
+  return (r << 8) + (g << 4) + b;
+}
+
+
+
 export class Color {
     private _data: number[];
 
     static fromArray(vals:ColorData, base256=false) {
-        if (vals.length < 3) throw new Error('Colors must have 3 values.');
+        while (vals.length < 3) { vals.push(0); }
         if (base256) {
             vals = vals.map( (v) => Math.round(v * 100 / 255) ) as ColorData;
         }
@@ -18,7 +33,7 @@ export class Color {
     }
 
     static fromString(css:string) {
-        if (!css.startsWith('#')) throw new Error('Color strings must be of form "#abc" or "#abcdef"');
+        if (!css.startsWith('#')) throw new Error('Color strings must be of form "#abc" or "#abcdef" - received: [' + css + ']');
         const c = Number.parseInt(css.substring(1),16);
         let r, g, b;
         if (css.length == 4) {
@@ -40,8 +55,9 @@ export class Color {
         return c;
     }
 
-    static make(arg:ColorBase, base256=false) {
-        if (arg instanceof this) {
+    static make(arg:ColorBase, base256=false): Color {
+        if ((arg === undefined) || (arg === null)) return new this();
+        if (arg instanceof Color) {
           return arg.clone();
         }
         if (typeof arg === 'string') {
@@ -56,7 +72,7 @@ export class Color {
         throw new Error('Failed to make color - unknown argument: ' + JSON.stringify(arg));
     }
     
-    static from(arg:ColorBase, base256=false) {
+    static from(arg:ColorBase, base256=false): Color {
       if (arg instanceof this) return arg;
       if (arg < 0) return new this();
       return this.make(arg, base256);
@@ -110,7 +126,11 @@ export class Color {
     isNull() { return this._r < 0; }
 
     equals(other:ColorBase) {
+      if (typeof other === 'string') {
+        return (other.length > 4) ? (this.toString(true) == other) : (this.toString() == other);
+      }
       other = Color.from(other);
+      if (this.isNull()) return other.isNull();
       const data = other._data;
       return this._data.every( (v:number,i:number) => {
         return v == (data[i] || 0);
@@ -122,8 +142,13 @@ export class Color {
       return this.set(...other._data);
     }
 
+    protected _changed() {
+      return this;
+    }
+
     clone() {
-        const other = new Color(); // Object.create(this.__proto__);
+        // @ts-ignore
+        const other = new this.constructor();
         other.copy(this);
         return other;
     }
@@ -132,14 +157,12 @@ export class Color {
       for(let i = 0; i < this._data.length; ++i) {
         this._data[i] = arguments[i] || 0;
       }
-      return this;
+      return this._changed();
     }
     
     setRGB(_r=0,_g=0,_b=0,_rand=0,_redRand=0,_greenRand=0,_blueRand=0) {
-      for(let i = 0; i < this._data.length; ++i) {
-        this._data[i] = Math.round((arguments[i] || 0) / 2.55);
-      }
-      return this;
+      const args = [].map.call(arguments, (v) => Math.round((v||0) / 2.55)) as number[];
+      return this.set(...args);
     }
 
     nullify() {
@@ -152,16 +175,7 @@ export class Color {
 
     toInt(base256=false) {
       if (this.isNull()) return -1;
-      if (base256) {
-          const r = Math.max(0, Math.min(255, this.r));
-          const g = Math.max(0, Math.min(255, this.g));
-          const b = Math.max(0, Math.min(255, this.b));
-          return (r << 16) + (g << 8) + b;
-      }
-      const r = Math.max(0, Math.min(15, Math.round(this._r / 100 * 15)));
-      const g = Math.max(0, Math.min(15, Math.round(this._g / 100 * 15)));
-      const b = Math.max(0, Math.min(15, Math.round(this._b / 100 * 15)));
-      return (r << 8) + (g << 4) + b;
+      return toColorInt(this._r, this._g, this._b, base256);
     }
 
     fromInt(val:number, base256=false) {
@@ -171,18 +185,17 @@ export class Color {
       if (val < 0) {
         this._r = -1;
       }
-      else if (base256) {
-          this._r = Math.round((val >> 16) * 100 / 255);
-          this._g = Math.round(((val & 0xFF00) >> 8) * 100 / 255);
-          this._b = Math.round((val & 0xFF) * 100 / 255);
-          return this;
+      else if (base256 || (val > 0xFFF)) {
+        this._r = Math.round(((val & 0xFF0000) >> 16) * 100 / 255);
+        this._g = Math.round(((val & 0xFF00) >> 8) * 100 / 255);
+        this._b = Math.round((val & 0xFF) * 100 / 255);
       }
       else {
-        this._r = Math.round((val >> 8) * 100 / 15);
+        this._r = Math.round(((val & 0xF00) >> 8) * 100 / 15);
         this._g = Math.round(((val & 0xF0) >> 4) * 100 / 15);
         this._b = Math.round((val & 0xF) * 100 / 15);
       }
-      return this;
+      return this._changed();
     }
 
     clamp() {
@@ -191,7 +204,7 @@ export class Color {
       this._r = Math.min(100, Math.max(0, this._r));
       this._g = Math.min(100, Math.max(0, this._g));
       this._b = Math.min(100, Math.max(0, this._b));
-      return this;
+      return this._changed();
     }
 
     mix(other:ColorBase, percent:number) {
@@ -206,7 +219,7 @@ export class Color {
       for(let i = 0; i < this._data.length; ++i) {
         this._data[i] = Math.round(((this._data[i] * keepPct) + (data[i]*percent)) / 100);
       }
-      return this;
+      return this._changed();
     }
 
     // Only adjusts r,g,b
@@ -220,7 +233,7 @@ export class Color {
       for(let i = 0; i < 3; ++i) {
         this._data[i] = Math.round(((this._data[i] * keepPct) + (100*percent)) / 100);
       }
-      return this;
+      return this._changed();
     }
 
     // Only adjusts r,g,b
@@ -234,21 +247,25 @@ export class Color {
       for(let i = 0; i < 3; ++i) {
         this._data[i] = Math.round(((this._data[i] * keepPct) + (0*percent)) / 100);
       }
-      return this;
+      return this._changed();
     }
 
     bake() {
       if (this.isNull()) return this;
 
-      const rand      = this._rand ? Math.floor(options.random() * this._rand) : 0;
-      const redRand   = this._redRand ? Math.floor(options.random() * this._redRand) : 0;
-      const greenRand = this._greenRand ? Math.floor(options.random() * this._greenRand) : 0;
-      const blueRand  = this._blueRand ? Math.floor(options.random() * this._blueRand) : 0;
-      this._r += (rand + redRand);
-      this._g += (rand + greenRand);
-      this._b += (rand + blueRand);
-      for(let i = 3; i < this._data.length; ++i) {
-        this._data[i] = 0;
+      const d = this._data;
+      if (d[3] + d[4] + d[5] + d[6]) {
+        const rand      = this._rand ? Math.floor(options.random() * this._rand) : 0;
+        const redRand   = this._redRand ? Math.floor(options.random() * this._redRand) : 0;
+        const greenRand = this._greenRand ? Math.floor(options.random() * this._greenRand) : 0;
+        const blueRand  = this._blueRand ? Math.floor(options.random() * this._blueRand) : 0;
+        this._r += (rand + redRand);
+        this._g += (rand + greenRand);
+        this._b += (rand + blueRand);
+        for(let i = 3; i < this._data.length; ++i) {
+          this._data[i] = 0;
+        }
+        return this._changed();
       }
       return this;
     }
@@ -265,29 +282,33 @@ export class Color {
       for(let i = 0; i < this._data.length; ++i) {
         this._data[i] += Math.round(data[i] * percent / 100);
       }
-      return this;
+      return this._changed();
     } 
 
     scale(percent:number) {
-      if (this.isNull()) return this;
+      if (this.isNull() || percent == 100) return this;
       
       percent = Math.max(0, percent);
       for(let i = 0; i < this._data.length; ++i) {
         this._data[i] = Math.round(this._data[i] * percent / 100);
       }
-      return this;
+      return this._changed();
     }
 
-    multiply(other:ColorBase) {
-      other = Color.from(other);
-      if (other.isNull()) return this;
+    multiply(other:number[]|ColorBase) {
       if (this.isNull()) return this;
-      
-      const data = other._data;
-      for(let i = 0; i < this._data.length; ++i) {
-        this._data[i] = Math.round(this._data[i] * data[i] / 100);
+      let data = other as number[];
+      if (!Array.isArray(other)) {
+        other = Color.from(other);
+        if (other.isNull()) return this;
+        data = other._data;
       }
-      return this;
+      
+      const len = Math.max(3, Math.min(this._data.length, data.length));
+      for(let i = 0; i < len; ++i) {
+        this._data[i] = Math.round(this._data[i] * (data[i] || 0) / 100);
+      }
+      return this._changed();
     }
     
     // scales rgb down to a max of 100
@@ -298,7 +319,27 @@ export class Color {
       this._r = Math.round(100 * this._r/max);
       this._g = Math.round(100 * this._g/max);
       this._b = Math.round(100 * this._b/max);
-      return this;
+      return this._changed();
+    }
+
+    css(base256=false) {
+      const d = this._data;
+      let v = 0;
+      if (d[3] + d[4] + d[5] + d[6]) {
+        const rand      = this._rand ? Math.floor(options.random() * this._rand) : 0;
+        const redRand   = this._redRand ? Math.floor(options.random() * this._redRand) : 0;
+        const greenRand = this._greenRand ? Math.floor(options.random() * this._greenRand) : 0;
+        const blueRand  = this._blueRand ? Math.floor(options.random() * this._blueRand) : 0;
+        
+        const red = (this._r + rand + redRand);
+        const green = (this._g + rand + greenRand);
+        const blue = (this._b + rand + blueRand);
+        v = toColorInt(red, green, blue, base256);
+      }
+      else {
+        v = this.toInt(base256);
+      }
+      return '#' + v.toString(16).padStart(base256 ? 6 : 3, '0');
     }
 
     toString(base256=false) {

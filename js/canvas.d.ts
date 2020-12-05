@@ -40,4 +40,7 @@ export declare class Canvas {
     private _requestRender;
     render(): void;
     _uploadGlyphs(): void;
+    hasXY(x: number, y: number): boolean;
+    toX(x: number): number;
+    toY(y: number): number;
 }

@@ -25,6 +25,19 @@ describe('Color', () => {
 
       // @ts-ignore
       expect( () => Color.make({})).toThrow();
+      
+      // @ts-ignore
+      const e = Color.make();
+      expect(e.isNull()).toBeTruthy();
+
+      // @ts-ignore
+      const f = Color.make(null);
+      expect(f.isNull()).toBeTruthy();
+
+      // @ts-ignore
+      const g = Color.make(undefined);
+      expect(g.isNull()).toBeTruthy();
+
     });
 
     test('fromArray', () => {
@@ -40,7 +53,7 @@ describe('Color', () => {
         const f = Color.fromArray([-50, 510, 255], true);
         expect(f.equals([-20,200,100])).toBeTruthy();
 
-        expect( () => Color.fromArray([])).toThrow();
+        expect(Color.fromArray([]).toString()).toEqual('#000');
     });
 
     test('make - array', () => {
@@ -83,6 +96,9 @@ describe('Color', () => {
 
         const d = Color.make(0x0080FF, true);
         expect(d.equals([0,50,100])).toBeTruthy();
+        
+        const e = Color.make(0x202020); // automatic base256 detect (> 0xFFF)
+        expect(e.toString()).toEqual('#222');
     });
     
     test('from', () => {
@@ -94,11 +110,19 @@ describe('Color', () => {
         const a = new Color(100, 50, 0);
         const b = new Color(100, 50, 0);
         const c = new Color(50, 50, 50);
+        const d = new Color();
 
         expect(a.equals(b)).toBeTruthy();
         expect(a.equals(c)).toBeFalsy();
         expect(a.equals([100,50,0])).toBeTruthy();
         expect(a.equals([50,50,50])).toBeFalsy();
+        
+        // @ts-ignore
+        expect(a.equals(null)).toBeFalsy();
+        // @ts-ignore
+        expect(a.equals()).toBeFalsy();
+        expect(a.equals(d)).toBeFalsy();
+        expect(d.equals(a)).toBeFalsy();
     });
 
     test('copy', () => {

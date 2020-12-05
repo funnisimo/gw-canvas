@@ -27,7 +27,8 @@ export declare class Color {
     isNull(): boolean;
     equals(other: ColorBase): boolean;
     copy(other: ColorBase): this;
-    clone(): Color;
+    protected _changed(): this;
+    clone(): any;
     set(_r?: number, _g?: number, _b?: number, _rand?: number, _redRand?: number, _greenRand?: number, _blueRand?: number): this;
     setRGB(_r?: number, _g?: number, _b?: number, _rand?: number, _redRand?: number, _greenRand?: number, _blueRand?: number): this;
     nullify(): this;
@@ -41,8 +42,9 @@ export declare class Color {
     bake(): this;
     add(other: ColorBase, percent?: number): this;
     scale(percent: number): this;
-    multiply(other: ColorBase): this;
+    multiply(other: number[] | ColorBase): this;
     normalize(): this;
+    css(base256?: boolean): string;
     toString(base256?: boolean): string;
     static separate(a: Color, b: Color): void;
 }

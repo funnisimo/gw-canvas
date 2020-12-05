@@ -203,6 +203,20 @@ export class Canvas {
     this._requestRender();
 		this._glyphs.needsUpdate = false;
   }
+	
+	hasXY(x:number, y:number) {
+    return x >= 0 && y >= 0 && x < this.width && y < this.height;
+  }
+
+  toX(x:number) {
+    return Math.floor(this.width * x / this.pxWidth);
+  }
+
+  toY(y:number) {
+    return Math.floor(this.height * y / this.pxHeight);
+  }
+
+	
 }
 
 

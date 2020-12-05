@@ -161,4 +161,13 @@ export class Canvas {
         this._requestRender();
         this._glyphs.needsUpdate = false;
     }
+    hasXY(x, y) {
+        return x >= 0 && y >= 0 && x < this.width && y < this.height;
+    }
+    toX(x) {
+        return Math.floor(this.width * x / this.pxWidth);
+    }
+    toY(y) {
+        return Math.floor(this.height * y / this.pxHeight);
+    }
 }
