@@ -23,8 +23,12 @@ export class Color extends Int16Array {
         return new this(...vals);
     }
     static fromString(css) {
-        if (!css.startsWith('#'))
+        if (!css.startsWith('#')) {
+            const l = options.colorLookup(css);
+            if (l)
+                return l;
             throw new Error('Color strings must be of form "#abc" or "#abcdef" - received: [' + css + ']');
+        }
         const c = Number.parseInt(css.substring(1), 16);
         let r, g, b;
         if (css.length == 4) {

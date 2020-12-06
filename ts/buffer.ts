@@ -56,7 +56,7 @@ export class Buffer {
     return this;
   }
 
-  // This is without opacity - opacity is more work...
+  // This is without opacity - opacity must be done in Mixer
   drawSprite(x:number,y:number,sprite:DrawInfo) {
     const glyph = sprite.ch ? sprite.ch : sprite.glyph;
     // const fg = sprite.fg ? sprite.fg.toInt() : -1;

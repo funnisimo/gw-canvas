@@ -2,6 +2,7 @@
 import { options } from './config';
 
 
+
 type ColorData = number[];
 export type ColorBase = string|number|Color|ColorData;
 
@@ -34,7 +35,11 @@ export class Color extends Int16Array {
     }
 
     static fromString(css:string) {
-        if (!css.startsWith('#')) throw new Error('Color strings must be of form "#abc" or "#abcdef" - received: [' + css + ']');
+        if (!css.startsWith('#')) {
+          const l = options.colorLookup(css);
+          if (l) return l as Color;
+          throw new Error('Color strings must be of form "#abc" or "#abcdef" - received: [' + css + ']');
+        }
         const c = Number.parseInt(css.substring(1),16);
         let r, g, b;
         if (css.length == 4) {

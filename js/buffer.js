@@ -36,7 +36,7 @@ export class Buffer {
         this._data[index] = style;
         return this;
     }
-    // This is without opacity - opacity is more work...
+    // This is without opacity - opacity must be done in Mixer
     drawSprite(x, y, sprite) {
         const glyph = sprite.ch ? sprite.ch : sprite.glyph;
         // const fg = sprite.fg ? sprite.fg.toInt() : -1;
