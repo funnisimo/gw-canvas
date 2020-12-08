@@ -22,8 +22,8 @@ export class Canvas {
     get height() { return this._height; }
     get tileWidth() { return this._glyphs.tileWidth; }
     get tileHeight() { return this._glyphs.tileHeight; }
-    get pxWidth() { return this.node.width; }
-    get pxHeight() { return this.node.height; }
+    get pxWidth() { return this.node.clientWidth; }
+    get pxHeight() { return this.node.clientHeight; }
     get glyphs() { return this._glyphs; }
     set glyphs(glyphs) {
         const gl = this._gl;
@@ -87,10 +87,14 @@ export class Canvas {
         if (typeof node === 'string') {
             const el = document.getElementById(node);
             if (!el)
-                throw new Error('Failed to find canvas with id:' + node);
-            if (!(el instanceof HTMLCanvasElement))
-                throw new Error('Canvas: node must be a canvas element.');
-            node = el;
+                throw new Error('Failed to find element with id:' + node);
+            if (!(el instanceof HTMLCanvasElement)) {
+                node = document.createElement('canvas');
+                el.appendChild(node);
+            }
+            else {
+                node = el;
+            }
         }
         else if (!node) {
             node = document.createElement("canvas");
@@ -135,16 +139,20 @@ export class Canvas {
         Object.assign(this._buffers, { style });
     }
     _requestRender() {
-        if (this._renderRequested || !this._autoRender) {
+        if (this._renderRequested)
             return;
-        }
         this._renderRequested = true;
+        if (!this._autoRender)
+            return;
         requestAnimationFrame(() => this.render());
     }
     render() {
         const gl = this._gl;
         if (this._glyphs.needsUpdate) { // auto keep glyphs up to date
             this._uploadGlyphs();
+        }
+        else if (!this._renderRequested) {
+            return;
         }
         this._renderRequested = false;
         gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.style);
@@ -160,5 +168,14 @@ export class Canvas {
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this._glyphs.node);
         this._requestRender();
         this._glyphs.needsUpdate = false;
+    }
+    hasXY(x, y) {
+        return x >= 0 && y >= 0 && x < this.width && y < this.height;
+    }
+    toX(x) {
+        return Math.floor(this.width * x / this.node.clientWidth);
+    }
+    toY(y) {
+        return Math.floor(this.height * y / this.node.clientHeight);
     }
 }

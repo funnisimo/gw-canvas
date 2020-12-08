@@ -1,12 +1,14 @@
 declare type ColorData = number[];
-export declare type ColorBase = Color | ColorData | string | number;
-export declare class Color {
-    private _data;
+export declare type ColorBase = string | number | Color | ColorData;
+export declare class Color extends Int16Array {
     static fromArray(vals: ColorData, base256?: boolean): Color;
-    static fromString(css: string): Color;
+    static fromCss(css: string): Color;
     static fromNumber(val: number, base256?: boolean): Color;
     static make(arg: ColorBase, base256?: boolean): Color;
-    static from(arg: ColorBase, base256?: boolean): Color;
+    static from(): Color;
+    static from(rgb: number, base256?: boolean): Color;
+    static from(color: ColorBase): Color;
+    static from(arrayLike: ArrayLike<number>): Color;
     constructor(r?: number, g?: number, b?: number, rand?: number, redRand?: number, greenRand?: number, blueRand?: number);
     get r(): number;
     private get _r();
@@ -27,13 +29,13 @@ export declare class Color {
     isNull(): boolean;
     equals(other: ColorBase): boolean;
     copy(other: ColorBase): this;
-    clone(): Color;
-    set(_r?: number, _g?: number, _b?: number, _rand?: number, _redRand?: number, _greenRand?: number, _blueRand?: number): this;
-    setRGB(_r?: number, _g?: number, _b?: number, _rand?: number, _redRand?: number, _greenRand?: number, _blueRand?: number): this;
+    protected _changed(): this;
+    clone(): any;
+    assign(_r?: number, _g?: number, _b?: number, _rand?: number, _redRand?: number, _greenRand?: number, _blueRand?: number): this;
+    assignRGB(_r?: number, _g?: number, _b?: number, _rand?: number, _redRand?: number, _greenRand?: number, _blueRand?: number): this;
     nullify(): this;
     blackOut(): this;
     toInt(base256?: boolean): number;
-    fromInt(val: number, base256?: boolean): this;
     clamp(): this;
     mix(other: ColorBase, percent: number): this;
     lighten(percent: number): this | undefined;
@@ -41,8 +43,9 @@ export declare class Color {
     bake(): this;
     add(other: ColorBase, percent?: number): this;
     scale(percent: number): this;
-    multiply(other: ColorBase): this;
+    multiply(other: ColorData | Color): this;
     normalize(): this;
+    css(base256?: boolean): string;
     toString(base256?: boolean): string;
     static separate(a: Color, b: Color): void;
 }

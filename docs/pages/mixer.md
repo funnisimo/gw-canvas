@@ -16,13 +16,13 @@ const buffer = new GW.canvas.Buffer(canvas);
 
 const tile = {
   ch: '.', 
-  fg: GW.canvas.Color.from(0x666), 
-  bg: GW.canvas.Color.from(0x333),
+  fg: 0x666, 
+  bg: 0x333,
 }
 
 const potion = {
   ch: 'p', 
-  fg: GW.canvas.Color.from(0xF0C),
+  fg: 0xF0C,
 };
 
 const light = GW.canvas.Color.fromArray([50,50,200]);

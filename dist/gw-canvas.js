@@ -129,8 +129,8 @@ class Canvas {
     get height() { return this._height; }
     get tileWidth() { return this._glyphs.tileWidth; }
     get tileHeight() { return this._glyphs.tileHeight; }
-    get pxWidth() { return this.node.width; }
-    get pxHeight() { return this.node.height; }
+    get pxWidth() { return this.node.clientWidth; }
+    get pxHeight() { return this.node.clientHeight; }
     get glyphs() { return this._glyphs; }
     set glyphs(glyphs) {
         const gl = this._gl;
@@ -194,10 +194,14 @@ class Canvas {
         if (typeof node === 'string') {
             const el = document.getElementById(node);
             if (!el)
-                throw new Error('Failed to find canvas with id:' + node);
-            if (!(el instanceof HTMLCanvasElement))
-                throw new Error('Canvas: node must be a canvas element.');
-            node = el;
+                throw new Error('Failed to find element with id:' + node);
+            if (!(el instanceof HTMLCanvasElement)) {
+                node = document.createElement('canvas');
+                el.appendChild(node);
+            }
+            else {
+                node = el;
+            }
         }
         else if (!node) {
             node = document.createElement("canvas");
@@ -242,16 +246,20 @@ class Canvas {
         Object.assign(this._buffers, { style });
     }
     _requestRender() {
-        if (this._renderRequested || !this._autoRender) {
+        if (this._renderRequested)
             return;
-        }
         this._renderRequested = true;
+        if (!this._autoRender)
+            return;
         requestAnimationFrame(() => this.render());
     }
     render() {
         const gl = this._gl;
         if (this._glyphs.needsUpdate) { // auto keep glyphs up to date
             this._uploadGlyphs();
+        }
+        else if (!this._renderRequested) {
+            return;
         }
         this._renderRequested = false;
         gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.style);
@@ -267,6 +275,15 @@ class Canvas {
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this._glyphs.node);
         this._requestRender();
         this._glyphs.needsUpdate = false;
+    }
+    hasXY(x, y) {
+        return x >= 0 && y >= 0 && x < this.width && y < this.height;
+    }
+    toX(x) {
+        return Math.floor(this.width * x / this.node.clientWidth);
+    }
+    toY(y) {
+        return Math.floor(this.height * y / this.node.clientHeight);
     }
 }
 
@@ -308,7 +325,11 @@ class Glyphs {
     get tileHeight() { return this._tileHeight; }
     get pxWidth() { return this._node.width; }
     get pxHeight() { return this._node.height; }
-    forChar(ch) { return this._map[ch] || (ch.charCodeAt(0) % 256); }
+    forChar(ch) {
+        if (ch === null || ch === undefined)
+            return -1;
+        return this._map[ch] || -1;
+    }
     _configure(opts) {
         this._tileWidth = opts.tileWidth || this.tileWidth;
         this._tileHeight = opts.tileHeight || this.tileHeight;
@@ -323,6 +344,8 @@ class Glyphs {
         this._ctx.fillStyle = 'white';
     }
     draw(n, ch) {
+        if (n > 256)
+            throw new Error('Cannot draw more than 256 glyphs.');
         const x = (n % 16) * this.tileWidth;
         const y = Math.floor(n / 16) * this.tileHeight;
         const cx = x + Math.floor(this.tileWidth / 2);
@@ -335,7 +358,8 @@ class Glyphs {
             ch(this._ctx, x, y, this.tileWidth, this.tileHeight);
         }
         else {
-            this._map[ch] = n;
+            if (this._map[ch] === undefined)
+                this._map[ch] = n;
             this._ctx.fillText(ch, cx, cy);
         }
         this._ctx.restore();
@@ -353,24 +377,44 @@ class Glyphs {
             ].forEach((ch, i) => {
                 this.draw(i, ch);
             });
-            [
-                '\u2302',
-                '\u2b09', '\u272a', '\u2718', '\u2610', '\u2611', '\u25ef', '\u25ce', '\u2690',
-                '\u2691', '\u2598', '\u2596', '\u259d', '\u2597', '\u2744', '\u272d', '\u2727',
-                '\u25e3', '\u25e4', '\u25e2', '\u25e5', '\u25a8', '\u25a7', '\u259a', '\u265f',
-                '\u265c', '\u265e', '\u265d', '\u265b', '\u265a', '\u301c', '\u2694', '\u2692',
-                '\u25b6', '\u25bc', '\u25c0', '\u25b2', '\u25a4', '\u25a5', '\u25a6', '\u257a',
-                '\u257b', '\u2578', '\u2579', '\u2581', '\u2594', '\u258f', '\u2595', '\u272d',
-                '\u2591', '\u2592', '\u2593', '\u2503', '\u252b', '\u2561', '\u2562', '\u2556',
-                '\u2555', '\u2563', '\u2551', '\u2557', '\u255d', '\u255c', '\u255b', '\u2513',
-                '\u2517', '\u253b', '\u2533', '\u2523', '\u2501', '\u254b', '\u255e', '\u255f',
-                '\u255a', '\u2554', '\u2569', '\u2566', '\u2560', '\u2550', '\u256c', '\u2567',
-                '\u2568', '\u2564', '\u2565', '\u2559', '\u2558', '\u2552', '\u2553', '\u256b',
-                '\u256a', '\u251b', '\u250f', '\u2588', '\u2585', '\u258c', '\u2590', '\u2580',
-                '\u03b1', '\u03b2', '\u0393', '\u03c0', '\u03a3', '\u03c3', '\u03bc', '\u03c4',
-                '\u03a6', '\u03b8', '\u03a9', '\u03b4', '\u221e', '\u03b8', '\u03b5', '\u03b7',
-                '\u039e', '\u00b1', '\u2265', '\u2264', '\u2234', '\u2237', '\u00f7', '\u2248',
-                '\u22c4', '\u22c5', '\u2217', '\u27b5', '\u2620', '\u2625', '\u25fc', '\u25fb'
+            // [
+            // '\u2302',
+            // '\u2b09', '\u272a', '\u2718', '\u2610', '\u2611', '\u25ef', '\u25ce', '\u2690',
+            // '\u2691', '\u2598', '\u2596', '\u259d', '\u2597', '\u2744', '\u272d', '\u2727',
+            // '\u25e3', '\u25e4', '\u25e2', '\u25e5', '\u25a8', '\u25a7', '\u259a', '\u265f',
+            // '\u265c', '\u265e', '\u265d', '\u265b', '\u265a', '\u301c', '\u2694', '\u2692',
+            // '\u25b6', '\u25bc', '\u25c0', '\u25b2', '\u25a4', '\u25a5', '\u25a6', '\u257a',
+            // '\u257b', '\u2578', '\u2579', '\u2581', '\u2594', '\u258f', '\u2595', '\u272d',
+            // '\u2591', '\u2592', '\u2593', '\u2503', '\u252b', '\u2561', '\u2562', '\u2556',
+            // '\u2555', '\u2563', '\u2551', '\u2557', '\u255d', '\u255c', '\u255b', '\u2513',
+            // '\u2517', '\u253b', '\u2533', '\u2523', '\u2501', '\u254b', '\u255e', '\u255f',
+            // '\u255a', '\u2554', '\u2569', '\u2566', '\u2560', '\u2550', '\u256c', '\u2567',
+            // '\u2568', '\u2564', '\u2565', '\u2559', '\u2558', '\u2552', '\u2553', '\u256b',
+            // '\u256a', '\u251b', '\u250f', '\u2588', '\u2585', '\u258c', '\u2590', '\u2580',
+            // '\u03b1', '\u03b2', '\u0393', '\u03c0', '\u03a3', '\u03c3', '\u03bc', '\u03c4',
+            // '\u03a6', '\u03b8', '\u03a9', '\u03b4', '\u221e', '\u03b8', '\u03b5', '\u03b7',
+            // '\u039e', '\u00b1', '\u2265', '\u2264', '\u2234', '\u2237', '\u00f7', '\u2248',
+            // '\u22c4', '\u22c5', '\u2217', '\u27b5', '\u2620', '\u2625', '\u25fc', '\u25fb'
+            // ].forEach( (ch, i) => {
+            //   this.draw(i + 127, ch); 
+            // });
+            ['\u2302',
+                '\u00C7', '\u00FC', '\u00E9', '\u00E2', '\u00E4', '\u00E0', '\u00E5', '\u00E7',
+                '\u00EA', '\u00EB', '\u00E8', '\u00EF', '\u00EE', '\u00EC', '\u00C4', '\u00C5',
+                '\u00C9', '\u00E6', '\u00C6', '\u00F4', '\u00F6', '\u00F2', '\u00FB', '\u00F9',
+                '\u00FF', '\u00D6', '\u00DC', '\u00A2', '\u00A3', '\u00A5', '\u20A7', '\u0192',
+                '\u00E1', '\u00ED', '\u00F3', '\u00FA', '\u00F1', '\u00D1', '\u00AA', '\u00BA',
+                '\u00BF', '\u2310', '\u00AC', '\u00BD', '\u00BC', '\u00A1', '\u00AB', '\u00BB',
+                '\u2591', '\u2592', '\u2593', '\u2502', '\u2524', '\u2561', '\u2562', '\u2556',
+                '\u2555', '\u2563', '\u2551', '\u2557', '\u255D', '\u255C', '\u255B', '\u2510',
+                '\u2514', '\u2534', '\u252C', '\u251C', '\u2500', '\u253C', '\u255E', '\u255F',
+                '\u255A', '\u2554', '\u2569', '\u2566', '\u2560', '\u2550', '\u256C', '\u2567',
+                '\u2568', '\u2564', '\u2565', '\u2559', '\u2558', '\u2552', '\u2553', '\u256B',
+                '\u256A', '\u2518', '\u250C', '\u2588', '\u2584', '\u258C', '\u2590', '\u2580',
+                '\u03B1', '\u00DF', '\u0393', '\u03C0', '\u03A3', '\u03C3', '\u00B5', '\u03C4',
+                '\u03A6', '\u0398', '\u03A9', '\u03B4', '\u221E', '\u03C6', '\u03B5', '\u2229',
+                '\u2261', '\u00B1', '\u2265', '\u2264', '\u2320', '\u2321', '\u00F7', '\u2248',
+                '\u00B0', '\u2219', '\u00B7', '\u221A', '\u207F', '\u00B2', '\u25A0', '\u00A0'
             ].forEach((ch, i) => {
                 this.draw(i + 127, ch);
             });
@@ -380,26 +424,39 @@ class Glyphs {
 
 var options = {
     random: Math.random.bind(Math),
+    colorLookup: ((_) => null),
 };
 function configure(opts = {}) {
     Object.assign(options, opts);
 }
 
-class Color {
-    constructor(r = -1, g = 0, b = 0, rand = 0, redRand = 0, greenRand = 0, blueRand = 0) {
-        this._data = [r, g, b, rand, redRand, greenRand, blueRand];
+function toColorInt(r = 0, g = 0, b = 0, base256 = false) {
+    if (base256) {
+        r = Math.max(0, Math.min(255, Math.round(r * 2.550001)));
+        g = Math.max(0, Math.min(255, Math.round(g * 2.550001)));
+        b = Math.max(0, Math.min(255, Math.round(b * 2.550001)));
+        return (r << 16) + (g << 8) + b;
     }
+    r = Math.max(0, Math.min(15, Math.round(r / 100 * 15)));
+    g = Math.max(0, Math.min(15, Math.round(g / 100 * 15)));
+    b = Math.max(0, Math.min(15, Math.round(b / 100 * 15)));
+    return (r << 8) + (g << 4) + b;
+}
+class Color extends Int16Array {
     static fromArray(vals, base256 = false) {
-        if (vals.length < 3)
-            throw new Error('Colors must have 3 values.');
+        while (vals.length < 3)
+            vals.push(0);
         if (base256) {
-            vals = vals.map((v) => Math.round(v * 100 / 255));
+            for (let i = 0; i < 7; ++i) {
+                vals[i] = Math.round((vals[i] || 0) * 100 / 255);
+            }
         }
         return new this(...vals);
     }
-    static fromString(css) {
-        if (!css.startsWith('#'))
-            throw new Error('Color strings must be of form "#abc" or "#abcdef"');
+    static fromCss(css) {
+        if (!css.startsWith('#')) {
+            throw new Error('Color CSS strings must be of form "#abc" or "#abcdef" - received: [' + css + ']');
+        }
         const c = Number.parseInt(css.substring(1), 16);
         let r, g, b;
         if (css.length == 4) {
@@ -416,44 +473,76 @@ class Color {
     }
     static fromNumber(val, base256 = false) {
         const c = new this();
-        c.fromInt(val, base256);
+        for (let i = 0; i < c.length; ++i) {
+            c[i] = 0;
+        }
+        if (val < 0) {
+            c._r = -1;
+        }
+        else if (base256 || (val > 0xFFF)) {
+            c._r = Math.round(((val & 0xFF0000) >> 16) * 100 / 255);
+            c._g = Math.round(((val & 0xFF00) >> 8) * 100 / 255);
+            c._b = Math.round((val & 0xFF) * 100 / 255);
+        }
+        else {
+            c._r = Math.round(((val & 0xF00) >> 8) * 100 / 15);
+            c._g = Math.round(((val & 0xF0) >> 4) * 100 / 15);
+            c._b = Math.round((val & 0xF) * 100 / 15);
+        }
         return c;
     }
     static make(arg, base256 = false) {
-        if (arg instanceof this) {
+        if ((arg === undefined) || (arg === null))
+            return new this(-1);
+        if (arg instanceof Color) {
             return arg.clone();
         }
         if (typeof arg === 'string') {
-            return this.fromString(arg);
+            const l = options.colorLookup(arg);
+            if (l)
+                return l.clone();
+            return this.fromCss(arg);
         }
         else if (Array.isArray(arg)) {
             return this.fromArray(arg, base256);
         }
         else if (typeof arg === 'number') {
+            if (arg < 0)
+                return new this(-1);
             return this.fromNumber(arg, base256);
         }
         throw new Error('Failed to make color - unknown argument: ' + JSON.stringify(arg));
     }
-    static from(arg, base256 = false) {
-        if (arg instanceof this)
+    static from(...args) {
+        const arg = args[0];
+        if (arg instanceof Color)
             return arg;
         if (arg < 0)
-            return new this();
-        return this.make(arg, base256);
+            return new this(-1);
+        if (typeof arg === 'string') {
+            const l = options.colorLookup(arg);
+            if (l)
+                return l;
+        }
+        return this.make(arg, args[1]);
     }
-    get r() { return Math.round(this._data[0] * 2.550001); }
-    get _r() { return this._data[0]; }
-    set _r(v) { this._data[0] = v; }
-    get g() { return Math.round(this._data[1] * 2.550001); }
-    get _g() { return this._data[1]; }
-    set _g(v) { this._data[1] = v; }
-    get b() { return Math.round(this._data[2] * 2.550001); }
-    get _b() { return this._data[2]; }
-    set _b(v) { this._data[2] = v; }
-    get _rand() { return this._data[3]; }
-    get _redRand() { return this._data[4]; }
-    get _greenRand() { return this._data[5]; }
-    get _blueRand() { return this._data[6]; }
+    constructor(r = -1, g = 0, b = 0, rand = 0, redRand = 0, greenRand = 0, blueRand = 0) {
+        super(7);
+        this.set([r, g, b, rand, redRand, greenRand, blueRand]);
+    }
+    get r() { return Math.round(this[0] * 2.550001); }
+    get _r() { return this[0]; }
+    set _r(v) { this[0] = v; }
+    get g() { return Math.round(this[1] * 2.550001); }
+    get _g() { return this[1]; }
+    set _g(v) { this[1] = v; }
+    get b() { return Math.round(this[2] * 2.550001); }
+    get _b() { return this[2]; }
+    set _b(v) { this[2] = v; }
+    get _rand() { return this[3]; }
+    get _redRand() { return this[4]; }
+    get _greenRand() { return this[5]; }
+    get _blueRand() { return this[6]; }
     // luminosity (0-100)
     get l() {
         return Math.round(0.5 * (Math.min(this._r, this._g, this._b) + Math.max(this._r, this._g, this._b)));
@@ -492,72 +581,64 @@ class Color {
     }
     isNull() { return this._r < 0; }
     equals(other) {
-        other = Color.from(other);
-        const data = other._data;
-        return this._data.every((v, i) => {
-            return v == (data[i] || 0);
+        if (typeof other === 'string') {
+            return (other.length > 4) ? (this.toString(true) == other) : (this.toString() == other);
+        }
+        else if (typeof other === 'number') {
+            return (this.toInt() == other) || (this.toInt(true) == other);
+        }
+        const O = Color.from(other);
+        if (this.isNull())
+            return O.isNull();
+        return this.every((v, i) => {
+            return v == (O[i] || 0);
         });
     }
     copy(other) {
-        other = Color.from(other);
-        return this.set(...other._data);
-    }
-    clone() {
-        const other = new Color(); // Object.create(this.__proto__);
-        other.copy(this);
-        return other;
-    }
-    set(_r = 0, _g = 0, _b = 0, _rand = 0, _redRand = 0, _greenRand = 0, _blueRand = 0) {
-        for (let i = 0; i < this._data.length; ++i) {
-            this._data[i] = arguments[i] || 0;
+        if (Array.isArray(other)) {
+            this.set(other);
+        }
+        else {
+            const O = Color.from(other);
+            this.set(O);
         }
         return this;
     }
-    setRGB(_r = 0, _g = 0, _b = 0, _rand = 0, _redRand = 0, _greenRand = 0, _blueRand = 0) {
-        for (let i = 0; i < this._data.length; ++i) {
-            this._data[i] = Math.round((arguments[i] || 0) / 2.55);
+    _changed() {
+        return this;
+    }
+    clone() {
+        // @ts-ignore
+        const other = new this.constructor();
+        other.copy(this);
+        return other;
+    }
+    assign(_r = -1, _g = 0, _b = 0, _rand = 0, _redRand = 0, _greenRand = 0, _blueRand = 0) {
+        for (let i = 0; i < this.length; ++i) {
+            this[i] = (arguments[i] || 0);
+        }
+        return this;
+    }
+    assignRGB(_r = -1, _g = 0, _b = 0, _rand = 0, _redRand = 0, _greenRand = 0, _blueRand = 0) {
+        for (let i = 0; i < this.length; ++i) {
+            this[i] = Math.round((arguments[i] || 0) / 2.55);
         }
         return this;
     }
     nullify() {
-        return this.set(-1, 0, 0);
+        this[0] = -1;
+        return this;
     }
     blackOut() {
-        return this.set(0, 0, 0);
+        for (let i = 0; i < this.length; ++i) {
+            this[i] = 0;
+        }
+        return this;
     }
     toInt(base256 = false) {
         if (this.isNull())
             return -1;
-        if (base256) {
-            const r = Math.max(0, Math.min(255, this.r));
-            const g = Math.max(0, Math.min(255, this.g));
-            const b = Math.max(0, Math.min(255, this.b));
-            return (r << 16) + (g << 8) + b;
-        }
-        const r = Math.max(0, Math.min(15, Math.round(this._r / 100 * 15)));
-        const g = Math.max(0, Math.min(15, Math.round(this._g / 100 * 15)));
-        const b = Math.max(0, Math.min(15, Math.round(this._b / 100 * 15)));
-        return (r << 8) + (g << 4) + b;
-    }
-    fromInt(val, base256 = false) {
-        for (let i = 0; i < this._data.length; ++i) {
-            this._data[i] = 0;
-        }
-        if (val < 0) {
-            this._r = -1;
-        }
-        else if (base256) {
-            this._r = Math.round((val >> 16) * 100 / 255);
-            this._g = Math.round(((val & 0xFF00) >> 8) * 100 / 255);
-            this._b = Math.round((val & 0xFF) * 100 / 255);
-            return this;
-        }
-        else {
-            this._r = Math.round((val >> 8) * 100 / 15);
-            this._g = Math.round(((val & 0xF0) >> 4) * 100 / 15);
-            this._b = Math.round((val & 0xF) * 100 / 15);
-        }
-        return this;
+        return toColorInt(this._r, this._g, this._b, base256);
     }
     clamp() {
         if (this.isNull())
@@ -565,22 +646,21 @@ class Color {
         this._r = Math.min(100, Math.max(0, this._r));
         this._g = Math.min(100, Math.max(0, this._g));
         this._b = Math.min(100, Math.max(0, this._b));
-        return this;
+        return this._changed();
     }
     mix(other, percent) {
-        other = Color.from(other);
-        if (other.isNull())
+        const O = Color.from(other);
+        if (O.isNull())
             return this;
         if (this.isNull()) {
             this.blackOut();
         }
-        const data = other._data;
         percent = Math.min(100, Math.max(0, percent));
         const keepPct = 100 - percent;
-        for (let i = 0; i < this._data.length; ++i) {
-            this._data[i] = Math.round(((this._data[i] * keepPct) + (data[i] * percent)) / 100);
+        for (let i = 0; i < this.length; ++i) {
+            this[i] = Math.round(((this[i] * keepPct) + (O[i] * percent)) / 100);
         }
-        return this;
+        return this._changed();
     }
     // Only adjusts r,g,b
     lighten(percent) {
@@ -591,9 +671,9 @@ class Color {
             return;
         const keepPct = 100 - percent;
         for (let i = 0; i < 3; ++i) {
-            this._data[i] = Math.round(((this._data[i] * keepPct) + (100 * percent)) / 100);
+            this[i] = Math.round(((this[i] * keepPct) + (100 * percent)) / 100);
         }
-        return this;
+        return this._changed();
     }
     // Only adjusts r,g,b
     darken(percent) {
@@ -604,59 +684,65 @@ class Color {
             return;
         const keepPct = 100 - percent;
         for (let i = 0; i < 3; ++i) {
-            this._data[i] = Math.round(((this._data[i] * keepPct) + (0 * percent)) / 100);
+            this[i] = Math.round(((this[i] * keepPct) + (0 * percent)) / 100);
         }
-        return this;
+        return this._changed();
     }
     bake() {
         if (this.isNull())
             return this;
-        const rand = this._rand ? Math.floor(options.random() * this._rand) : 0;
-        const redRand = this._redRand ? Math.floor(options.random() * this._redRand) : 0;
-        const greenRand = this._greenRand ? Math.floor(options.random() * this._greenRand) : 0;
-        const blueRand = this._blueRand ? Math.floor(options.random() * this._blueRand) : 0;
-        this._r += (rand + redRand);
-        this._g += (rand + greenRand);
-        this._b += (rand + blueRand);
-        for (let i = 3; i < this._data.length; ++i) {
-            this._data[i] = 0;
+        const d = this;
+        if (d[3] + d[4] + d[5] + d[6]) {
+            const rand = this._rand ? Math.floor(options.random() * this._rand) : 0;
+            const redRand = this._redRand ? Math.floor(options.random() * this._redRand) : 0;
+            const greenRand = this._greenRand ? Math.floor(options.random() * this._greenRand) : 0;
+            const blueRand = this._blueRand ? Math.floor(options.random() * this._blueRand) : 0;
+            this._r += (rand + redRand);
+            this._g += (rand + greenRand);
+            this._b += (rand + blueRand);
+            for (let i = 3; i < this.length; ++i) {
+                this[i] = 0;
+            }
+            return this._changed();
         }
         return this;
     }
     // Adds a color to this one
     add(other, percent = 100) {
-        other = Color.from(other);
-        if (other.isNull())
+        const O = Color.from(other);
+        if (O.isNull())
             return this;
         if (this.isNull()) {
             this.blackOut();
         }
-        const data = other._data;
-        for (let i = 0; i < this._data.length; ++i) {
-            this._data[i] += Math.round(data[i] * percent / 100);
+        for (let i = 0; i < this.length; ++i) {
+            this[i] += Math.round(O[i] * percent / 100);
         }
-        return this;
+        return this._changed();
     }
     scale(percent) {
-        if (this.isNull())
+        if (this.isNull() || percent == 100)
             return this;
         percent = Math.max(0, percent);
-        for (let i = 0; i < this._data.length; ++i) {
-            this._data[i] = Math.round(this._data[i] * percent / 100);
+        for (let i = 0; i < this.length; ++i) {
+            this[i] = Math.round(this[i] * percent / 100);
         }
-        return this;
+        return this._changed();
     }
     multiply(other) {
-        other = Color.from(other);
-        if (other.isNull())
-            return this;
         if (this.isNull())
             return this;
-        const data = other._data;
-        for (let i = 0; i < this._data.length; ++i) {
-            this._data[i] = Math.round(this._data[i] * data[i] / 100);
+        let data = other;
+        if (!Array.isArray(other)) {
+            if (other.isNull())
+                return this;
+            data = other;
         }
-        return this;
+        const len = Math.max(3, Math.min(this.length, data.length));
+        for (let i = 0; i < len; ++i) {
+            this[i] = Math.round(this[i] * (data[i] || 0) / 100);
+        }
+        return this._changed();
     }
     // scales rgb down to a max of 100
     normalize() {
@@ -668,7 +754,25 @@ class Color {
         this._r = Math.round(100 * this._r / max);
         this._g = Math.round(100 * this._g / max);
         this._b = Math.round(100 * this._b / max);
-        return this;
+        return this._changed();
+    }
+    css(base256 = false) {
+        const d = this;
+        let v = 0;
+        if (d[3] + d[4] + d[5] + d[6]) {
+            const rand = this._rand ? Math.floor(options.random() * this._rand) : 0;
+            const redRand = this._redRand ? Math.floor(options.random() * this._redRand) : 0;
+            const greenRand = this._greenRand ? Math.floor(options.random() * this._greenRand) : 0;
+            const blueRand = this._blueRand ? Math.floor(options.random() * this._blueRand) : 0;
+            const red = (this._r + rand + redRand);
+            const green = (this._g + rand + greenRand);
+            const blue = (this._b + rand + blueRand);
+            v = toColorInt(red, green, blue, base256);
+        }
+        else {
+            v = this.toInt(base256);
+        }
+        return '#' + v.toString(16).padStart(base256 ? 6 : 3, '0');
     }
     toString(base256 = false) {
         if (this.isNull())
@@ -708,15 +812,15 @@ class Color {
 const BLACK = new Color(0, 0, 0);
 const WHITE = new Color(100, 100, 100);
 
-class Buffer {
-    constructor(canvas) {
-        this._canvas = canvas;
-        this._data = new Uint32Array(canvas.width * canvas.height);
-        canvas.copyTo(this);
+class DataBuffer {
+    constructor(width, height) {
+        this._width = width;
+        this._height = height;
+        this._data = new Uint32Array(width * height);
     }
     get data() { return this._data; }
-    get width() { return this._canvas.width; }
-    get height() { return this._canvas.height; }
+    get width() { return this._width; }
+    get height() { return this._height; }
     get(x, y) {
         let index = y * this.width + x;
         const style = this._data[index] || 0;
@@ -725,17 +829,22 @@ class Buffer {
         const fg = (style & 0xFFF);
         return { glyph, fg, bg };
     }
+    _toGlyph(ch) {
+        if (ch === null || ch === undefined)
+            return -1;
+        return ch.charCodeAt(0);
+    }
     draw(x, y, glyph = -1, fg = -1, bg = -1) {
         let index = y * this.width + x;
         const current = this._data[index] || 0;
-        if (typeof glyph == 'string') {
-            glyph = this._canvas.glyphs.forChar(glyph);
+        if (typeof glyph !== 'number') {
+            glyph = this._toGlyph(glyph);
         }
-        if (fg instanceof Color) {
-            fg = fg.toInt();
+        if (typeof fg !== 'number') {
+            fg = Color.from(fg).toInt();
         }
-        if (bg instanceof Color) {
-            bg = bg.toInt();
+        if (typeof bg !== 'number') {
+            bg = Color.from(bg).toInt();
         }
         glyph = (glyph >= 0) ? (glyph & 0xFF) : (current >> 24);
         bg = (bg >= 0) ? (bg & 0xFFF) : ((current >> 12) & 0xFFF);
@@ -744,7 +853,7 @@ class Buffer {
         this._data[index] = style;
         return this;
     }
-    // This is without opacity - opacity is more work...
+    // This is without opacity - opacity must be done in Mixer
     drawSprite(x, y, sprite) {
         const glyph = sprite.ch ? sprite.ch : sprite.glyph;
         // const fg = sprite.fg ? sprite.fg.toInt() : -1;
@@ -752,11 +861,14 @@ class Buffer {
         return this.draw(x, y, glyph, sprite.fg, sprite.bg);
     }
     blackOut(x, y) {
+        if (arguments.length == 0) {
+            return this.fill(0, 0, 0);
+        }
         return this.draw(x, y, 0, 0, 0);
     }
     fill(glyph = 0, fg = 0xFFF, bg = 0) {
         if (typeof glyph == 'string') {
-            glyph = this._canvas.glyphs.forChar(glyph);
+            glyph = this._toGlyph(glyph);
         }
         glyph = glyph & 0xFF;
         fg = fg & 0xFFF;
@@ -768,6 +880,17 @@ class Buffer {
     copy(other) {
         this._data.set(other._data);
         return this;
+    }
+}
+class Buffer extends DataBuffer {
+    constructor(canvas) {
+        super(canvas.width, canvas.height);
+        this._canvas = canvas;
+        canvas.copyTo(this);
+    }
+    get canvas() { return this._canvas; }
+    _toGlyph(ch) {
+        return this._canvas.glyphs.forChar(ch);
     }
     render() {
         this._canvas.copy(this);
@@ -785,11 +908,14 @@ class Mixer {
         this.fg = new Color();
         this.bg = new Color();
     }
+    _changed() {
+        return this;
+    }
     copy(other) {
         this.ch = other.ch;
         this.fg.copy(other.fg);
         this.bg.copy(other.bg);
-        return this;
+        return this._changed();
     }
     clone() {
         const other = new Mixer();
@@ -800,29 +926,33 @@ class Mixer {
         this.ch = -1;
         this.fg.nullify();
         this.bg.nullify();
-        return this;
+        return this._changed();
     }
     blackOut() {
         this.ch = 0;
         this.fg.blackOut();
         this.bg.blackOut();
-        return this;
+        return this._changed();
     }
     draw(ch = -1, fg = -1, bg = -1) {
-        if (ch !== -1) {
+        if (ch && (ch !== -1)) {
             this.ch = ch;
         }
-        if (fg != -1) {
+        if ((fg !== -1) && (fg !== null)) {
             fg = Color.from(fg);
             this.fg.copy(fg);
         }
-        if (bg != -1) {
+        if ((bg !== -1) && (bg !== null)) {
             bg = Color.from(bg);
             this.bg.copy(bg);
         }
-        return this;
+        return this._changed();
     }
-    drawSprite(info, opacity = 100) {
+    drawSprite(info, opacity) {
+        if (opacity === undefined)
+            opacity = info.opacity;
+        if (opacity === undefined)
+            opacity = 100;
         if (opacity <= 0)
             return;
         if (info.ch)
@@ -833,11 +963,11 @@ class Mixer {
             this.fg.mix(info.fg, opacity);
         if (info.bg)
             this.bg.mix(info.bg, opacity);
-        return this;
+        return this._changed();
     }
     invert() {
         [this.bg, this.fg] = [this.fg, this.bg];
-        return this;
+        return this._changed();
     }
     multiply(color, fg = true, bg = true) {
         color = Color.from(color);
@@ -847,7 +977,7 @@ class Mixer {
         if (bg) {
             this.bg.multiply(color);
         }
-        return this;
+        return this._changed();
     }
     mix(color, fg = 50, bg = fg) {
         color = Color.from(color);
@@ -857,7 +987,7 @@ class Mixer {
         if (bg > 0) {
             this.bg.mix(color, bg);
         }
-        return this;
+        return this._changed();
     }
     add(color, fg = 100, bg = fg) {
         color = Color.from(color);
@@ -867,15 +997,16 @@ class Mixer {
         if (bg > 0) {
             this.bg.add(color, bg);
         }
-        return this;
+        return this._changed();
     }
     separate() {
         Color.separate(this.fg, this.bg);
-        return this;
+        return this._changed();
     }
     bake() {
         this.fg.bake();
         this.bg.bake();
+        this._changed();
         return {
             ch: this.ch,
             fg: this.fg.toInt(),
@@ -911,6 +1042,7 @@ function withFont(src) {
 exports.Buffer = Buffer;
 exports.Canvas = Canvas;
 exports.Color = Color;
+exports.DataBuffer = DataBuffer;
 exports.Glyphs = Glyphs;
 exports.Mixer = Mixer;
 exports.configure = configure;

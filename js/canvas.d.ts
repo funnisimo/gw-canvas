@@ -1,5 +1,5 @@
 import { Glyphs } from './glyphs';
-import { Buffer } from './buffer';
+import { DataBuffer } from './buffer';
 export interface Options {
     width?: number;
     height?: number;
@@ -20,7 +20,7 @@ export declare class Canvas {
     private _width;
     private _height;
     constructor(options: Options);
-    get node(): HTMLCanvasElement | OffscreenCanvas;
+    get node(): HTMLCanvasElement;
     get width(): number;
     get height(): number;
     get tileWidth(): number;
@@ -32,12 +32,15 @@ export declare class Canvas {
     private _configure;
     resize(width: number, height: number): void;
     draw(x: number, y: number, glyph: number, fg: number, bg: number): void;
-    copy(buffer: Buffer): void;
-    copyTo(buffer: Buffer): void;
+    copy(buffer: DataBuffer): void;
+    copyTo(buffer: DataBuffer): void;
     private _initGL;
     private _createGeometry;
     private _createData;
     private _requestRender;
     render(): void;
     _uploadGlyphs(): void;
+    hasXY(x: number, y: number): boolean;
+    toX(x: number): number;
+    toY(y: number): number;
 }
