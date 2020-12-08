@@ -64,14 +64,14 @@ describe('Color', () => {
         expect(d.toString()).toEqual('#08f');
     });
 
-    test('fromString', () => {
-        const c = Color.fromString('#07F');
+    test('fromCss', () => {
+        const c = Color.fromCss('#07F');
         expect(c.equals([0,47,100])).toBeTruthy();
 
-        const d = Color.fromString('#0080FF');
+        const d = Color.fromCss('#0080FF');
         expect(d.equals([0,50,100])).toBeTruthy();
         
-        expect(() => Color.fromString('black')).toThrow();
+        expect(() => Color.fromCss('black')).toThrow();
     });
 
     test('make - string', () => {
@@ -123,6 +123,9 @@ describe('Color', () => {
         expect(a.equals()).toBeFalsy();
         expect(a.equals(d)).toBeFalsy();
         expect(d.equals(a)).toBeFalsy();
+
+        expect(a.toInt()).toEqual(0xF80);
+        expect(a.equals(0xF80)).toBeTruthy();
     });
 
     test('copy', () => {
@@ -141,25 +144,25 @@ describe('Color', () => {
 
     test('set', () => {
       const a = new Color();
-      a.set(100, 50, 0);
+      a.assign(100, 50, 0);
       expect(a.equals([100, 50, 0])).toBeTruthy();
-      
-      a.set(1,2,3,4,5,6,7);
+    
+      a.assign(1,2,3,4,5,6,7);
       expect(a.equals([1,2,3,4,5,6,7])).toBeTruthy();
-      
-      a.set();
+    
+      a.assign();
       expect(a.toString()).toEqual('#000');
     });
     
-    test('setRGB', () => {
+    test('assignRGB', () => {
       const a = new Color();
-      a.setRGB(255, 128, 0);
+      a.assignRGB(255, 128, 0);
       expect(a.equals([100, 50, 0])).toBeTruthy();
-      
-      a.setRGB(255,255,255,255,255,255,255);
+    
+      a.assignRGB(255,255,255,255,255,255,255);
       expect(a.equals([100,100,100,100,100,100,100])).toBeTruthy();
-      
-      a.setRGB();
+    
+      a.assignRGB();
       expect(a.toString()).toEqual('#000');
     });
 
@@ -191,16 +194,16 @@ describe('Color', () => {
         expect(e.toInt()).toEqual(-1);
     });
 
-    test('fromInt', () => {
-        const c = new Color().fromInt(0xF70);
-        expect(c.toString()).toEqual('#f70')
-
-        const d = new Color().fromInt(0xFF8000, true);
-        expect(d.toString()).toEqual('#f80');
-        
-        const e = new Color(100,100,100).fromInt(-1);
-        expect(e.isNull()).toBeTruthy();
-    });
+    // test('fromInt', () => {
+    //     const c = new Color().fromInt(0xF70);
+    //     expect(c.toString()).toEqual('#f70')
+    // 
+    //     const d = new Color().fromInt(0xFF8000, true);
+    //     expect(d.toString()).toEqual('#f80');
+    // 
+    //     const e = new Color(100,100,100).fromInt(-1);
+    //     expect(e.isNull()).toBeTruthy();
+    // });
 
     test('clamp', () => {
       const c = new Color();
@@ -208,7 +211,7 @@ describe('Color', () => {
       c.clamp();
       expect(c.isNull()).toBeTruthy();
       
-      c.set(200, -100, 50);
+      c.assign(200, -100, 50);
       c.clamp();
       expect(c.equals([100,0,50])).toBeTruthy();
       
@@ -357,7 +360,7 @@ describe('Color', () => {
     });
 
     test('rgb hsl', () => {
-      const c = Color.fromString('#f80');
+      const c = Color.fromCss('#f80');
       expect(c.r).toEqual(255);
       expect(c.g).toEqual(135);  // 256 vs 100 rounding
       expect(c.b).toEqual(0);
@@ -372,34 +375,34 @@ describe('Color', () => {
       expect(c.s).toEqual(0);
 
       // (A) If R ≥ G ≥ B  |  H = 60° x [(G-B)/(R-B)]
-      c.setRGB(255, 128, 0);
+      c.assignRGB(255, 128, 0);
       expect(c.h).toEqual(30);
       
       // (B) If G > R ≥ B  |  H = 60° x [2 - (R-B)/(G-B)]
-      c.setRGB(128, 255, 0);
+      c.assignRGB(128, 255, 0);
       expect(c.h).toEqual(90);
       
       // (C) If G ≥ B > R  |  H = 60° x [2 + (B-R)/(G-R)]
-      c.setRGB(0, 255, 128);
+      c.assignRGB(0, 255, 128);
       expect(c.h).toEqual(150);
 
       // (D) If B > G > R  |  H = 60° x [4 - (G-R)/(B-R)]
-      c.setRGB(0, 128, 255);
+      c.assignRGB(0, 128, 255);
       expect(c.h).toEqual(210);
 
       // (E) If B > R ≥ G  |  H = 60° x [4 + (R-G)/(B-G)]
-      c.setRGB(128, 0, 255);
+      c.assignRGB(128, 0, 255);
       expect(c.h).toEqual(270);
 
       // (F) If R ≥ B > G  |  H = 60° x [6 - (B-G)/(R-G)]
-      c.setRGB(255, 0, 128);
+      c.assignRGB(255, 0, 128);
       expect(c.h).toEqual(330);
     });
     
 
     test('separate', () => {
-      const a = Color.fromString('#f80');
-      const b = Color.fromString('#d73');
+      const a = Color.fromCss('#f80');
+      const b = Color.fromCss('#d73');
       Color.separate(a, b);
       expect(a.toString()).toEqual('#fb6');
       expect(b.toString()).toEqual('#742');
@@ -416,24 +419,24 @@ describe('Color', () => {
     });
 
     test('separate - 2 (far enough apart)', () => {
-      const a = Color.fromString('#ff0');
-      const b = Color.fromString('#d79');
+      const a = Color.fromCss('#ff0');
+      const b = Color.fromCss('#d79');
       Color.separate(a, b);
       expect(a.toString()).toEqual('#ff0');
       expect(b.toString()).toEqual('#d79');
     });
     
     test('separate - 3', () => {
-      const a = Color.fromString('#660');
-      const b = Color.fromString('#5f0');
+      const a = Color.fromCss('#660');
+      const b = Color.fromCss('#5f0');
       Color.separate(a, b);
       expect(a.toString()).toEqual('#550');
       expect(b.toString()).toEqual('#6f2');
     });
 
     test('separate 3', () => {
-      const a = Color.fromString('#33F');
-      const b = Color.fromString('#006');
+      const a = Color.fromCss('#33F');
+      const b = Color.fromCss('#006');
       Color.separate(a, b);
       expect(a.toString()).toEqual('#33f');
       expect(b.toString()).toEqual('#006');

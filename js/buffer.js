@@ -1,14 +1,14 @@
 import { Color } from './color';
 ;
-export class Buffer {
-    constructor(canvas) {
-        this._canvas = canvas;
-        this._data = new Uint32Array(canvas.width * canvas.height);
-        canvas.copyTo(this);
+export class DataBuffer {
+    constructor(width, height) {
+        this._width = width;
+        this._height = height;
+        this._data = new Uint32Array(width * height);
     }
     get data() { return this._data; }
-    get width() { return this._canvas.width; }
-    get height() { return this._canvas.height; }
+    get width() { return this._width; }
+    get height() { return this._height; }
     get(x, y) {
         let index = y * this.width + x;
         const style = this._data[index] || 0;
@@ -17,17 +17,22 @@ export class Buffer {
         const fg = (style & 0xFFF);
         return { glyph, fg, bg };
     }
+    _toGlyph(ch) {
+        if (ch === null || ch === undefined)
+            return -1;
+        return ch.charCodeAt(0);
+    }
     draw(x, y, glyph = -1, fg = -1, bg = -1) {
         let index = y * this.width + x;
         const current = this._data[index] || 0;
-        if (typeof glyph == 'string') {
-            glyph = this._canvas.glyphs.forChar(glyph);
+        if (typeof glyph !== 'number') {
+            glyph = this._toGlyph(glyph);
         }
-        if (fg instanceof Color) {
-            fg = fg.toInt();
+        if (typeof fg !== 'number') {
+            fg = Color.from(fg).toInt();
         }
-        if (bg instanceof Color) {
-            bg = bg.toInt();
+        if (typeof bg !== 'number') {
+            bg = Color.from(bg).toInt();
         }
         glyph = (glyph >= 0) ? (glyph & 0xFF) : (current >> 24);
         bg = (bg >= 0) ? (bg & 0xFFF) : ((current >> 12) & 0xFFF);
@@ -36,7 +41,7 @@ export class Buffer {
         this._data[index] = style;
         return this;
     }
-    // This is without opacity - opacity is more work...
+    // This is without opacity - opacity must be done in Mixer
     drawSprite(x, y, sprite) {
         const glyph = sprite.ch ? sprite.ch : sprite.glyph;
         // const fg = sprite.fg ? sprite.fg.toInt() : -1;
@@ -44,11 +49,14 @@ export class Buffer {
         return this.draw(x, y, glyph, sprite.fg, sprite.bg);
     }
     blackOut(x, y) {
+        if (arguments.length == 0) {
+            return this.fill(0, 0, 0);
+        }
         return this.draw(x, y, 0, 0, 0);
     }
     fill(glyph = 0, fg = 0xFFF, bg = 0) {
         if (typeof glyph == 'string') {
-            glyph = this._canvas.glyphs.forChar(glyph);
+            glyph = this._toGlyph(glyph);
         }
         glyph = glyph & 0xFF;
         fg = fg & 0xFFF;
@@ -60,6 +68,17 @@ export class Buffer {
     copy(other) {
         this._data.set(other._data);
         return this;
+    }
+}
+export class Buffer extends DataBuffer {
+    constructor(canvas) {
+        super(canvas.width, canvas.height);
+        this._canvas = canvas;
+        canvas.copyTo(this);
+    }
+    get canvas() { return this._canvas; }
+    _toGlyph(ch) {
+        return this._canvas.glyphs.forChar(ch);
     }
     render() {
         this._canvas.copy(this);

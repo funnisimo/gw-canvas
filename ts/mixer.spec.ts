@@ -79,7 +79,7 @@ describe('Mixer', () => {
   
   test('draw', () => {
     const mixer = new Mixer();
-    mixer.draw('@', 0xF00, Color.fromString('#00F'));
+    mixer.draw('@', 0xF00, Color.fromCss('#00F'));
     expect(mixer.ch).toEqual('@');
     expect(mixer.fg.toString()).toEqual('#f00');
     expect(mixer.bg.toString()).toEqual('#00f');
@@ -103,23 +103,23 @@ describe('Mixer', () => {
 
   test('drawSprite', () => {
     const mixer = new Mixer();
-    mixer.drawSprite({ ch:'@', fg: 0xF00, bg: Color.fromString('#00F') });
+    mixer.drawSprite({ ch:'@', fg: 0xF00, bg: Color.fromCss('#00F') });
     expect(mixer.ch).toEqual('@');
     expect(mixer.fg.toString()).toEqual('#f00');
     expect(mixer.bg.toString()).toEqual('#00f');
 
-    mixer.drawSprite({ glyph:100, fg: Color.fromString('#00F'), bg: 0xFF0});
+    mixer.drawSprite({ glyph:100, fg: Color.fromCss('#00F'), bg: 0xFF0});
     expect(mixer.ch).toEqual(100);
     expect(mixer.fg.toString()).toEqual('#00f');
     expect(mixer.bg.toString()).toEqual('#ff0');
 
     // no change if no opacity
-    mixer.drawSprite({ ch:'@', fg: 0xF00, bg: Color.fromString('#00F') }, 0);
+    mixer.drawSprite({ ch:'@', fg: 0xF00, bg: Color.fromCss('#00F') }, 0);
     expect(mixer.ch).toEqual(100);
     expect(mixer.fg.toString()).toEqual('#00f');
     expect(mixer.bg.toString()).toEqual('#ff0');
 
-    mixer.drawSprite({ ch:'@', fg: 0xF00, bg: Color.fromString('#00F') }, 50);
+    mixer.drawSprite({ ch:'@', fg: 0xF00, bg: Color.fromCss('#00F') }, 50);
     expect(mixer.ch).toEqual('@');
     expect(mixer.fg.toString()).toEqual('#808');
     expect(mixer.bg.toString()).toEqual('#888');
@@ -134,7 +134,7 @@ describe('Mixer', () => {
   
   test('invert', () => {
     const mixer = new Mixer();
-    mixer.draw('@', 0xF00, Color.fromString('#00F'));
+    mixer.draw('@', 0xF00, Color.fromCss('#00F'));
     expect(mixer.ch).toEqual('@');
     expect(mixer.fg.toString()).toEqual('#f00');
     expect(mixer.bg.toString()).toEqual('#00f');
@@ -146,7 +146,7 @@ describe('Mixer', () => {
   
   test('multiply', () => {
     const mixer = new Mixer();
-    mixer.draw('@', 0xF00, Color.fromString('#00F'));
+    mixer.draw('@', 0xF00, Color.fromCss('#00F'));
     expect(mixer.ch).toEqual('@');
     expect(mixer.fg.toString()).toEqual('#f00');
     expect(mixer.bg.toString()).toEqual('#00f');
@@ -156,7 +156,7 @@ describe('Mixer', () => {
     expect(mixer.fg.toString()).toEqual('#f00');
     expect(mixer.bg.toString()).toEqual('#008');
     
-    mixer.draw('@', 0xF00, Color.fromString('#00F'));
+    mixer.draw('@', 0xF00, Color.fromCss('#00F'));
     expect(mixer.ch).toEqual('@');
     expect(mixer.fg.toString()).toEqual('#f00');
     expect(mixer.bg.toString()).toEqual('#00f');
@@ -166,7 +166,7 @@ describe('Mixer', () => {
     expect(mixer.fg.toString()).toEqual('#f00');
     expect(mixer.bg.toString()).toEqual('#008');
 
-    mixer.draw('@', 0x800, Color.fromString('#00F'));
+    mixer.draw('@', 0x800, Color.fromCss('#00F'));
     expect(mixer.ch).toEqual('@');
     expect(mixer.fg.toString()).toEqual('#800');
     expect(mixer.bg.toString()).toEqual('#00f');
@@ -180,7 +180,7 @@ describe('Mixer', () => {
   
   test('mix', () => {
     const mixer = new Mixer();
-    mixer.draw('@', 0xF00, Color.fromString('#00F'));
+    mixer.draw('@', 0xF00, Color.fromCss('#00F'));
     expect(mixer.ch).toEqual('@');
     expect(mixer.fg.toString()).toEqual('#f00');
     expect(mixer.bg.toString()).toEqual('#00f');
@@ -191,7 +191,7 @@ describe('Mixer', () => {
     expect(mixer.fg.toString()).toEqual('#b38');
     expect(mixer.bg.toString()).toEqual('#33f');
 
-    mixer.draw('@', 0xF00, Color.fromString('#00F'));
+    mixer.draw('@', 0xF00, Color.fromCss('#00F'));
     mixer.mix(water, 0, 0); // does nothing
     expect(mixer.ch).toEqual('@');
     expect(mixer.fg.toString()).toEqual('#f00');
@@ -201,7 +201,7 @@ describe('Mixer', () => {
   
   test('add', () => {
     const mixer = new Mixer();
-    mixer.draw('@', 0xF00, Color.fromString('#00F'));
+    mixer.draw('@', 0xF00, Color.fromCss('#00F'));
     expect(mixer.ch).toEqual('@');
     expect(mixer.fg.toString()).toEqual('#f00');
     expect(mixer.bg.toString()).toEqual('#00f');
@@ -211,7 +211,7 @@ describe('Mixer', () => {
     expect(mixer.fg.toString()).toEqual('#f03');
     expect(mixer.bg.toString()).toEqual('#00f');
 
-    mixer.draw('@', 0xF00, Color.fromString('#00F'));
+    mixer.draw('@', 0xF00, Color.fromCss('#00F'));
     mixer.add(water, 0, 0); // does nothing
     expect(mixer.ch).toEqual('@');
     expect(mixer.fg.toString()).toEqual('#f00');
@@ -221,7 +221,7 @@ describe('Mixer', () => {
   
   test('separate', () => {
     const mixer = new Mixer();
-    mixer.draw('@', Color.fromString('#F80'), 0xD73);
+    mixer.draw('@', Color.fromCss('#F80'), 0xD73);
     expect(mixer.ch).toEqual('@');
     expect(mixer.fg.toString()).toEqual('#f80');
     expect(mixer.bg.toString()).toEqual('#d73');
