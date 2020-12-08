@@ -64,14 +64,14 @@ describe('Color', () => {
         expect(d.toString()).toEqual('#08f');
     });
 
-    test('fromString', () => {
-        const c = Color.fromString('#07F');
+    test('fromCss', () => {
+        const c = Color.fromCss('#07F');
         expect(c.equals([0,47,100])).toBeTruthy();
 
-        const d = Color.fromString('#0080FF');
+        const d = Color.fromCss('#0080FF');
         expect(d.equals([0,50,100])).toBeTruthy();
         
-        expect(() => Color.fromString('black')).toThrow();
+        expect(() => Color.fromCss('black')).toThrow();
     });
 
     test('make - string', () => {
@@ -123,6 +123,9 @@ describe('Color', () => {
         expect(a.equals()).toBeFalsy();
         expect(a.equals(d)).toBeFalsy();
         expect(d.equals(a)).toBeFalsy();
+
+        expect(a.toInt()).toEqual(0xF80);
+        expect(a.equals(0xF80)).toBeTruthy();
     });
 
     test('copy', () => {
@@ -357,7 +360,7 @@ describe('Color', () => {
     });
 
     test('rgb hsl', () => {
-      const c = Color.fromString('#f80');
+      const c = Color.fromCss('#f80');
       expect(c.r).toEqual(255);
       expect(c.g).toEqual(135);  // 256 vs 100 rounding
       expect(c.b).toEqual(0);
@@ -398,8 +401,8 @@ describe('Color', () => {
     
 
     test('separate', () => {
-      const a = Color.fromString('#f80');
-      const b = Color.fromString('#d73');
+      const a = Color.fromCss('#f80');
+      const b = Color.fromCss('#d73');
       Color.separate(a, b);
       expect(a.toString()).toEqual('#fb6');
       expect(b.toString()).toEqual('#742');
@@ -416,24 +419,24 @@ describe('Color', () => {
     });
 
     test('separate - 2 (far enough apart)', () => {
-      const a = Color.fromString('#ff0');
-      const b = Color.fromString('#d79');
+      const a = Color.fromCss('#ff0');
+      const b = Color.fromCss('#d79');
       Color.separate(a, b);
       expect(a.toString()).toEqual('#ff0');
       expect(b.toString()).toEqual('#d79');
     });
     
     test('separate - 3', () => {
-      const a = Color.fromString('#660');
-      const b = Color.fromString('#5f0');
+      const a = Color.fromCss('#660');
+      const b = Color.fromCss('#5f0');
       Color.separate(a, b);
       expect(a.toString()).toEqual('#550');
       expect(b.toString()).toEqual('#6f2');
     });
 
     test('separate 3', () => {
-      const a = Color.fromString('#33F');
-      const b = Color.fromString('#006');
+      const a = Color.fromCss('#33F');
+      const b = Color.fromCss('#006');
       Color.separate(a, b);
       expect(a.toString()).toEqual('#33f');
       expect(b.toString()).toEqual('#006');

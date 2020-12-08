@@ -34,11 +34,9 @@ export class Color extends Int16Array {
       return new this(...vals);
     }
 
-    static fromString(css:string) {
+    static fromCss(css:string) {
         if (!css.startsWith('#')) {
-          const l = options.colorLookup(css);
-          if (l) return l as Color;
-          throw new Error('Color strings must be of form "#abc" or "#abcdef" - received: [' + css + ']');
+          throw new Error('Color CSS strings must be of form "#abc" or "#abcdef" - received: [' + css + ']');
         }
         const c = Number.parseInt(css.substring(1),16);
         let r, g, b;
@@ -82,7 +80,9 @@ export class Color extends Int16Array {
         return arg.clone();
       }
       if (typeof arg === 'string') {
-        return this.fromString(arg);
+        const l = options.colorLookup(arg);
+        if (l) return l.clone();
+        return this.fromCss(arg);
       }
       else if (Array.isArray(arg)) {
         return this.fromArray(arg, base256);
@@ -100,8 +100,12 @@ export class Color extends Int16Array {
     static from(arrayLike: ArrayLike<number>): Color;
     static from(...args: any[]): Color {
       const arg = args[0];
-      if (arg instanceof this) return arg;
+      if (arg instanceof Color) return arg;
       if (arg < 0) return new this(-1);
+      if (typeof arg === 'string') {
+        const l = options.colorLookup(arg);
+        if (l) return l;
+      }
       return this.make(arg, args[1]);
     }
 
@@ -156,6 +160,9 @@ export class Color extends Int16Array {
     equals(other:ColorBase) {
       if (typeof other === 'string') {
         return (other.length > 4) ? (this.toString(true) == other) : (this.toString() == other);
+      }
+      else if (typeof other === 'number') {
+        return (this.toInt() == other) || (this.toInt(true) == other);
       }
       const O = Color.from(other);
       if (this.isNull()) return O.isNull();

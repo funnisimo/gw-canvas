@@ -3,7 +3,7 @@
 import { createProgram, createTexture, createGeometry } from "./utils";
 import * as shaders from "./shaders";
 import { Glyphs } from './glyphs'; 
-import { Buffer } from './buffer';
+import { DataBuffer } from './buffer';
 
 type GL = WebGL2RenderingContext;
 const VERTICES_PER_TILE = 6;
@@ -40,13 +40,13 @@ export class Canvas {
     this._configure(options);
   }
 	
-  get node() { return this._gl.canvas; }
+  get node(): HTMLCanvasElement { return this._gl.canvas as HTMLCanvasElement; }
 	get width() { return this._width; }
 	get height() { return this._height; }
 	get tileWidth() { return this._glyphs.tileWidth; }
 	get tileHeight() { return this._glyphs.tileHeight; }
-	get pxWidth() { return this.node.width; }
-	get pxHeight() { return this.node.height; }
+	get pxWidth() { return this.node.clientWidth; }
+	get pxHeight() { return this.node.clientHeight; }
 
 	get glyphs():Glyphs { return this._glyphs; }
 	set glyphs(glyphs: Glyphs) {
@@ -101,7 +101,7 @@ export class Canvas {
       this._requestRender();
   }
 	
-	copy(buffer: Buffer) {
+	copy(buffer: DataBuffer) {
 		buffer.data.forEach( (style, i) => {
 			const index = i * VERTICES_PER_TILE;
 			this._data[index + 2] = style;
@@ -110,7 +110,7 @@ export class Canvas {
 		this._requestRender();
 	}
 
-	copyTo(buffer: Buffer) {
+	copyTo(buffer: DataBuffer) {
 		const n = this.width * this.height;
 		const dest = buffer.data;
 		for(let i = 0; i < n; ++i) {
@@ -121,10 +121,15 @@ export class Canvas {
 	
   private _initGL(node?: HTMLCanvasElement|string) {
 			if (typeof node === 'string') {
-				const el = document.getElementById(node) as HTMLCanvasElement;
-				if (!el) throw new Error('Failed to find canvas with id:' + node);
-				if (!(el instanceof HTMLCanvasElement)) throw new Error('Canvas: node must be a canvas element.');
-				node = el;
+				const el = document.getElementById(node);
+				if (!el) throw new Error('Failed to find element with id:' + node);
+				if (!(el instanceof HTMLCanvasElement)) {
+					node = document.createElement('canvas');
+					el.appendChild(node);
+				}
+				else {
+					node = el;
+				}
 			}
 			else if (!node) {
 				node = document.createElement("canvas");
@@ -173,10 +178,9 @@ export class Canvas {
   }
 	
   private _requestRender() {
-      if (this._renderRequested || !this._autoRender) {
-          return;
-      }
+      if (this._renderRequested) return;
       this._renderRequested = true;
+			if (!this._autoRender) return;
       requestAnimationFrame(() => this.render());
   }
 	
@@ -185,6 +189,9 @@ export class Canvas {
 			
 			if (this._glyphs.needsUpdate) {	// auto keep glyphs up to date
 				this._uploadGlyphs();
+			}
+			else if (!this._renderRequested) {
+				return;
 			}
 			
       this._renderRequested = false;
@@ -209,11 +216,11 @@ export class Canvas {
   }
 
   toX(x:number) {
-    return Math.floor(this.width * x / this.pxWidth);
+    return Math.floor(this.width * x / this.node.clientWidth);
   }
 
   toY(y:number) {
-    return Math.floor(this.height * y / this.pxHeight);
+    return Math.floor(this.height * y / this.node.clientHeight);
   }
 
 	

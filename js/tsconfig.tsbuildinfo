@@ -187,13 +187,13 @@
         "affectsGlobalScope": false
       },
       "../ts/glyphs.ts": {
-        "version": "9f10c3563418be57380fe65033ae2c1792df4dead9ea7007afddbacafee92fa6",
+        "version": "6a97f43c9d87f1a374bd092796c2bc7d9d83b74d0db0372bfeb1656665a8cafc",
         "signature": "f35f75a1fd6d92b66d6d5c30dbcc8a097ef7a371b245bf8150a7b4982d5df12e",
         "affectsGlobalScope": false
       },
       "../ts/canvas.ts": {
-        "version": "f9238f8c59843e0715871feb0b6d139f279777b0744652b7947cff2a5c94e43a",
-        "signature": "cb5a86f7bbab7bdbcdda1a9062eb8bafa2e7a9b130e90a341771ff7432d56cbf",
+        "version": "760a2dd3825b6391f8d94bdd3d59f18b1cd4c99290aef67dcfefeb71b410468a",
+        "signature": "c56c4d11ba17bb639b8d887337338b97ed96e4774d3dfd7dadaff6612609878b",
         "affectsGlobalScope": false
       },
       "../ts/config.ts": {
@@ -202,13 +202,13 @@
         "affectsGlobalScope": false
       },
       "../ts/color.ts": {
-        "version": "7a208b212d998e9f896c186b1e32a57de379410f339c2fbe10bd93ae4d9b8b69",
-        "signature": "9879a77fb38e250034194a43cfd2614b149313c76284c8060ed926e1be6f24b9",
+        "version": "4f54ac3a48fe90ed5cef71c247bff54da07b36be63eb82937c38bbd7c77086ae",
+        "signature": "7ec94cef7181efca1004a18b2c06cbdcb997dda7ab004d8f28ef924b0fbdfd66",
         "affectsGlobalScope": false
       },
       "../ts/buffer.ts": {
-        "version": "4d87d1fdcbc933115c031ff05455fe690ae3915ad6236302c4a6322f4d211ac3",
-        "signature": "844fbe1309086c8faafbaa15a397d8243301b2fd960e209d505fa95ad764bb0c",
+        "version": "089c6e39dc4a92f85bc1c8e1efe7b442945fad8e7f598dd2c6febb4376e01900",
+        "signature": "ee124aec96614ecf3272aae8e11bea0e523a1a04ca0d05ac2b0d714db5b77550",
         "affectsGlobalScope": false
       },
       "../ts/mixer.ts": {
@@ -217,8 +217,8 @@
         "affectsGlobalScope": false
       },
       "../ts/index.ts": {
-        "version": "b983ca604ad9ad5ebc25cbec10177dd959bf1d87b24af8dd623c92478dab0597",
-        "signature": "df2f35a46394457cee125dc1e32dbeace26c8b515ff2cc431f9a728e8fe40e9e",
+        "version": "508d4994b2b55438f160ff41ef7f262155b846457116b21784519139c6edf68c",
+        "signature": "56c7c14094adc69bff25ccb9249d09f67bde7bc8394613975e22764e2aa2b601",
         "affectsGlobalScope": false
       },
       "../ts/gw.ts": {

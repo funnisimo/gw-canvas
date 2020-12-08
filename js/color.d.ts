@@ -2,7 +2,7 @@ declare type ColorData = number[];
 export declare type ColorBase = string | number | Color | ColorData;
 export declare class Color extends Int16Array {
     static fromArray(vals: ColorData, base256?: boolean): Color;
-    static fromString(css: string): Color;
+    static fromCss(css: string): Color;
     static fromNumber(val: number, base256?: boolean): Color;
     static make(arg: ColorBase, base256?: boolean): Color;
     static from(): Color;
