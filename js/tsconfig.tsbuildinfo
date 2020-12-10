@@ -192,8 +192,8 @@
         "affectsGlobalScope": false
       },
       "../ts/canvas.ts": {
-        "version": "372c0c2d93fa9fff6383808ca9b607117bd551bf227dc6d2ee7ac8c0d5e39c5f",
-        "signature": "761933927ebffef4b179909f9a9e1d264414d20c6331a97849b040f834e6043f",
+        "version": "cb10632a57ba465f0bb6c588f2743de2b687fe01fdfd50f6822ffdb7d4ac731e",
+        "signature": "226df383dceed7fe9c41f842b1085ddc3d3b097b2917eb05992de7069898ae90",
         "affectsGlobalScope": false
       },
       "../ts/config.ts": {

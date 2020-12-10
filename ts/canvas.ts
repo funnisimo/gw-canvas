@@ -12,9 +12,27 @@ export interface Options {
 	width?: number;
 	height?: number;
 	glyphs: Glyphs;
-	node?: HTMLCanvasElement|string;
+	div?: HTMLElement|string;
 	render?: boolean;
 }
+
+
+export class NotSupportedError extends Error {
+  constructor(...params: any[]) {
+    // Pass remaining arguments (including vendor specific ones) to parent constructor
+    super(...params)
+
+    // Maintains proper stack trace for where our error was thrown (only available on V8)
+		// @ts-ignore
+    if (Error.captureStackTrace) {
+			// @ts-ignore
+      Error.captureStackTrace(this, NotSupportedError);
+    }
+
+    this.name = 'NotSupportedError';
+  }
+}
+
 
 export abstract class BaseCanvas {
 	protected _data = new Uint32Array();
@@ -28,8 +46,8 @@ export abstract class BaseCanvas {
 
   constructor(options: Options) {
 		if (!options.glyphs) throw new Error('You must supply glyphs for the canvas.');
-		this._node = this._initNode(options.node);
-		this._initContext();
+		this._node = this._createNode();
+		this._createContext();
 		this._configure(options);
   }
 	
@@ -46,31 +64,34 @@ export abstract class BaseCanvas {
 		this._setGlyphs(glyphs);
 	}
 	
-	protected _initNode(node?: HTMLCanvasElement|string) {
-		if (!node) {
-			node = document.createElement("canvas");
-		}
-		else if (typeof node === 'string') {
-			const el = document.getElementById(node);
-			if (!el) throw new Error('Failed to find element with id:' + node);
-			if (!(el instanceof HTMLCanvasElement)) {
-				node = document.createElement('canvas');
-				el.appendChild(node);
-			}
-			else {
-				node = el;
-			}
-		}
-		return node;
+	protected _createNode() {
+		return document.createElement("canvas");
 	}
 	
-	protected abstract _initContext(): void;
+	protected abstract _createContext(): void;
 	
 	private _configure(options: Options) {
 		this._width = options.width || this._width;
 		this._height = options.height || this._height;
 		this._autoRender = (options.render !== false);
 		this._setGlyphs(options.glyphs);
+
+		if (options.div) {
+			let el;
+			if (typeof options.div === 'string') {
+				el = document.getElementById(options.div);
+				if (!el) {
+					console.warn('Failed to find parent element by ID: ' + options.div);
+				}
+			}
+			else {
+				el = options.div;
+			}
+			if (el && el.appendChild) {
+				el.appendChild(this.node);
+			}
+		}
+
 	}
 
 	protected _setGlyphs(glyphs: Glyphs) {
@@ -154,10 +175,10 @@ export class Canvas extends BaseCanvas {
 		super(options);
 	}
 	
-	protected _initContext() {
+	protected _createContext() {
     let gl = this.node.getContext("webgl2");
     if (!gl) {
-        throw new Error("WebGL 2 not supported");
+        throw new NotSupportedError("WebGL 2 not supported");
     }
 		this._gl = gl;
 		this._buffers = {};

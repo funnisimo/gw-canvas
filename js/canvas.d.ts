@@ -4,8 +4,11 @@ export interface Options {
     width?: number;
     height?: number;
     glyphs: Glyphs;
-    node?: HTMLCanvasElement | string;
+    div?: HTMLElement | string;
     render?: boolean;
+}
+export declare class NotSupportedError extends Error {
+    constructor(...params: any[]);
 }
 export declare abstract class BaseCanvas {
     protected _data: Uint32Array;
@@ -25,8 +28,8 @@ export declare abstract class BaseCanvas {
     get pxHeight(): number;
     get glyphs(): Glyphs;
     set glyphs(glyphs: Glyphs);
-    protected _initNode(node?: HTMLCanvasElement | string): HTMLCanvasElement;
-    protected abstract _initContext(): void;
+    protected _createNode(): HTMLCanvasElement;
+    protected abstract _createContext(): void;
     private _configure;
     protected _setGlyphs(glyphs: Glyphs): boolean;
     resize(width: number, height: number): void;
@@ -47,7 +50,7 @@ export declare class Canvas extends BaseCanvas {
     private _uniforms;
     private _texture;
     constructor(options: Options);
-    protected _initContext(): void;
+    protected _createContext(): void;
     private _createGeometry;
     private _createData;
     protected _setGlyphs(glyphs: Glyphs): boolean;

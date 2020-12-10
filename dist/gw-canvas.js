@@ -109,6 +109,19 @@ void main() {
 
 // Based on: https://github.com/ondras/fastiles/blob/master/ts/scene.ts (v2.1.0)
 const VERTICES_PER_TILE = 6;
+class NotSupportedError extends Error {
+    constructor(...params) {
+        // Pass remaining arguments (including vendor specific ones) to parent constructor
+        super(...params);
+        // Maintains proper stack trace for where our error was thrown (only available on V8)
+        // @ts-ignore
+        if (Error.captureStackTrace) {
+            // @ts-ignore
+            Error.captureStackTrace(this, NotSupportedError);
+        }
+        this.name = 'NotSupportedError';
+    }
+}
 class BaseCanvas {
     constructor(options) {
         this._data = new Uint32Array();
@@ -118,8 +131,8 @@ class BaseCanvas {
         this._height = 25;
         if (!options.glyphs)
             throw new Error('You must supply glyphs for the canvas.');
-        this._node = this._initNode(options.node);
-        this._initContext();
+        this._node = this._createNode();
+        this._createContext();
         this._configure(options);
     }
     get node() { return this._node; }
@@ -133,29 +146,29 @@ class BaseCanvas {
     set glyphs(glyphs) {
         this._setGlyphs(glyphs);
     }
-    _initNode(node) {
-        if (!node) {
-            node = document.createElement("canvas");
-        }
-        else if (typeof node === 'string') {
-            const el = document.getElementById(node);
-            if (!el)
-                throw new Error('Failed to find element with id:' + node);
-            if (!(el instanceof HTMLCanvasElement)) {
-                node = document.createElement('canvas');
-                el.appendChild(node);
-            }
-            else {
-                node = el;
-            }
-        }
-        return node;
+    _createNode() {
+        return document.createElement("canvas");
     }
     _configure(options) {
         this._width = options.width || this._width;
         this._height = options.height || this._height;
         this._autoRender = (options.render !== false);
         this._setGlyphs(options.glyphs);
+        if (options.div) {
+            let el;
+            if (typeof options.div === 'string') {
+                el = document.getElementById(options.div);
+                if (!el) {
+                    console.warn('Failed to find parent element by ID: ' + options.div);
+                }
+            }
+            else {
+                el = options.div;
+            }
+            if (el && el.appendChild) {
+                el.appendChild(this.node);
+            }
+        }
     }
     _setGlyphs(glyphs) {
         if (glyphs === this._glyphs)
@@ -215,10 +228,10 @@ class Canvas extends BaseCanvas {
     constructor(options) {
         super(options);
     }
-    _initContext() {
+    _createContext() {
         let gl = this.node.getContext("webgl2");
         if (!gl) {
-            throw new Error("WebGL 2 not supported");
+            throw new NotSupportedError("WebGL 2 not supported");
         }
         this._gl = gl;
         this._buffers = {};
