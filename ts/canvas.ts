@@ -337,6 +337,16 @@ export class Canvas2D extends BaseCanvas {
 		this._changed = new Int8Array(width * height);
 	}
 
+	copy(buffer: DataBuffer) {
+		for(let i = 0; i < this._data.length; ++i) {
+			if (this._data[i] !== buffer.data[i]) {
+				this._data[i] = buffer.data[i];
+				this._changed[i] = 1;
+			}
+		}
+		this._requestRender();
+	}
+
 	render() {
 		this._renderRequested = false;
 		for(let i = 0; i < this._changed.length; ++i) {

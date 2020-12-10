@@ -40,9 +40,9 @@ const a = new GW.canvas.Color(100,50,21);
 SHOW(a.toString(true));
 
 // css strings
-const b = GW.canvas.Color.fromString('#ff33aa');
+const b = GW.canvas.Color.fromCss('#ff33aa');
 SHOW(b.toString(true));
-const b2 = GW.canvas.Color.fromString('#f3a');
+const b2 = GW.canvas.Color.fromCss('#f3a');
 SHOW(b2.toString(true));
 
 // rgb integer values
