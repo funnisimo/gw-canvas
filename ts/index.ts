@@ -74,4 +74,5 @@ export {
   withImage,
   withFont,
   configure,
+  NotSupportedError,
 };

@@ -192,8 +192,8 @@
         "affectsGlobalScope": false
       },
       "../ts/canvas.ts": {
-        "version": "4f36897c2ad796ca53fa141bbe9106db27b1341ed9a9b21268865602f42d18cf",
-        "signature": "3ae28839a59d65267f9bffdb984cdd1e8ffb6c4411b8e3e578a8930cd11071f9",
+        "version": "95de7f44d6f620835aa053b60c36acd7691f68e707625ec90baf3c2c9b7a8b3e",
+        "signature": "0b0a7decc4a9ed209e9bf9b5ec2b0f8ad9636b7fbcb1af58590bb06535ab83b4",
         "affectsGlobalScope": false
       },
       "../ts/config.ts": {
@@ -217,8 +217,8 @@
         "affectsGlobalScope": false
       },
       "../ts/index.ts": {
-        "version": "57361dc7c02dd816333b08982eaf5dd1867742f17e8a64006314ce842c79c8f8",
-        "signature": "7ba1a16a0fa470820d12726a4d8ea93b4fb00e5fdc607186ba137b3bce51838f",
+        "version": "931427905c1ed68fa3907fed1498c1a376ecaad18a4a11136452ab84f8870826",
+        "signature": "0d7aed159230636508677debdd089f9e0a5cb81138bdb55b8a552af3c97b6acc",
         "affectsGlobalScope": false
       },
       "../ts/gw.ts": {

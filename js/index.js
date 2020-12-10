@@ -49,4 +49,4 @@ function withFont(src) {
     }
     return canvas;
 }
-export { Canvas, Canvas2D, Glyphs, Buffer, DataBuffer, Color, Mixer, withImage, withFont, configure, };
+export { Canvas, Canvas2D, Glyphs, Buffer, DataBuffer, Color, Mixer, withImage, withFont, configure, NotSupportedError, };

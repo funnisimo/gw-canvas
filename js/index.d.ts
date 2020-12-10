@@ -1,4 +1,4 @@
-import { Canvas, Canvas2D, Options as CanvasOptions } from "./canvas";
+import { Canvas, Canvas2D, Options as CanvasOptions, NotSupportedError } from "./canvas";
 import { Glyphs, Options as GlyphOptions } from "./glyphs";
 import { Buffer, DataBuffer } from './buffer';
 import { Color } from './color';
@@ -10,4 +10,4 @@ interface ImageOptions extends CanvasOptions {
 declare type FontOptions = CanvasOptions & GlyphOptions;
 declare function withImage(image: ImageOptions | HTMLImageElement | string): Canvas | Canvas2D;
 declare function withFont(src: FontOptions | string): Canvas | Canvas2D;
-export { Canvas, Canvas2D, Glyphs, Buffer, DataBuffer, Color, Mixer, withImage, withFont, configure, };
+export { Canvas, Canvas2D, Glyphs, Buffer, DataBuffer, Color, Mixer, withImage, withFont, configure, NotSupportedError, };

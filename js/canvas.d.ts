@@ -68,6 +68,7 @@ export declare class Canvas2D extends BaseCanvas {
     protected _createContext(): void;
     protected _set(x: number, y: number, style: number): boolean;
     resize(width: number, height: number): void;
+    copy(buffer: DataBuffer): void;
     render(): void;
     protected _renderCell(index: number): void;
 }
