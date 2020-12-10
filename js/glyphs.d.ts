@@ -21,6 +21,7 @@ export declare class Glyphs {
     static fromFont(src: Options | string): Glyphs;
     private constructor();
     get node(): HTMLCanvasElement;
+    get ctx(): CanvasRenderingContext2D;
     get tileWidth(): number;
     get tileHeight(): number;
     get pxWidth(): number;

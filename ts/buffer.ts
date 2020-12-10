@@ -89,7 +89,7 @@ export class DataBuffer {
     return this;
   }
 
-  copy(other: Buffer) {
+  copy(other: DataBuffer) {
     this._data.set(other._data);
     return this;
   }
@@ -106,7 +106,7 @@ export class Buffer extends DataBuffer {
     canvas.copyTo(this);
   }
   
-  get canvas() { return this._canvas; }
+  // get canvas() { return this._canvas; }
 
   _toGlyph(ch: string) {
     return this._canvas.glyphs.forChar(ch);

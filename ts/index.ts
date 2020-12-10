@@ -1,4 +1,4 @@
-import { Canvas, Options as CanvasOptions } from "./canvas";
+import { Canvas, Canvas2D, Options as CanvasOptions, NotSupportedError } from "./canvas";
 import { Glyphs, Options as GlyphOptions } from "./glyphs";
 import { Buffer, DataBuffer } from './buffer';
 import { Color } from './color';
@@ -27,7 +27,19 @@ function withImage(image: ImageOptions|HTMLImageElement|string) {
     opts.glyphs = Glyphs.fromImage(image.image);
   }
 
-  return new Canvas(opts);
+  let canvas;
+  try {
+    canvas = new Canvas(opts);
+  }
+  catch( e ) {
+    if (!(e instanceof NotSupportedError)) throw e;
+  }
+  
+  if (!canvas) {
+    canvas = new Canvas2D(opts);
+  }
+  
+  return canvas;
 }
 
 
@@ -36,11 +48,24 @@ function withFont(src: FontOptions|string) {
     src = { font: src } as FontOptions;
   }
   src.glyphs = Glyphs.fromFont(src);
-  return new Canvas(src);
+  let canvas;
+  try {
+    canvas = new Canvas(src);
+  }
+  catch( e ) {
+    if (!(e instanceof NotSupportedError)) throw e;
+  }
+  
+  if (!canvas) {
+    canvas = new Canvas2D(src);
+  }
+  
+  return canvas;
 }
 
 export { 
   Canvas, 
+  Canvas2D,
   Glyphs, 
   Buffer,
   DataBuffer,
