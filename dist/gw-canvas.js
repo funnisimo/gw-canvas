@@ -170,9 +170,12 @@ class Canvas {
         bg = bg & 0xFFF;
         fg = fg & 0xFFF;
         const style = (glyph << 24) + (bg << 12) + fg;
-        this._data[index + 2] = style;
-        this._data[index + 5] = style;
-        this._requestRender();
+        const current = this._data[index + 2];
+        if (current !== style) {
+            this._data[index + 2] = style;
+            this._data[index + 5] = style;
+            this._requestRender();
+        }
     }
     copy(buffer) {
         buffer.data.forEach((style, i) => {
