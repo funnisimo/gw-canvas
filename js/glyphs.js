@@ -32,6 +32,7 @@ export class Glyphs {
         return glyphs;
     }
     get node() { return this._node; }
+    get ctx() { return this._ctx; }
     get tileWidth() { return this._tileWidth; }
     get tileHeight() { return this._tileHeight; }
     get pxWidth() { return this._node.width; }

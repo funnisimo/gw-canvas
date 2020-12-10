@@ -35,7 +35,7 @@ export declare abstract class BaseCanvas {
     resize(width: number, height: number): void;
     draw(x: number, y: number, glyph: number, fg: number, bg: number): void;
     protected _requestRender(): void;
-    protected _set(x: number, y: number, style: number): void;
+    protected _set(x: number, y: number, style: number): boolean;
     copy(buffer: DataBuffer): void;
     copyTo(buffer: DataBuffer): void;
     abstract render(): void;
@@ -56,8 +56,18 @@ export declare class Canvas extends BaseCanvas {
     protected _setGlyphs(glyphs: Glyphs): boolean;
     _uploadGlyphs(): void;
     resize(width: number, height: number): void;
-    protected _set(x: number, y: number, style: number): void;
+    protected _set(x: number, y: number, style: number): boolean;
     copy(buffer: DataBuffer): void;
     copyTo(buffer: DataBuffer): void;
     render(): void;
+}
+export declare class Canvas2D extends BaseCanvas {
+    private _ctx;
+    private _changed;
+    constructor(options: Options);
+    protected _createContext(): void;
+    protected _set(x: number, y: number, style: number): boolean;
+    resize(width: number, height: number): void;
+    render(): void;
+    protected _renderCell(index: number): void;
 }

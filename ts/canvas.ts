@@ -35,7 +35,7 @@ export class NotSupportedError extends Error {
 
 
 export abstract class BaseCanvas {
-	protected _data = new Uint32Array();
+	protected _data!: Uint32Array;
 	protected _renderRequested: boolean = false;
 	protected _glyphs!: Glyphs;
 	protected _autoRender: boolean=true;
@@ -115,7 +115,7 @@ export abstract class BaseCanvas {
 			glyph = glyph & 0xFF;
 			bg = bg & 0xFFF;
 			fg = fg & 0xFFF;
-      const style = (glyph << 24) + (bg << 12) + fg;
+      const style = (glyph * (1 << 24)) + (bg * (1 << 12)) + fg;
 			this._set(x, y, style);
   }
 
@@ -132,7 +132,9 @@ export abstract class BaseCanvas {
 		if (current !== style) {
 			this._data[index] = style;
 			this._requestRender();
+			return true;
 		}
+		return false;
 	}
 	
 	copy(buffer: DataBuffer) {
@@ -263,7 +265,9 @@ export class Canvas extends BaseCanvas {
 			this._data[index + 2] = style;
 			this._data[index + 5] = style;
 			this._requestRender();
+			return true;
 		}
+		return false;
 	}
 	
 	copy(buffer: DataBuffer) {
@@ -300,5 +304,78 @@ export class Canvas extends BaseCanvas {
       gl.drawArrays(gl.TRIANGLES, 0, this._width * this._height * VERTICES_PER_TILE);
   }
 		
+}
+
+
+export class Canvas2D extends BaseCanvas {
+	private _ctx!: CanvasRenderingContext2D;
+	private _changed!: Int8Array;
+
+	constructor(options: Options) {
+		super(options);
+	}
+
+	protected _createContext() {
+		const ctx = this.node.getContext('2d');
+		if (!ctx) {
+			throw new NotSupportedError('2d context not supported!');
+		}
+		this._ctx = ctx;
+	}
+
+	protected _set(x: number, y: number, style: number) {
+		const result = super._set(x, y, style);
+		if (result) {
+			this._changed[y * this.width + x] = 1;
+		}
+		return result;
+	}
+
+	resize(width: number, height: number) {
+		super.resize(width, height);
+		this._data = new Uint32Array(width * height);
+		this._changed = new Int8Array(width * height);
+	}
+
+	render() {
+		this._renderRequested = false;
+		for(let i = 0; i < this._changed.length; ++i) {
+			if (this._changed[i]) this._renderCell(i);
+			this._changed[i] = 0;
+		}
+	}
+
+	protected _renderCell(index: number) {
+		const x = index % this.width;
+		const y = Math.floor(index / this.width);
+
+		const style = this._data[index];
+		const glyph = (style / (1 << 24)) >> 0;
+    const bg    = (style >> 12) & 0xFFF;
+    const fg    = (style & 0xFFF);
+
+		const px = x * this.tileWidth;
+		const py = y * this.tileHeight;
+		
+		const gx = (glyph % 16) * this.tileWidth;
+		const gy = Math.floor(glyph / 16) * this.tileHeight;
+
+		// this._ctx.fillStyle = '#' + bg.toString(16).padStart(3, '0');
+		// this._ctx.fillRect(px, py, this.tileWidth, this.tileHeight);
+		// 
+		// this._ctx.fillStyle = '#' + fg.toString(16).padStart(3, '0');
+		// this._ctx.drawImage(this.glyphs.node, gx, gy, this.tileWidth, this.tileHeight, px, py, this.tileWidth, this.tileHeight);
+
+		const d = this.glyphs.ctx.getImageData(gx, gy, this.tileWidth, this.tileHeight);
+		for(let di = 0; di < d.width * d.height; ++di) {
+			const src = (d.data[di*4] > 127) ? fg : bg;
+			d.data[di*4+0] = ( (src & 0xF00) >> 8) * 17;	
+			d.data[di*4+1] = ( (src & 0xF0) >> 4) * 17;	
+			d.data[di*4+2] = (src & 0xF) * 17;	
+			d.data[di*4+3] = 255;	// not transparent anymore
+		}
+		this._ctx.putImageData(d, px, py);
+
+	}
 }
 
