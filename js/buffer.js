@@ -76,7 +76,7 @@ export class Buffer extends DataBuffer {
         this._canvas = canvas;
         canvas.copyTo(this);
     }
-    get canvas() { return this._canvas; }
+    // get canvas() { return this._canvas; }
     _toGlyph(ch) {
         return this._canvas.glyphs.forChar(ch);
     }
