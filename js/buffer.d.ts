@@ -24,12 +24,11 @@ export declare class DataBuffer {
     drawSprite(x: number, y: number, sprite: DrawInfo): this;
     blackOut(x: number, y: number): this;
     fill(glyph?: number | string, fg?: number, bg?: number): this;
-    copy(other: Buffer): this;
+    copy(other: DataBuffer): this;
 }
 export declare class Buffer extends DataBuffer {
     private _canvas;
     constructor(canvas: Canvas);
-    get canvas(): Canvas;
     _toGlyph(ch: string): number;
     render(): this;
     copyFromCanvas(): this;

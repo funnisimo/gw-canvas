@@ -1,4 +1,4 @@
-import { Canvas } from "./canvas";
+import { Canvas, Canvas2D, NotSupportedError } from "./canvas";
 import { Glyphs } from "./glyphs";
 import { Buffer, DataBuffer } from './buffer';
 import { Color } from './color';
@@ -18,13 +18,35 @@ function withImage(image) {
         Object.assign(opts, image);
         opts.glyphs = Glyphs.fromImage(image.image);
     }
-    return new Canvas(opts);
+    let canvas;
+    try {
+        canvas = new Canvas(opts);
+    }
+    catch (e) {
+        if (!(e instanceof NotSupportedError))
+            throw e;
+    }
+    if (!canvas) {
+        canvas = new Canvas2D(opts);
+    }
+    return canvas;
 }
 function withFont(src) {
     if (typeof src === 'string') {
         src = { font: src };
     }
     src.glyphs = Glyphs.fromFont(src);
-    return new Canvas(src);
+    let canvas;
+    try {
+        canvas = new Canvas(src);
+    }
+    catch (e) {
+        if (!(e instanceof NotSupportedError))
+            throw e;
+    }
+    if (!canvas) {
+        canvas = new Canvas2D(src);
+    }
+    return canvas;
 }
-export { Canvas, Glyphs, Buffer, DataBuffer, Color, Mixer, withImage, withFont, configure, };
+export { Canvas, Canvas2D, Glyphs, Buffer, DataBuffer, Color, Mixer, withImage, withFont, configure, };
