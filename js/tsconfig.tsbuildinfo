@@ -192,7 +192,7 @@
         "affectsGlobalScope": false
       },
       "../ts/canvas.ts": {
-        "version": "95de7f44d6f620835aa053b60c36acd7691f68e707625ec90baf3c2c9b7a8b3e",
+        "version": "f2d7902955cb9b209c8191f0ee7b6855e69d81224c3a445c502a02fba80bae5a",
         "signature": "0b0a7decc4a9ed209e9bf9b5ec2b0f8ad9636b7fbcb1af58590bb06535ab83b4",
         "affectsGlobalScope": false
       },

@@ -400,10 +400,11 @@ class Canvas2D extends BaseCanvas {
         // this._ctx.drawImage(this.glyphs.node, gx, gy, this.tileWidth, this.tileHeight, px, py, this.tileWidth, this.tileHeight);
         const d = this.glyphs.ctx.getImageData(gx, gy, this.tileWidth, this.tileHeight);
         for (let di = 0; di < d.width * d.height; ++di) {
-            const src = (d.data[di * 4] > 127) ? fg : bg;
-            d.data[di * 4 + 0] = ((src & 0xF00) >> 8) * 17;
-            d.data[di * 4 + 1] = ((src & 0xF0) >> 4) * 17;
-            d.data[di * 4 + 2] = (src & 0xF) * 17;
+            const pct = d.data[di * 4] / 255;
+            const inv = 1.0 - pct;
+            d.data[di * 4 + 0] = pct * (((fg & 0xF00) >> 8) * 17) + inv * (((bg & 0xF00) >> 8) * 17);
+            d.data[di * 4 + 1] = pct * (((fg & 0xF0) >> 4) * 17) + inv * (((bg & 0xF0) >> 4) * 17);
+            d.data[di * 4 + 2] = pct * ((fg & 0xF) * 17) + inv * ((bg & 0xF) * 17);
             d.data[di * 4 + 3] = 255; // not transparent anymore
         }
         this._ctx.putImageData(d, px, py);
