@@ -176,11 +176,6 @@
         "signature": "1f03b495671c3a1bd24510f38b8947f0991dfd6bf0278c68eca14af15b306e1f",
         "affectsGlobalScope": false
       },
-      "../ts/utils.ts": {
-        "version": "4ab7e1962142e3acef6ebd9548d5d4023afc4d4334872772da5f586d8bf3413a",
-        "signature": "6ef96a54618bfbddf053b52d61395220008295feee9634df7b53e8523e8d9ab1",
-        "affectsGlobalScope": false
-      },
       "../ts/shaders.ts": {
         "version": "94507129f43a60c24d809e9a21d648eccf790174fae98103ce7fb9741889de6f",
         "signature": "a5929b0b6a4ad6c34b60702d28c531f21757ce1b8dc3307abe2ffa873cd1f4c0",
@@ -192,33 +187,38 @@
         "affectsGlobalScope": false
       },
       "../ts/canvas.ts": {
-        "version": "f2d7902955cb9b209c8191f0ee7b6855e69d81224c3a445c502a02fba80bae5a",
-        "signature": "0b0a7decc4a9ed209e9bf9b5ec2b0f8ad9636b7fbcb1af58590bb06535ab83b4",
+        "version": "8e230b3208c2af5658430e435cf74fbe93d0c1daf4d32ce8d630bcbdefd306fa",
+        "signature": "7c0f6aa0decae6b27915dc0ecbbb71b1da42ecc3fd5f969eeea5a4205856ce90",
         "affectsGlobalScope": false
       },
       "../ts/config.ts": {
-        "version": "1eaf4b544889ae1e55d3b4ebc7e90cc8551c8b6157dc572e38cf976319a5c72a",
-        "signature": "71017828e0def77e43d2cfee0076c4d2b043d245e310d8586d5eaa93bf4deace",
+        "version": "c173bba4a4f42903a126de384e45179c40c74d69abec8069f2685ea6c3415d82",
+        "signature": "0027c52ed063b06cc4a867f3f2b6bc03b92ba54457e37d82a1cd21bbfcd98c97",
         "affectsGlobalScope": false
       },
       "../ts/color.ts": {
-        "version": "4f54ac3a48fe90ed5cef71c247bff54da07b36be63eb82937c38bbd7c77086ae",
-        "signature": "7ec94cef7181efca1004a18b2c06cbdcb997dda7ab004d8f28ef924b0fbdfd66",
+        "version": "cd0cd30fc3348255ffb28db1fd8792d3496d4cdfc8c834dfe85abfeec4520063",
+        "signature": "99d26c5644e5724ae75ee539bad14bfd41fc8ba97abe4ee1878a29496cfef3fe",
         "affectsGlobalScope": false
       },
       "../ts/buffer.ts": {
-        "version": "9816182b178a2630f6d1037edd980606dbaab8e87922adbe2b6be2d2e4c684d6",
-        "signature": "ae12b13d2638862c49ca86636214d3af989ad0e2bd5624fec18a6025b342266c",
+        "version": "891849320d1e18d6b73b0504f9ebcb97b2e1fbccf58a1a7b0cf40586a0e3cd7a",
+        "signature": "0d78d60230f92110e38ec9ab5df2e456520eb86089683d54d2814e37815195ef",
+        "affectsGlobalScope": false
+      },
+      "../ts/sprite.ts": {
+        "version": "d8536a215329518f67425fec09f5ed223eec2da89a1d6c9a658b1568a12ea8e6",
+        "signature": "eb225999a315ee78ef67945fe508c55c1ac6188354571fa1aaeff4623df29cac",
         "affectsGlobalScope": false
       },
       "../ts/mixer.ts": {
-        "version": "eb82fdd2811d96a08e2300d747b700d3cf02ca04f8a689e696c6cf1487e72125",
-        "signature": "a166eb888b3688f7ab4b93d0897eca6bf0a0c513940a8e8ad5f0b5be666b2cd7",
+        "version": "534b51e949bc16083d3a5b41433cb38e8a0dcdd2798b54b04b67a8f9dcdc0cc0",
+        "signature": "05967d83cd1d1145efc2c4b073dbb4bf6a06467c60fb0749909464e9d1a88595",
         "affectsGlobalScope": false
       },
       "../ts/index.ts": {
-        "version": "931427905c1ed68fa3907fed1498c1a376ecaad18a4a11136452ab84f8870826",
-        "signature": "0d7aed159230636508677debdd089f9e0a5cb81138bdb55b8a552af3c97b6acc",
+        "version": "ed9cdf9fc28eae4c43e9cdb21780e1bfbfab30feab7aaea182c4d4f7f0cdd887",
+        "signature": "08b8efbb6bb859ce207cea4242f795d552976776096272a4fc2ab2b878d4041e",
         "affectsGlobalScope": false
       },
       "../ts/gw.ts": {
@@ -321,8 +321,7 @@
       "../ts/canvas.ts": [
         "../ts/buffer.ts",
         "../ts/glyphs.ts",
-        "../ts/shaders.ts",
-        "../ts/utils.ts"
+        "../ts/shaders.ts"
       ],
       "../ts/color.ts": [
         "../ts/config.ts"
@@ -336,9 +335,14 @@
         "../ts/color.ts",
         "../ts/config.ts",
         "../ts/glyphs.ts",
-        "../ts/mixer.ts"
+        "../ts/mixer.ts",
+        "../ts/sprite.ts"
       ],
       "../ts/mixer.ts": [
+        "../ts/color.ts",
+        "../ts/sprite.ts"
+      ],
+      "../ts/sprite.ts": [
         "../ts/buffer.ts",
         "../ts/color.ts"
       ]
@@ -385,9 +389,14 @@
         "../ts/color.ts",
         "../ts/config.ts",
         "../ts/glyphs.ts",
-        "../ts/mixer.ts"
+        "../ts/mixer.ts",
+        "../ts/sprite.ts"
       ],
       "../ts/mixer.ts": [
+        "../ts/color.ts",
+        "../ts/sprite.ts"
+      ],
+      "../ts/sprite.ts": [
         "../ts/buffer.ts",
         "../ts/color.ts"
       ]
@@ -446,7 +455,7 @@
       "../ts/index.ts",
       "../ts/mixer.ts",
       "../ts/shaders.ts",
-      "../ts/utils.ts"
+      "../ts/sprite.ts"
     ]
   },
   "version": "4.1.2"

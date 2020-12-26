@@ -1,41 +1,58 @@
-import { Color } from './color';
-;
+import { Color } from "./color";
 export class Sprite {
-    constructor() {
-        this.ch = 0;
-        this.fg = new Color();
-        this.bg = new Color();
+    constructor(ch, fg, bg, opacity) {
+        this.ch = ch;
+        this.fg = fg;
+        this.bg = bg;
+        this.opacity = opacity;
     }
-    copy(other) {
-        this.ch = other.ch;
-        this.fg.copy(other.fg);
-        this.bg.copy(other.bg);
-        return this;
+    static make(...args) {
+        let ch = null, fg = -1, bg = -1, opacity;
+        if (args.length == 0) {
+            return new Sprite(null, -1, -1);
+        }
+        else if (args.length == 1 && Array.isArray(args[0])) {
+            args = args[0];
+        }
+        if (args.length > 1) {
+            ch = args[0] || null;
+            fg = args[1];
+            bg = args[2];
+            opacity = args[3];
+        }
+        else if (args.length == 1) {
+            if (typeof args[0] === "string") {
+                bg = args[0];
+            }
+            else {
+                const sprite = args[0];
+                ch = sprite.ch || null;
+                fg = sprite.fg || -1;
+                bg = sprite.bg || -1;
+                opacity = sprite.opacity;
+            }
+        }
+        if (typeof fg === "string")
+            fg = Color.from(fg);
+        else if (Array.isArray(fg))
+            fg = Color.make(fg);
+        else if (fg === undefined || fg === null)
+            fg = -1;
+        if (typeof bg === "string")
+            bg = Color.from(bg);
+        else if (Array.isArray(bg))
+            bg = Color.make(bg);
+        else if (bg === undefined || bg === null)
+            bg = -1;
+        return new this(ch, fg, bg, opacity);
     }
-    clone() {
-        const other = new Sprite();
-        other.copy(this);
-        return other;
-    }
-    clear() {
-        this.ch = 0;
-        this.fg.clear();
-        this.bg.clear();
-        return this;
-    }
-    draw(sprite, opacity = 100) {
-        if (opacity <= 0)
-            return;
-        if (sprite.ch)
-            this.ch = sprite.ch;
-        if (sprite.fg)
-            this.fg.mix(sprite.fg, opacity);
-        if (sprite.bg)
-            this.bg.mix(sprite.bg, opacity);
-        return this;
-    }
-    swapColors() {
-        [this.bg, this.fg] = [this.fg, this.bg];
-        return this;
+    static install(name, ...args) {
+        let sprite;
+        // @ts-ignore
+        sprite = this.make(...args);
+        sprite.name = name;
+        sprites[name] = sprite;
+        return sprite;
     }
 }
+export const sprites = {};

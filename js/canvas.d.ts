@@ -1,5 +1,6 @@
-import { Glyphs } from './glyphs';
-import { DataBuffer } from './buffer';
+import { Glyphs, Options as GlyphOptions } from "./glyphs";
+import { DataBuffer } from "./buffer";
+declare type GL = WebGL2RenderingContext;
 export interface Options {
     width?: number;
     height?: number;
@@ -72,3 +73,17 @@ export declare class Canvas2D extends BaseCanvas {
     render(): void;
     protected _renderCell(index: number): void;
 }
+export interface ImageOptions extends Options {
+    image: HTMLImageElement | string;
+}
+export declare type FontOptions = Options & GlyphOptions;
+export declare function withImage(image: ImageOptions | HTMLImageElement | string): Canvas | Canvas2D;
+export declare function withFont(src: FontOptions | string): Canvas | Canvas2D;
+export declare const QUAD: number[];
+export declare function createProgram(gl: GL, ...sources: string[]): WebGLProgram;
+export declare function createTexture(gl: GL): WebGLTexture;
+export declare function createGeometry(gl: GL, attribs: Record<string, number>, width: number, height: number): {
+    position: WebGLBuffer | null;
+    uv: WebGLBuffer | null;
+};
+export {};

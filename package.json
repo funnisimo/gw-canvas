@@ -4,6 +4,7 @@
   "browser": "dist/gw-canvas.min.js",
   "main": "dist/gw-canvas.js",
   "module": "js/index.js",
+  "types": "js/index.d.ts",
   "devDependencies": {
     "@babel/types": "^7.12.7",
     "@types/jest": "^26.0.16",
