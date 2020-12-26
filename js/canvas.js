@@ -1,6 +1,6 @@
 // Based on: https://github.com/ondras/fastiles/blob/master/ts/scene.ts (v2.1.0)
-import { createProgram, createTexture, createGeometry } from "./utils";
 import * as shaders from "./shaders";
+import { Glyphs } from "./glyphs";
 const VERTICES_PER_TILE = 6;
 export class NotSupportedError extends Error {
     constructor(...params) {
@@ -12,7 +12,7 @@ export class NotSupportedError extends Error {
             // @ts-ignore
             Error.captureStackTrace(this, NotSupportedError);
         }
-        this.name = 'NotSupportedError';
+        this.name = "NotSupportedError";
     }
 }
 export class BaseCanvas {
@@ -22,19 +22,35 @@ export class BaseCanvas {
         this._width = 50;
         this._height = 25;
         if (!options.glyphs)
-            throw new Error('You must supply glyphs for the canvas.');
+            throw new Error("You must supply glyphs for the canvas.");
         this._node = this._createNode();
         this._createContext();
         this._configure(options);
     }
-    get node() { return this._node; }
-    get width() { return this._width; }
-    get height() { return this._height; }
-    get tileWidth() { return this._glyphs.tileWidth; }
-    get tileHeight() { return this._glyphs.tileHeight; }
-    get pxWidth() { return this.node.clientWidth; }
-    get pxHeight() { return this.node.clientHeight; }
-    get glyphs() { return this._glyphs; }
+    get node() {
+        return this._node;
+    }
+    get width() {
+        return this._width;
+    }
+    get height() {
+        return this._height;
+    }
+    get tileWidth() {
+        return this._glyphs.tileWidth;
+    }
+    get tileHeight() {
+        return this._glyphs.tileHeight;
+    }
+    get pxWidth() {
+        return this.node.clientWidth;
+    }
+    get pxHeight() {
+        return this.node.clientHeight;
+    }
+    get glyphs() {
+        return this._glyphs;
+    }
     set glyphs(glyphs) {
         this._setGlyphs(glyphs);
     }
@@ -44,14 +60,14 @@ export class BaseCanvas {
     _configure(options) {
         this._width = options.width || this._width;
         this._height = options.height || this._height;
-        this._autoRender = (options.render !== false);
+        this._autoRender = options.render !== false;
         this._setGlyphs(options.glyphs);
         if (options.div) {
             let el;
-            if (typeof options.div === 'string') {
+            if (typeof options.div === "string") {
                 el = document.getElementById(options.div);
                 if (!el) {
-                    console.warn('Failed to find parent element by ID: ' + options.div);
+                    console.warn("Failed to find parent element by ID: " + options.div);
                 }
             }
             else {
@@ -77,10 +93,10 @@ export class BaseCanvas {
         node.height = this._height * this.tileHeight;
     }
     draw(x, y, glyph, fg, bg) {
-        glyph = glyph & 0xFF;
-        bg = bg & 0xFFF;
-        fg = fg & 0xFFF;
-        const style = (glyph * (1 << 24)) + (bg * (1 << 12)) + fg;
+        glyph = glyph & 0xff;
+        bg = bg & 0xfff;
+        fg = fg & 0xfff;
+        const style = glyph * (1 << 24) + bg * (1 << 12) + fg;
         this._set(x, y, style);
     }
     _requestRender() {
@@ -112,10 +128,10 @@ export class BaseCanvas {
         return x >= 0 && y >= 0 && x < this.width && y < this.height;
     }
     toX(x) {
-        return Math.floor(this.width * x / this.node.clientWidth);
+        return Math.floor((this.width * x) / this.node.clientWidth);
     }
     toY(y) {
-        return Math.floor(this.height * y / this.node.clientHeight);
+        return Math.floor((this.height * y) / this.node.clientHeight);
     }
 }
 export class Canvas extends BaseCanvas {
@@ -223,7 +239,8 @@ export class Canvas extends BaseCanvas {
     }
     render() {
         const gl = this._gl;
-        if (this._glyphs.needsUpdate) { // auto keep glyphs up to date
+        if (this._glyphs.needsUpdate) {
+            // auto keep glyphs up to date
             this._uploadGlyphs();
         }
         else if (!this._renderRequested) {
@@ -240,9 +257,9 @@ export class Canvas2D extends BaseCanvas {
         super(options);
     }
     _createContext() {
-        const ctx = this.node.getContext('2d');
+        const ctx = this.node.getContext("2d");
         if (!ctx) {
-            throw new NotSupportedError('2d context not supported!');
+            throw new NotSupportedError("2d context not supported!");
         }
         this._ctx = ctx;
     }
@@ -280,25 +297,118 @@ export class Canvas2D extends BaseCanvas {
         const y = Math.floor(index / this.width);
         const style = this._data[index];
         const glyph = (style / (1 << 24)) >> 0;
-        const bg = (style >> 12) & 0xFFF;
-        const fg = (style & 0xFFF);
+        const bg = (style >> 12) & 0xfff;
+        const fg = style & 0xfff;
         const px = x * this.tileWidth;
         const py = y * this.tileHeight;
         const gx = (glyph % 16) * this.tileWidth;
         const gy = Math.floor(glyph / 16) * this.tileHeight;
-        // this._ctx.fillStyle = '#' + bg.toString(16).padStart(3, '0');
-        // this._ctx.fillRect(px, py, this.tileWidth, this.tileHeight);
-        // 
-        // this._ctx.fillStyle = '#' + fg.toString(16).padStart(3, '0');
-        // this._ctx.drawImage(this.glyphs.node, gx, gy, this.tileWidth, this.tileHeight, px, py, this.tileWidth, this.tileHeight);
         const d = this.glyphs.ctx.getImageData(gx, gy, this.tileWidth, this.tileHeight);
         for (let di = 0; di < d.width * d.height; ++di) {
-            const src = (d.data[di * 4] > 127) ? fg : bg;
-            d.data[di * 4 + 0] = ((src & 0xF00) >> 8) * 17;
-            d.data[di * 4 + 1] = ((src & 0xF0) >> 4) * 17;
-            d.data[di * 4 + 2] = (src & 0xF) * 17;
+            const pct = d.data[di * 4] / 255;
+            const inv = 1.0 - pct;
+            d.data[di * 4 + 0] =
+                pct * (((fg & 0xf00) >> 8) * 17) + inv * (((bg & 0xf00) >> 8) * 17);
+            d.data[di * 4 + 1] =
+                pct * (((fg & 0xf0) >> 4) * 17) + inv * (((bg & 0xf0) >> 4) * 17);
+            d.data[di * 4 + 2] = pct * ((fg & 0xf) * 17) + inv * ((bg & 0xf) * 17);
             d.data[di * 4 + 3] = 255; // not transparent anymore
         }
         this._ctx.putImageData(d, px, py);
     }
+}
+export function withImage(image) {
+    let opts = {};
+    if (typeof image === "string") {
+        opts.glyphs = Glyphs.fromImage(image);
+    }
+    else if (image instanceof HTMLImageElement) {
+        opts.glyphs = Glyphs.fromImage(image);
+    }
+    else {
+        if (!image.image)
+            throw new Error("You must supply the image.");
+        Object.assign(opts, image);
+        opts.glyphs = Glyphs.fromImage(image.image);
+    }
+    let canvas;
+    try {
+        canvas = new Canvas(opts);
+    }
+    catch (e) {
+        if (!(e instanceof NotSupportedError))
+            throw e;
+    }
+    if (!canvas) {
+        canvas = new Canvas2D(opts);
+    }
+    return canvas;
+}
+export function withFont(src) {
+    if (typeof src === "string") {
+        src = { font: src };
+    }
+    src.glyphs = Glyphs.fromFont(src);
+    let canvas;
+    try {
+        canvas = new Canvas(src);
+    }
+    catch (e) {
+        if (!(e instanceof NotSupportedError))
+            throw e;
+    }
+    if (!canvas) {
+        canvas = new Canvas2D(src);
+    }
+    return canvas;
+}
+// Copy of: https://github.com/ondras/fastiles/blob/master/ts/utils.ts (v2.1.0)
+export const QUAD = [0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1];
+export function createProgram(gl, ...sources) {
+    const p = gl.createProgram();
+    [gl.VERTEX_SHADER, gl.FRAGMENT_SHADER].forEach((type, index) => {
+        const shader = gl.createShader(type);
+        gl.shaderSource(shader, sources[index]);
+        gl.compileShader(shader);
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+            throw new Error(gl.getShaderInfoLog(shader));
+        }
+        gl.attachShader(p, shader);
+    });
+    gl.linkProgram(p);
+    if (!gl.getProgramParameter(p, gl.LINK_STATUS)) {
+        throw new Error(gl.getProgramInfoLog(p));
+    }
+    return p;
+}
+export function createTexture(gl) {
+    let t = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, t);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    return t;
+}
+export function createGeometry(gl, attribs, width, height) {
+    let tileCount = width * height;
+    let positionData = new Uint16Array(tileCount * QUAD.length);
+    let uvData = new Uint8Array(tileCount * QUAD.length);
+    let i = 0;
+    for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+            QUAD.forEach((value) => {
+                positionData[i] = (i % 2 ? y : x) + value;
+                uvData[i] = value;
+                i++;
+            });
+        }
+    }
+    const position = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, position);
+    gl.vertexAttribIPointer(attribs["position"], 2, gl.UNSIGNED_SHORT, 0, 0);
+    gl.bufferData(gl.ARRAY_BUFFER, positionData, gl.STATIC_DRAW);
+    const uv = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, uv);
+    gl.vertexAttribIPointer(attribs["uv"], 2, gl.UNSIGNED_BYTE, 0, 0);
+    gl.bufferData(gl.ARRAY_BUFFER, uvData, gl.STATIC_DRAW);
+    return { position, uv };
 }

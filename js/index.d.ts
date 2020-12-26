@@ -1,13 +1,8 @@
-import { Canvas, Canvas2D, Options as CanvasOptions, NotSupportedError } from "./canvas";
-import { Glyphs, Options as GlyphOptions } from "./glyphs";
-import { Buffer, DataBuffer } from './buffer';
-import { Color } from './color';
-import { Mixer } from './mixer';
-import { configure } from './config';
-interface ImageOptions extends CanvasOptions {
-    image: HTMLImageElement | string;
-}
-declare type FontOptions = CanvasOptions & GlyphOptions;
-declare function withImage(image: ImageOptions | HTMLImageElement | string): Canvas | Canvas2D;
-declare function withFont(src: FontOptions | string): Canvas | Canvas2D;
-export { Canvas, Canvas2D, Glyphs, Buffer, DataBuffer, Color, Mixer, withImage, withFont, configure, NotSupportedError, };
+import { Canvas, Canvas2D, ImageOptions, FontOptions, NotSupportedError, withImage, withFont } from "./canvas";
+import { Glyphs } from "./glyphs";
+import { Buffer, DataBuffer } from "./buffer";
+import { Color, ColorBase, colors } from "./color";
+import { Mixer } from "./mixer";
+import { configure } from "./config";
+import { Sprite, SpriteConfig } from "./sprite";
+export { Canvas, Canvas2D, ImageOptions, FontOptions, Glyphs, Buffer, DataBuffer, Color, ColorBase, colors, Mixer, Sprite, SpriteConfig, withImage, withFont, configure, NotSupportedError, };

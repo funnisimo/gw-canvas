@@ -1,4 +1,4 @@
-import { Color } from './color';
+import { Color } from "./color";
 export class Mixer {
     constructor() {
         this.ch = -1;
@@ -32,14 +32,14 @@ export class Mixer {
         return this._changed();
     }
     draw(ch = -1, fg = -1, bg = -1) {
-        if (ch && (ch !== -1)) {
+        if (ch && ch !== -1) {
             this.ch = ch;
         }
-        if ((fg !== -1) && (fg !== null)) {
+        if (fg !== -1 && fg !== null) {
             fg = Color.from(fg);
             this.fg.copy(fg);
         }
-        if ((bg !== -1) && (bg !== null)) {
+        if (bg !== -1 && bg !== null) {
             bg = Color.from(bg);
             this.bg.copy(bg);
         }

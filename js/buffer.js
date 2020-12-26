@@ -1,20 +1,25 @@
-import { Color } from './color';
-;
+import { Color } from "./color";
 export class DataBuffer {
     constructor(width, height) {
         this._width = width;
         this._height = height;
         this._data = new Uint32Array(width * height);
     }
-    get data() { return this._data; }
-    get width() { return this._width; }
-    get height() { return this._height; }
+    get data() {
+        return this._data;
+    }
+    get width() {
+        return this._width;
+    }
+    get height() {
+        return this._height;
+    }
     get(x, y) {
         let index = y * this.width + x;
         const style = this._data[index] || 0;
-        const glyph = (style >> 24);
-        const bg = (style >> 12) & 0xFFF;
-        const fg = (style & 0xFFF);
+        const glyph = style >> 24;
+        const bg = (style >> 12) & 0xfff;
+        const fg = style & 0xfff;
         return { glyph, fg, bg };
     }
     _toGlyph(ch) {
@@ -25,25 +30,29 @@ export class DataBuffer {
     draw(x, y, glyph = -1, fg = -1, bg = -1) {
         let index = y * this.width + x;
         const current = this._data[index] || 0;
-        if (typeof glyph !== 'number') {
+        if (typeof glyph !== "number") {
             glyph = this._toGlyph(glyph);
         }
-        if (typeof fg !== 'number') {
+        if (typeof fg !== "number") {
             fg = Color.from(fg).toInt();
         }
-        if (typeof bg !== 'number') {
+        if (typeof bg !== "number") {
             bg = Color.from(bg).toInt();
         }
-        glyph = (glyph >= 0) ? (glyph & 0xFF) : (current >> 24);
-        bg = (bg >= 0) ? (bg & 0xFFF) : ((current >> 12) & 0xFFF);
-        fg = (fg >= 0) ? (fg & 0xFFF) : (current & 0xFFF);
+        glyph = glyph >= 0 ? glyph & 0xff : current >> 24;
+        bg = bg >= 0 ? bg & 0xfff : (current >> 12) & 0xfff;
+        fg = fg >= 0 ? fg & 0xfff : current & 0xfff;
         const style = (glyph << 24) + (bg << 12) + fg;
         this._data[index] = style;
         return this;
     }
     // This is without opacity - opacity must be done in Mixer
     drawSprite(x, y, sprite) {
-        const glyph = sprite.ch ? sprite.ch : sprite.glyph;
+        let glyph = sprite.ch
+            ? sprite.ch
+            : sprite.glyph !== undefined
+                ? sprite.glyph
+                : -1;
         // const fg = sprite.fg ? sprite.fg.toInt() : -1;
         // const bg = sprite.bg ? sprite.bg.toInt() : -1;
         return this.draw(x, y, glyph, sprite.fg, sprite.bg);
@@ -54,13 +63,13 @@ export class DataBuffer {
         }
         return this.draw(x, y, 0, 0, 0);
     }
-    fill(glyph = 0, fg = 0xFFF, bg = 0) {
-        if (typeof glyph == 'string') {
+    fill(glyph = 0, fg = 0xfff, bg = 0) {
+        if (typeof glyph == "string") {
             glyph = this._toGlyph(glyph);
         }
-        glyph = glyph & 0xFF;
-        fg = fg & 0xFFF;
-        bg = bg & 0xFFF;
+        glyph = glyph & 0xff;
+        fg = fg & 0xfff;
+        bg = bg & 0xfff;
         const style = (glyph << 24) + (bg << 12) + fg;
         this._data.fill(style);
         return this;

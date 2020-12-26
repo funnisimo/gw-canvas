@@ -1,8 +1,5 @@
-import { Color, ColorBase } from './color';
-import { DrawInfo } from './buffer';
-interface Sprite extends DrawInfo {
-    opacity?: number;
-}
+import { Color, ColorBase } from "./color";
+import { Sprite } from "./sprite";
 export declare class Mixer {
     ch: string | number;
     fg: Color;
@@ -26,4 +23,3 @@ export declare class Mixer {
         bg: number;
     };
 }
-export {};

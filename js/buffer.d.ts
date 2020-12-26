@@ -1,7 +1,7 @@
-import { Canvas } from './canvas';
-import { Color } from './color';
+import { Canvas } from "./canvas";
+import { Color } from "./color";
 export interface DrawInfo {
-    ch?: string;
+    ch?: string | null;
     glyph?: number;
     fg: Color | number;
     bg: Color | number;
