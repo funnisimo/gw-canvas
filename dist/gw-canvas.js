@@ -1373,9 +1373,11 @@ class Sprite {
         // @ts-ignore
         sprite = this.make(...args);
         sprite.name = name;
+        sprites[name] = sprite;
         return sprite;
     }
 }
+const sprites = {};
 
 exports.Buffer = Buffer;
 exports.Canvas = Canvas;
