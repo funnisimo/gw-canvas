@@ -19,7 +19,7 @@
   "scripts": {
     "compile": "tsc --build tsconfig.json",
     "bundle": "rollup -c",
-    "copy": "cp dist/gw-canvas.min.js docs/js",
+    "copy": "cp dist/gw-canvas.min.* docs/js",
     "build": "npm run compile && npm run bundle && npm run copy",
     "serve": "cd docs && http-server",
     "test": "jest",
