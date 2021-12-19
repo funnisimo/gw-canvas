@@ -8,6 +8,7 @@
   "devDependencies": {
     "@babel/types": "^7.16.0",
     "@types/jest": "^27.0.3",
+    "http-server": "^14.0.0",
     "jest": "^27.4.5",
     "jest-extended": "^1.2.0",
     "rollup": "^2.61.1",
@@ -20,7 +21,7 @@
     "bundle": "rollup -c",
     "copy": "cp dist/gw-canvas.min.js docs/js",
     "build": "npm run compile && npm run bundle && npm run copy",
-    "serve": "python -m SimpleHTTPServer",
+    "serve": "cd docs && http-server",
     "test": "jest",
     "test-debug": "node --inspect-brk node_modules/.bin/jest --runInBand"
   },
