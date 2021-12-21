@@ -12,7 +12,7 @@ flat out vec3 fgRgb;
 flat out vec3 bgRgb;
 flat out uvec2 fontPos;
 
-uniform highp uvec2 tileSize;
+uniform uvec2 tileSize;
 uniform uvec2 viewportSize;
 
 void main() {
@@ -21,16 +21,15 @@ void main() {
 	positionNdc.y *= -1.0;
 	gl_Position = vec4(positionNdc, 0.0, 1.0);
 
-	float s = 15.0;
-	uint fr = (style & uint(0xF00)) >> 8;
-	uint fg = (style & uint(0x0F0)) >> 4;
-	uint fb = (style & uint(0x00F)) >> 0;
-	fgRgb = vec3(fr, fg, fb) / s;
+	float fr = float((style & uint(0x00000F00)) >> 8);
+	float fg = float((style & uint(0x000000F0)) >> 4);
+	float fb = float(style & uint(0x0000000F));
+	fgRgb = vec3(fr, fg, fb) / 15.0;
   
-	uint br = (style & uint(0xF00000)) >> 20;
-	uint bg = (style & uint(0x0F0000)) >> 16;
-	uint bb = (style & uint(0x00F000)) >> 12;
-	bgRgb = vec3(br, bg, bb) / s;
+	float br = float((style & uint(0x00F00000)) >> 20);
+	float bg = float((style & uint(0x000F0000)) >> 16);
+	float bb = float((style & uint(0x0000F000)) >> 12);
+	bgRgb = vec3(br, bg, bb) / 15.0;
 
 	uint glyph = (style & uint(0xFF000000)) >> 24;
 	uint glyphX = (glyph & uint(0xF));
