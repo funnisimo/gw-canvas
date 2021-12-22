@@ -39,7 +39,7 @@ void main() {
 	uint glyphY = (glyph >> 4);
 	fontPos = uvec2(glyphX, glyphY);
 
-	fsUv = vec2(uv);
+	fsUv = vec2(offset);
 }`.trim();
 const FS = `
 #version 300 es
