@@ -6,7 +6,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 const VS = `
 #version 300 es
 
-in uvec2 position;
+in vec2 position;
 in uvec2 offset;
 in highp uint style;
 
@@ -19,10 +19,7 @@ uniform uvec2 tileSize;
 uniform uvec2 viewportSize;
 
 void main() {
-	ivec2 positionPx = ivec2(position * tileSize);
-	vec2 positionNdc = (vec2(positionPx * 2) / vec2(viewportSize))-1.0;
-	positionNdc.y *= -1.0;
-	gl_Position = vec4(positionNdc, 0.0, 1.0);
+	gl_Position = vec4(position, 0.0, 1.0);
 
 	float fr = float((style & uint(0x00000F00)) >> 8);
 	float fg = float((style & uint(0x000000F0)) >> 4);
@@ -589,18 +586,26 @@ function createTexture(gl) {
 const QUAD = [0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1];
 function createGeometry(gl, attribs, width, height) {
     let tileCount = width * height;
-    let positionData = new Uint16Array(tileCount * QUAD.length);
+    let positionData = new Float32Array(tileCount * QUAD.length);
     let offsetData = new Uint8Array(tileCount * QUAD.length);
     for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
             const index = (x + y * width) * QUAD.length;
-            positionData.set(QUAD.map((v, i) => (i % 2) ? y + v : x + v), index);
+            positionData.set(QUAD.map((v, i) => {
+                if (i % 2) {
+                    // y
+                    return 1 - (2 * (y + v)) / height;
+                }
+                else {
+                    return (2 * (x + v)) / width - 1;
+                }
+            }), index);
             offsetData.set(QUAD, index);
         }
     }
     const position = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, position);
-    gl.vertexAttribIPointer(attribs["position"], 2, gl.UNSIGNED_SHORT, 0, 0);
+    gl.vertexAttribPointer(attribs["position"], 2, gl.FLOAT, false, 0, 0);
     gl.bufferData(gl.ARRAY_BUFFER, positionData, gl.STATIC_DRAW);
     const uv = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, uv);

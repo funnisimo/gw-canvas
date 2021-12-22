@@ -505,20 +505,30 @@ export function createGeometry(
   height: number
 ) {
   let tileCount = width * height;
-  let positionData = new Uint16Array(tileCount * QUAD.length);
+  let positionData = new Float32Array(tileCount * QUAD.length);
   let offsetData = new Uint8Array(tileCount * QUAD.length);
 
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       const index = (x + y * width) * QUAD.length;
-      positionData.set( QUAD.map( (v, i) => (i%2) ? y + v : x + v), index);
-      offsetData.set( QUAD, index);
+      positionData.set(
+        QUAD.map((v, i) => {
+          if (i % 2) {
+            // y
+            return 1 - (2 * (y + v)) / height;
+          } else {
+            return (2 * (x + v)) / width - 1;
+          }
+        }),
+        index
+      );
+      offsetData.set(QUAD, index);
     }
   }
 
   const position = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, position);
-  gl.vertexAttribIPointer(attribs["position"], 2, gl.UNSIGNED_SHORT, 0, 0);
+  gl.vertexAttribPointer(attribs["position"], 2, gl.FLOAT, false, 0, 0);
   gl.bufferData(gl.ARRAY_BUFFER, positionData, gl.STATIC_DRAW);
 
   const uv = gl.createBuffer();

@@ -2,7 +2,7 @@
 export const VS = `
 #version 300 es
 
-in uvec2 position;
+in vec2 position;
 in uvec2 offset;
 in highp uint style;
 
@@ -15,10 +15,7 @@ uniform uvec2 tileSize;
 uniform uvec2 viewportSize;
 
 void main() {
-	ivec2 positionPx = ivec2(position * tileSize);
-	vec2 positionNdc = (vec2(positionPx * 2) / vec2(viewportSize))-1.0;
-	positionNdc.y *= -1.0;
-	gl_Position = vec4(positionNdc, 0.0, 1.0);
+	gl_Position = vec4(position, 0.0, 1.0);
 
 	float fr = float((style & uint(0x00000F00)) >> 8);
 	float fg = float((style & uint(0x000000F0)) >> 4);
