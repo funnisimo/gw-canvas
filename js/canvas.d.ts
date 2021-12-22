@@ -79,9 +79,9 @@ export interface ImageOptions extends Options {
 export declare type FontOptions = Options & GlyphOptions;
 export declare function withImage(image: ImageOptions | HTMLImageElement | string): Canvas | Canvas2D;
 export declare function withFont(src: FontOptions | string): Canvas | Canvas2D;
-export declare const QUAD: number[];
 export declare function createProgram(gl: GL, ...sources: string[]): WebGLProgram;
 export declare function createTexture(gl: GL): WebGLTexture;
+export declare const QUAD: number[];
 export declare function createGeometry(gl: GL, attribs: Record<string, number>, width: number, height: number): {
     position: WebGLBuffer | null;
     uv: WebGLBuffer | null;

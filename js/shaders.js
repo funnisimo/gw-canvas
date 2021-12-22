@@ -3,7 +3,7 @@ export const VS = `
 #version 300 es
 
 in uvec2 position;
-in uvec2 uv;
+in uvec2 offset;
 in highp uint style;
 
 out vec2 fsUv;

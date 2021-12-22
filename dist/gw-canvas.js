@@ -7,7 +7,7 @@ const VS = `
 #version 300 es
 
 in uvec2 position;
-in uvec2 uv;
+in uvec2 offset;
 in highp uint style;
 
 out vec2 fsUv;
@@ -561,7 +561,6 @@ function withFont(src) {
     return canvas;
 }
 // Copy of: https://github.com/ondras/fastiles/blob/master/ts/utils.ts (v2.1.0)
-const QUAD = [0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1];
 function createProgram(gl, ...sources) {
     const p = gl.createProgram();
     [gl.VERTEX_SHADER, gl.FRAGMENT_SHADER].forEach((type, index) => {
@@ -586,18 +585,17 @@ function createTexture(gl) {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
     return t;
 }
+// x, y offsets for 6 verticies (2 triangles) in square
+const QUAD = [0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1];
 function createGeometry(gl, attribs, width, height) {
     let tileCount = width * height;
     let positionData = new Uint16Array(tileCount * QUAD.length);
-    let uvData = new Uint8Array(tileCount * QUAD.length);
-    let i = 0;
+    let offsetData = new Uint8Array(tileCount * QUAD.length);
     for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
-            QUAD.forEach((value) => {
-                positionData[i] = (i % 2 ? y : x) + value;
-                uvData[i] = value;
-                i++;
-            });
+            const index = (x + y * width) * QUAD.length;
+            positionData.set(QUAD.map((v, i) => (i % 2) ? y + v : x + v), index);
+            offsetData.set(QUAD, index);
         }
     }
     const position = gl.createBuffer();
@@ -606,8 +604,8 @@ function createGeometry(gl, attribs, width, height) {
     gl.bufferData(gl.ARRAY_BUFFER, positionData, gl.STATIC_DRAW);
     const uv = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, uv);
-    gl.vertexAttribIPointer(attribs["uv"], 2, gl.UNSIGNED_BYTE, 0, 0);
-    gl.bufferData(gl.ARRAY_BUFFER, uvData, gl.STATIC_DRAW);
+    gl.vertexAttribIPointer(attribs["offset"], 2, gl.UNSIGNED_BYTE, 0, 0);
+    gl.bufferData(gl.ARRAY_BUFFER, offsetData, gl.STATIC_DRAW);
     return { position, uv };
 }
 

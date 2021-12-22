@@ -466,8 +466,6 @@ export function withFont(src: FontOptions | string) {
 
 // Copy of: https://github.com/ondras/fastiles/blob/master/ts/utils.ts (v2.1.0)
 
-export const QUAD = [0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1];
-
 export function createProgram(gl: GL, ...sources: string[]) {
   const p = gl.createProgram() as WebGLProgram;
 
@@ -497,6 +495,9 @@ export function createTexture(gl: GL) {
   return t;
 }
 
+// x, y offsets for 6 verticies (2 triangles) in square
+export const QUAD = [0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1];
+
 export function createGeometry(
   gl: GL,
   attribs: Record<string, number>,
@@ -505,16 +506,13 @@ export function createGeometry(
 ) {
   let tileCount = width * height;
   let positionData = new Uint16Array(tileCount * QUAD.length);
-  let uvData = new Uint8Array(tileCount * QUAD.length);
-  let i = 0;
+  let offsetData = new Uint8Array(tileCount * QUAD.length);
 
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
-      QUAD.forEach((value) => {
-        positionData[i] = (i % 2 ? y : x) + value;
-        uvData[i] = value;
-        i++;
-      });
+      const index = (x + y * width) * QUAD.length;
+      positionData.set( QUAD.map( (v, i) => (i%2) ? y + v : x + v), index);
+      offsetData.set( QUAD, index);
     }
   }
 
@@ -525,8 +523,8 @@ export function createGeometry(
 
   const uv = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, uv);
-  gl.vertexAttribIPointer(attribs["uv"], 2, gl.UNSIGNED_BYTE, 0, 0);
-  gl.bufferData(gl.ARRAY_BUFFER, uvData, gl.STATIC_DRAW);
+  gl.vertexAttribIPointer(attribs["offset"], 2, gl.UNSIGNED_BYTE, 0, 0);
+  gl.bufferData(gl.ARRAY_BUFFER, offsetData, gl.STATIC_DRAW);
 
   return { position, uv };
 }
