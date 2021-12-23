@@ -7,8 +7,8 @@ in uvec2 offset;
 in highp uint style;
 
 out vec2 fsUv;
-flat out vec3 fgRgb;
-flat out vec3 bgRgb;
+out vec3 fgRgb;
+out vec3 bgRgb;
 flat out uvec2 fontPos;
 
 uniform uvec2 tileSize;
@@ -39,8 +39,8 @@ export const FS = `
 precision highp float;
 
 in vec2 fsUv;
-flat in vec3 fgRgb;
-flat in vec3 bgRgb;
+in vec3 fgRgb;
+in vec3 bgRgb;
 flat in uvec2 fontPos;
 
 out vec4 fragColor;

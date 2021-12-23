@@ -11,8 +11,8 @@ in uvec2 offset;
 in highp uint style;
 
 out vec2 fsUv;
-flat out vec3 fgRgb;
-flat out vec3 bgRgb;
+out vec3 fgRgb;
+out vec3 bgRgb;
 flat out uvec2 fontPos;
 
 uniform uvec2 tileSize;
@@ -43,8 +43,8 @@ const FS = `
 precision highp float;
 
 in vec2 fsUv;
-flat in vec3 fgRgb;
-flat in vec3 bgRgb;
+in vec3 fgRgb;
+in vec3 bgRgb;
 flat in uvec2 fontPos;
 
 out vec4 fragColor;
@@ -392,6 +392,8 @@ class Canvas extends BaseCanvas {
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, this._texture);
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this._glyphs.node);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
         this._requestRender();
         this._glyphs.needsUpdate = false;
     }
@@ -407,9 +409,13 @@ class Canvas extends BaseCanvas {
     _set(x, y, style) {
         let index = y * this.width + x;
         index *= VERTICES_PER_TILE;
-        const current = this._data[index + 2];
+        const current = this._data[index];
         if (current !== style) {
+            this._data[index + 0] = style;
+            this._data[index + 1] = style;
             this._data[index + 2] = style;
+            this._data[index + 3] = style;
+            this._data[index + 4] = style;
             this._data[index + 5] = style;
             this._requestRender();
             return true;
@@ -419,7 +425,11 @@ class Canvas extends BaseCanvas {
     copy(buffer) {
         buffer.data.forEach((style, i) => {
             const index = i * VERTICES_PER_TILE;
+            this._data[index + 0] = style;
+            this._data[index + 1] = style;
             this._data[index + 2] = style;
+            this._data[index + 3] = style;
+            this._data[index + 4] = style;
             this._data[index + 5] = style;
         });
         this._requestRender();
@@ -429,7 +439,7 @@ class Canvas extends BaseCanvas {
         const dest = buffer.data;
         for (let i = 0; i < n; ++i) {
             const index = i * VERTICES_PER_TILE;
-            dest[i] = this._data[index + 2];
+            dest[i] = this._data[index + 0];
         }
     }
     render() {
