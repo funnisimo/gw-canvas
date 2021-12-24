@@ -12,7 +12,6 @@ export declare class NotSupportedError extends Error {
     constructor(...params: any[]);
 }
 export declare abstract class BaseCanvas {
-    protected _data: Uint32Array;
     protected _renderRequested: boolean;
     protected _glyphs: Glyphs;
     protected _autoRender: boolean;
@@ -36,9 +35,9 @@ export declare abstract class BaseCanvas {
     resize(width: number, height: number): void;
     draw(x: number, y: number, glyph: number, fg: number, bg: number): void;
     protected _requestRender(): void;
-    protected _set(x: number, y: number, style: number): boolean;
-    copy(buffer: DataBuffer): void;
-    copyTo(buffer: DataBuffer): void;
+    protected abstract _set(x: number, y: number, style: number): void;
+    abstract copy(buffer: DataBuffer): void;
+    abstract copyTo(buffer: DataBuffer): void;
     abstract render(): void;
     hasXY(x: number, y: number): boolean;
     toX(x: number): number;
@@ -47,6 +46,10 @@ export declare abstract class BaseCanvas {
 export declare class Canvas extends BaseCanvas {
     private _gl;
     private _buffers;
+    protected _data: {
+        style: Uint32Array;
+        glyph: Uint8Array;
+    };
     private _attribs;
     private _uniforms;
     private _texture;
@@ -65,9 +68,11 @@ export declare class Canvas extends BaseCanvas {
 export declare class Canvas2D extends BaseCanvas {
     private _ctx;
     private _changed;
+    protected _data: Uint32Array;
     constructor(options: Options);
     protected _createContext(): void;
     protected _set(x: number, y: number, style: number): boolean;
+    copyTo(buffer: DataBuffer): void;
     resize(width: number, height: number): void;
     copy(buffer: DataBuffer): void;
     render(): void;

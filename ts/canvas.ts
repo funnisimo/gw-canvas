@@ -32,7 +32,6 @@ export class NotSupportedError extends Error {
 }
 
 export abstract class BaseCanvas {
-  protected _data!: Uint32Array;
   protected _renderRequested: boolean = false;
   protected _glyphs!: Glyphs;
   protected _autoRender: boolean = true;
@@ -138,26 +137,9 @@ export abstract class BaseCanvas {
     requestAnimationFrame(() => this.render());
   }
 
-  protected _set(x: number, y: number, style: number) {
-    let index = y * this.width + x;
-    const current = this._data[index];
-    if (current !== style) {
-      this._data[index] = style;
-      this._requestRender();
-      return true;
-    }
-    return false;
-  }
-
-  copy(buffer: DataBuffer) {
-    this._data.set(buffer.data);
-    this._requestRender();
-  }
-
-  copyTo(buffer: DataBuffer) {
-    buffer.data.set(this._data);
-  }
-
+  protected abstract _set(x: number, y: number, style: number): void;
+  abstract copy(buffer: DataBuffer): void;
+  abstract copyTo(buffer: DataBuffer): void;
   abstract render(): void;
 
   hasXY(x: number, y: number) {
@@ -179,6 +161,11 @@ export class Canvas extends BaseCanvas {
     position?: WebGLBuffer;
     uv?: WebGLBuffer;
     style?: WebGLBuffer;
+    glyph?: WebGLBuffer;
+  };
+  protected _data!: {
+    style: Uint32Array;
+    glyph: Uint8Array;
   };
   private _attribs!: Record<string, number>;
   private _uniforms!: Record<string, WebGLUniformLocation>;
@@ -231,11 +218,21 @@ export class Canvas extends BaseCanvas {
     const attribs = this._attribs;
     const tileCount = this.width * this.height;
     this._buffers.style && gl.deleteBuffer(this._buffers.style);
-    this._data = new Uint32Array(tileCount * VERTICES_PER_TILE);
+    this._buffers.glyph && gl.deleteBuffer(this._buffers.glyph);
+    this._data = {
+      style: new Uint32Array(tileCount * VERTICES_PER_TILE),
+      glyph: new Uint8Array(tileCount * VERTICES_PER_TILE),
+    };
+
     const style = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, style);
     gl.vertexAttribIPointer(attribs["style"], 1, gl.UNSIGNED_INT, 0, 0);
-    Object.assign(this._buffers, { style });
+
+    const glyph = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, glyph);
+    gl.vertexAttribIPointer(attribs["glyph"], 1, gl.UNSIGNED_BYTE, 0, 0);
+
+    Object.assign(this._buffers, { style, glyph });
   }
 
   protected _setGlyphs(glyphs: Glyphs) {
@@ -272,9 +269,9 @@ export class Canvas extends BaseCanvas {
   resize(width: number, height: number) {
     super.resize(width, height);
     const gl = this._gl;
-    const uniforms = this._uniforms;
+    // const uniforms = this._uniforms;
     gl.viewport(0, 0, this.node.width, this.node.height);
-    gl.uniform2ui(uniforms["viewportSize"], this.node.width, this.node.height);
+    // gl.uniform2ui(uniforms["viewportSize"], this.node.width, this.node.height);
 
     this._createGeometry();
     this._createData();
@@ -284,14 +281,26 @@ export class Canvas extends BaseCanvas {
     let index = y * this.width + x;
     index *= VERTICES_PER_TILE;
 
-    const current = this._data[index];
+    const sd = this._data.style;
+    const gd = this._data.glyph;
+
+    const current = sd[index];
     if (current !== style) {
-      this._data[index + 0] = style;
-      this._data[index + 1] = style;
-      this._data[index + 2] = style;
-      this._data[index + 3] = style;
-      this._data[index + 4] = style;
-      this._data[index + 5] = style;
+      sd[index + 0] = style;
+      sd[index + 1] = style;
+      sd[index + 2] = style;
+      sd[index + 3] = style;
+      sd[index + 4] = style;
+      sd[index + 5] = style;
+
+      const g = (style & 0xff000000) >> 24;
+      gd[index + 0] = g;
+      gd[index + 1] = g;
+      gd[index + 2] = g;
+      gd[index + 3] = g;
+      gd[index + 4] = g;
+      gd[index + 5] = g;
+
       this._requestRender();
       return true;
     }
@@ -299,14 +308,25 @@ export class Canvas extends BaseCanvas {
   }
 
   copy(buffer: DataBuffer) {
+    const sd = this._data.style;
+    const gd = this._data.glyph;
+
     buffer.data.forEach((style, i) => {
       const index = i * VERTICES_PER_TILE;
-      this._data[index + 0] = style;
-      this._data[index + 1] = style;
-      this._data[index + 2] = style;
-      this._data[index + 3] = style;
-      this._data[index + 4] = style;
-      this._data[index + 5] = style;
+      sd[index + 0] = style;
+      sd[index + 1] = style;
+      sd[index + 2] = style;
+      sd[index + 3] = style;
+      sd[index + 4] = style;
+      sd[index + 5] = style;
+
+      const g = (style & 0xff000000) >> 24;
+      gd[index + 0] = g;
+      gd[index + 1] = g;
+      gd[index + 2] = g;
+      gd[index + 3] = g;
+      gd[index + 4] = g;
+      gd[index + 5] = g;
     });
     this._requestRender();
   }
@@ -316,7 +336,7 @@ export class Canvas extends BaseCanvas {
     const dest = buffer.data;
     for (let i = 0; i < n; ++i) {
       const index = i * VERTICES_PER_TILE;
-      dest[i] = this._data[index + 0];
+      dest[i] = this._data.style[index + 0];
     }
   }
 
@@ -332,7 +352,11 @@ export class Canvas extends BaseCanvas {
 
     this._renderRequested = false;
     gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.style!);
-    gl.bufferData(gl.ARRAY_BUFFER, this._data, gl.DYNAMIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, this._data.style, gl.DYNAMIC_DRAW);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.glyph!);
+    gl.bufferData(gl.ARRAY_BUFFER, this._data.glyph, gl.DYNAMIC_DRAW);
+
     gl.drawArrays(
       gl.TRIANGLES,
       0,
@@ -344,6 +368,7 @@ export class Canvas extends BaseCanvas {
 export class Canvas2D extends BaseCanvas {
   private _ctx!: CanvasRenderingContext2D;
   private _changed!: Int8Array;
+  protected _data!: Uint32Array;
 
   constructor(options: Options) {
     super(options);
@@ -358,11 +383,19 @@ export class Canvas2D extends BaseCanvas {
   }
 
   protected _set(x: number, y: number, style: number) {
-    const result = super._set(x, y, style);
-    if (result) {
+    let index = y * this.width + x;
+    const current = this._data[index];
+    if (current !== style) {
+      this._data[index] = style;
       this._changed[y * this.width + x] = 1;
+      this._requestRender();
+      return true;
     }
-    return result;
+    return false;
+  }
+
+  copyTo(buffer: DataBuffer) {
+    buffer.data.set(this._data);
   }
 
   resize(width: number, height: number) {

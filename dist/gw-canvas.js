@@ -8,7 +8,8 @@ const VS = `
 
 in vec2 position;
 in uvec2 offset;
-in highp uint style;
+in uint style;
+in uint glyph;
 
 out vec2 fsUv;
 out vec3 fgRgb;
@@ -16,7 +17,6 @@ out vec3 bgRgb;
 flat out uvec2 fontPos;
 
 uniform uvec2 tileSize;
-uniform uvec2 viewportSize;
 
 void main() {
 	gl_Position = vec4(position, 0.0, 1.0);
@@ -31,7 +31,7 @@ void main() {
 	float bb = float((style & uint(0x0000F000)) >> 12);
 	bgRgb = vec3(br, bg, bb) / 15.0;
 
-	uint glyph = (style & uint(0xFF000000)) >> 24;
+	//uint glyph = (style & uint(0xFF000000)) >> 24;
 	uint glyphX = (glyph & uint(0xF));
 	uint glyphY = (glyph >> 4);
 	fontPos = uvec2(glyphX, glyphY);
@@ -302,23 +302,6 @@ class BaseCanvas {
             return;
         requestAnimationFrame(() => this.render());
     }
-    _set(x, y, style) {
-        let index = y * this.width + x;
-        const current = this._data[index];
-        if (current !== style) {
-            this._data[index] = style;
-            this._requestRender();
-            return true;
-        }
-        return false;
-    }
-    copy(buffer) {
-        this._data.set(buffer.data);
-        this._requestRender();
-    }
-    copyTo(buffer) {
-        buffer.data.set(this._data);
-    }
     hasXY(x, y) {
         return x >= 0 && y >= 0 && x < this.width && y < this.height;
     }
@@ -370,11 +353,18 @@ class Canvas extends BaseCanvas {
         const attribs = this._attribs;
         const tileCount = this.width * this.height;
         this._buffers.style && gl.deleteBuffer(this._buffers.style);
-        this._data = new Uint32Array(tileCount * VERTICES_PER_TILE);
+        this._buffers.glyph && gl.deleteBuffer(this._buffers.glyph);
+        this._data = {
+            style: new Uint32Array(tileCount * VERTICES_PER_TILE),
+            glyph: new Uint8Array(tileCount * VERTICES_PER_TILE),
+        };
         const style = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, style);
         gl.vertexAttribIPointer(attribs["style"], 1, gl.UNSIGNED_INT, 0, 0);
-        Object.assign(this._buffers, { style });
+        const glyph = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, glyph);
+        gl.vertexAttribIPointer(attribs["glyph"], 1, gl.UNSIGNED_BYTE, 0, 0);
+        Object.assign(this._buffers, { style, glyph });
     }
     _setGlyphs(glyphs) {
         if (!super._setGlyphs(glyphs))
@@ -400,37 +390,55 @@ class Canvas extends BaseCanvas {
     resize(width, height) {
         super.resize(width, height);
         const gl = this._gl;
-        const uniforms = this._uniforms;
+        // const uniforms = this._uniforms;
         gl.viewport(0, 0, this.node.width, this.node.height);
-        gl.uniform2ui(uniforms["viewportSize"], this.node.width, this.node.height);
+        // gl.uniform2ui(uniforms["viewportSize"], this.node.width, this.node.height);
         this._createGeometry();
         this._createData();
     }
     _set(x, y, style) {
         let index = y * this.width + x;
         index *= VERTICES_PER_TILE;
-        const current = this._data[index];
+        const sd = this._data.style;
+        const gd = this._data.glyph;
+        const current = sd[index];
         if (current !== style) {
-            this._data[index + 0] = style;
-            this._data[index + 1] = style;
-            this._data[index + 2] = style;
-            this._data[index + 3] = style;
-            this._data[index + 4] = style;
-            this._data[index + 5] = style;
+            sd[index + 0] = style;
+            sd[index + 1] = style;
+            sd[index + 2] = style;
+            sd[index + 3] = style;
+            sd[index + 4] = style;
+            sd[index + 5] = style;
+            const g = (style & 0xff000000) >> 24;
+            gd[index + 0] = g;
+            gd[index + 1] = g;
+            gd[index + 2] = g;
+            gd[index + 3] = g;
+            gd[index + 4] = g;
+            gd[index + 5] = g;
             this._requestRender();
             return true;
         }
         return false;
     }
     copy(buffer) {
+        const sd = this._data.style;
+        const gd = this._data.glyph;
         buffer.data.forEach((style, i) => {
             const index = i * VERTICES_PER_TILE;
-            this._data[index + 0] = style;
-            this._data[index + 1] = style;
-            this._data[index + 2] = style;
-            this._data[index + 3] = style;
-            this._data[index + 4] = style;
-            this._data[index + 5] = style;
+            sd[index + 0] = style;
+            sd[index + 1] = style;
+            sd[index + 2] = style;
+            sd[index + 3] = style;
+            sd[index + 4] = style;
+            sd[index + 5] = style;
+            const g = (style & 0xff000000) >> 24;
+            gd[index + 0] = g;
+            gd[index + 1] = g;
+            gd[index + 2] = g;
+            gd[index + 3] = g;
+            gd[index + 4] = g;
+            gd[index + 5] = g;
         });
         this._requestRender();
     }
@@ -439,7 +447,7 @@ class Canvas extends BaseCanvas {
         const dest = buffer.data;
         for (let i = 0; i < n; ++i) {
             const index = i * VERTICES_PER_TILE;
-            dest[i] = this._data[index + 0];
+            dest[i] = this._data.style[index + 0];
         }
     }
     render() {
@@ -453,7 +461,9 @@ class Canvas extends BaseCanvas {
         }
         this._renderRequested = false;
         gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.style);
-        gl.bufferData(gl.ARRAY_BUFFER, this._data, gl.DYNAMIC_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, this._data.style, gl.DYNAMIC_DRAW);
+        gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.glyph);
+        gl.bufferData(gl.ARRAY_BUFFER, this._data.glyph, gl.DYNAMIC_DRAW);
         gl.drawArrays(gl.TRIANGLES, 0, this._width * this._height * VERTICES_PER_TILE);
     }
 }
@@ -469,11 +479,18 @@ class Canvas2D extends BaseCanvas {
         this._ctx = ctx;
     }
     _set(x, y, style) {
-        const result = super._set(x, y, style);
-        if (result) {
+        let index = y * this.width + x;
+        const current = this._data[index];
+        if (current !== style) {
+            this._data[index] = style;
             this._changed[y * this.width + x] = 1;
+            this._requestRender();
+            return true;
         }
-        return result;
+        return false;
+    }
+    copyTo(buffer) {
+        buffer.data.set(this._data);
     }
     resize(width, height) {
         super.resize(width, height);

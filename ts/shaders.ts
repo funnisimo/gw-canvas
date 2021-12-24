@@ -5,7 +5,8 @@ export const VS = `
 
 in vec2 position;
 in uvec2 offset;
-in highp uint style;
+in uint style;
+in uint glyph;
 
 out vec2 fsUv;
 out vec3 fgRgb;
@@ -13,7 +14,6 @@ out vec3 bgRgb;
 flat out uvec2 fontPos;
 
 uniform uvec2 tileSize;
-uniform uvec2 viewportSize;
 
 void main() {
 	gl_Position = vec4(position, 0.0, 1.0);
@@ -28,7 +28,7 @@ void main() {
 	float bb = float((style & uint(0x0000F000)) >> 12);
 	bgRgb = vec3(br, bg, bb) / 15.0;
 
-	uint glyph = (style & uint(0xFF000000)) >> 24;
+	//uint glyph = (style & uint(0xFF000000)) >> 24;
 	uint glyphX = (glyph & uint(0xF));
 	uint glyphY = (glyph >> 4);
 	fontPos = uvec2(glyphX, glyphY);
