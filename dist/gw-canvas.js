@@ -17,8 +17,6 @@ out vec3 fgRgb;
 out vec3 bgRgb;
 flat out uvec2 fontPos;
 
-uniform uvec2 tileSize;
-
 void main() {
 	gl_Position = vec4(position, 0.0, 1.0);
 
@@ -32,7 +30,6 @@ void main() {
 	float bgb = float((bg & uint(0x00F)));
 	bgRgb = vec3(bgr, bgg, bgb) / 15.0;
 
-	//uint glyph = (style & uint(0xFF000000)) >> 24;
 	uint glyphX = (glyph & uint(0xF));
 	uint glyphY = (glyph >> 4);
 	fontPos = uvec2(glyphX, glyphY);
@@ -51,7 +48,7 @@ flat in uvec2 fontPos;
 out vec4 fragColor;
 
 uniform sampler2D font;
-uniform highp uvec2 tileSize;
+uniform uvec2 tileSize;
 
 void main() {
 	uvec2 fontPx = (tileSize * fontPos) + uvec2(vec2(tileSize) * fsOffset);
