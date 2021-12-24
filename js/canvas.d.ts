@@ -33,9 +33,8 @@ export declare abstract class BaseCanvas {
     private _configure;
     protected _setGlyphs(glyphs: Glyphs): boolean;
     resize(width: number, height: number): void;
-    draw(x: number, y: number, glyph: number, fg: number, bg: number): void;
     protected _requestRender(): void;
-    protected abstract _set(x: number, y: number, style: number): void;
+    protected abstract draw(x: number, y: number, glyph: number, fg: number, bg: number): boolean;
     abstract copy(buffer: DataBuffer): void;
     abstract copyTo(buffer: DataBuffer): void;
     abstract render(): void;
@@ -47,7 +46,8 @@ export declare class Canvas extends BaseCanvas {
     private _gl;
     private _buffers;
     protected _data: {
-        style: Uint32Array;
+        fg: Uint16Array;
+        bg: Uint16Array;
         glyph: Uint8Array;
     };
     private _attribs;
@@ -60,7 +60,7 @@ export declare class Canvas extends BaseCanvas {
     protected _setGlyphs(glyphs: Glyphs): boolean;
     _uploadGlyphs(): void;
     resize(width: number, height: number): void;
-    protected _set(x: number, y: number, style: number): boolean;
+    draw(x: number, y: number, glyph: number, fg: number, bg: number): boolean;
     copy(buffer: DataBuffer): void;
     copyTo(buffer: DataBuffer): void;
     render(): void;
@@ -71,7 +71,7 @@ export declare class Canvas2D extends BaseCanvas {
     protected _data: Uint32Array;
     constructor(options: Options);
     protected _createContext(): void;
-    protected _set(x: number, y: number, style: number): boolean;
+    draw(x: number, y: number, glyph: number, fg: number, bg: number): boolean;
     copyTo(buffer: DataBuffer): void;
     resize(width: number, height: number): void;
     copy(buffer: DataBuffer): void;

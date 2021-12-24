@@ -92,13 +92,6 @@ export class BaseCanvas {
         node.width = this._width * this.tileWidth;
         node.height = this._height * this.tileHeight;
     }
-    draw(x, y, glyph, fg, bg) {
-        glyph = glyph & 0xff;
-        bg = bg & 0xfff;
-        fg = fg & 0xfff;
-        const style = glyph * (1 << 24) + bg * (1 << 12) + fg;
-        this._set(x, y, style);
-    }
     _requestRender() {
         if (this._renderRequested)
             return;
@@ -157,19 +150,24 @@ export class Canvas extends BaseCanvas {
         const gl = this._gl;
         const attribs = this._attribs;
         const tileCount = this.width * this.height;
-        this._buffers.style && gl.deleteBuffer(this._buffers.style);
+        this._buffers.fg && gl.deleteBuffer(this._buffers.fg);
+        this._buffers.bg && gl.deleteBuffer(this._buffers.bg);
         this._buffers.glyph && gl.deleteBuffer(this._buffers.glyph);
         this._data = {
-            style: new Uint32Array(tileCount * VERTICES_PER_TILE),
+            fg: new Uint16Array(tileCount * VERTICES_PER_TILE),
+            bg: new Uint16Array(tileCount * VERTICES_PER_TILE),
             glyph: new Uint8Array(tileCount * VERTICES_PER_TILE),
         };
-        const style = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, style);
-        gl.vertexAttribIPointer(attribs["style"], 1, gl.UNSIGNED_INT, 0, 0);
+        const fg = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, fg);
+        gl.vertexAttribIPointer(attribs["fg"], 1, gl.UNSIGNED_SHORT, 0, 0);
+        const bg = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, bg);
+        gl.vertexAttribIPointer(attribs["bg"], 1, gl.UNSIGNED_SHORT, 0, 0);
         const glyph = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, glyph);
         gl.vertexAttribIPointer(attribs["glyph"], 1, gl.UNSIGNED_BYTE, 0, 0);
-        Object.assign(this._buffers, { style, glyph });
+        Object.assign(this._buffers, { fg, bg, glyph });
     }
     _setGlyphs(glyphs) {
         if (!super._setGlyphs(glyphs))
@@ -201,49 +199,63 @@ export class Canvas extends BaseCanvas {
         this._createGeometry();
         this._createData();
     }
-    _set(x, y, style) {
+    draw(x, y, glyph, fg, bg) {
+        glyph = glyph & 0xff;
+        bg = bg & 0xfff;
+        fg = fg & 0xfff;
         let index = y * this.width + x;
         index *= VERTICES_PER_TILE;
-        const sd = this._data.style;
+        const fd = this._data.fg;
+        const bd = this._data.bg;
         const gd = this._data.glyph;
-        const current = sd[index];
-        if (current !== style) {
-            sd[index + 0] = style;
-            sd[index + 1] = style;
-            sd[index + 2] = style;
-            sd[index + 3] = style;
-            sd[index + 4] = style;
-            sd[index + 5] = style;
-            const g = (style & 0xff000000) >> 24;
-            gd[index + 0] = g;
-            gd[index + 1] = g;
-            gd[index + 2] = g;
-            gd[index + 3] = g;
-            gd[index + 4] = g;
-            gd[index + 5] = g;
-            this._requestRender();
-            return true;
-        }
-        return false;
+        fd[index + 0] = fg;
+        fd[index + 1] = fg;
+        fd[index + 2] = fg;
+        fd[index + 3] = fg;
+        fd[index + 4] = fg;
+        fd[index + 5] = fg;
+        bd[index + 0] = bg;
+        bd[index + 1] = bg;
+        bd[index + 2] = bg;
+        bd[index + 3] = bg;
+        bd[index + 4] = bg;
+        bd[index + 5] = bg;
+        gd[index + 0] = glyph;
+        gd[index + 1] = glyph;
+        gd[index + 2] = glyph;
+        gd[index + 3] = glyph;
+        gd[index + 4] = glyph;
+        gd[index + 5] = glyph;
+        this._requestRender();
+        return true;
     }
     copy(buffer) {
-        const sd = this._data.style;
+        const fd = this._data.fg;
+        const bd = this._data.bg;
         const gd = this._data.glyph;
         buffer.data.forEach((style, i) => {
             const index = i * VERTICES_PER_TILE;
-            sd[index + 0] = style;
-            sd[index + 1] = style;
-            sd[index + 2] = style;
-            sd[index + 3] = style;
-            sd[index + 4] = style;
-            sd[index + 5] = style;
-            const g = (style & 0xff000000) >> 24;
-            gd[index + 0] = g;
-            gd[index + 1] = g;
-            gd[index + 2] = g;
-            gd[index + 3] = g;
-            gd[index + 4] = g;
-            gd[index + 5] = g;
+            const fg = style & 0xfff;
+            const bg = (style & 0xfff000) >> 12;
+            const gl = (style & 0xff000000) >> 24;
+            fd[index + 0] = fg;
+            fd[index + 1] = fg;
+            fd[index + 2] = fg;
+            fd[index + 3] = fg;
+            fd[index + 4] = fg;
+            fd[index + 5] = fg;
+            bd[index + 0] = bg;
+            bd[index + 1] = bg;
+            bd[index + 2] = bg;
+            bd[index + 3] = bg;
+            bd[index + 4] = bg;
+            bd[index + 5] = bg;
+            gd[index + 0] = gl;
+            gd[index + 1] = gl;
+            gd[index + 2] = gl;
+            gd[index + 3] = gl;
+            gd[index + 4] = gl;
+            gd[index + 5] = gl;
         });
         this._requestRender();
     }
@@ -252,7 +264,11 @@ export class Canvas extends BaseCanvas {
         const dest = buffer.data;
         for (let i = 0; i < n; ++i) {
             const index = i * VERTICES_PER_TILE;
-            dest[i] = this._data.style[index + 0];
+            const fg = this._data.fg[index];
+            const bg = this._data.bg[index];
+            const gl = this._data.glyph[index];
+            const style = (gl << 24) + (bg << 12) + fg;
+            dest[i] = style;
         }
     }
     render() {
@@ -265,8 +281,10 @@ export class Canvas extends BaseCanvas {
             return;
         }
         this._renderRequested = false;
-        gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.style);
-        gl.bufferData(gl.ARRAY_BUFFER, this._data.style, gl.DYNAMIC_DRAW);
+        gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.fg);
+        gl.bufferData(gl.ARRAY_BUFFER, this._data.fg, gl.DYNAMIC_DRAW);
+        gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.bg);
+        gl.bufferData(gl.ARRAY_BUFFER, this._data.bg, gl.DYNAMIC_DRAW);
         gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.glyph);
         gl.bufferData(gl.ARRAY_BUFFER, this._data.glyph, gl.DYNAMIC_DRAW);
         gl.drawArrays(gl.TRIANGLES, 0, this._width * this._height * VERTICES_PER_TILE);
@@ -283,7 +301,8 @@ export class Canvas2D extends BaseCanvas {
         }
         this._ctx = ctx;
     }
-    _set(x, y, style) {
+    draw(x, y, glyph, fg, bg) {
+        const style = (glyph << 24) + (bg << 12) + fg;
         let index = y * this.width + x;
         const current = this._data[index];
         if (current !== style) {
