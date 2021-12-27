@@ -1,29 +1,41 @@
-
-// GW-CANVAS: rollup.config.js
+// GW-UTILS: rollup.config.js
 
 import { terser } from "rollup-plugin-terser";
+import dts from "rollup-plugin-dts";
+import { nodeResolve } from "@rollup/plugin-node-resolve";
 
-
-export default [{
-  input: 'js/gw.js',
-  output: {
-    file: 'dist/gw-canvas.min.js',
-    format: 'umd',
-    name: 'GW',
-    freeze: false,
-    extend: true,
-    sourcemap: true,
-    plugins: [terser()]
-  }
-},
-{
-  // Really?  Do we need this?
-  input: 'js/index.js',
-  output: {
-    file: 'dist/gw-canvas.js',
-    format: 'cjs',
-    freeze: false,
-  }
-},
-
+export default [
+  {
+    input: "js/index.js",
+    plugins: [nodeResolve()],
+    output: [
+      {
+        file: "dist/gw-canvas.min.js",
+        format: "umd",
+        name: "GWC",
+        // freeze: false,
+        // extend: true,
+        sourcemap: true,
+        plugins: [terser()],
+      },
+      {
+        file: "dist/gw-canvas.mjs",
+        format: "es",
+        // freeze: false,
+      },
+      {
+        file: "dist/gw-canvas.js",
+        format: "umd",
+        name: "GWC",
+        // freeze: false,
+        // extend: true,
+        sourcemap: true,
+      },
+    ],
+  },
+  {
+    input: "./js/index.d.ts",
+    output: [{ file: "dist/gw-canvas.d.ts", format: "es" }],
+    plugins: [dts()],
+  },
 ];

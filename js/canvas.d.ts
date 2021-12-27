@@ -1,23 +1,39 @@
 import { Glyphs, Options as GlyphOptions } from "./glyphs";
-import { DataBuffer } from "./buffer";
+import { Layer } from "./layer";
+import * as Color from "./color";
 declare type GL = WebGL2RenderingContext;
+export declare const VERTICES_PER_TILE = 6;
 export interface Options {
     width?: number;
     height?: number;
     glyphs: Glyphs;
     div?: HTMLElement | string;
     render?: boolean;
+    bg?: Color.ColorBase;
 }
 export declare class NotSupportedError extends Error {
     constructor(...params: any[]);
 }
-export declare abstract class BaseCanvas {
-    protected _renderRequested: boolean;
-    protected _glyphs: Glyphs;
-    protected _autoRender: boolean;
-    protected _node: HTMLCanvasElement;
-    protected _width: number;
-    protected _height: number;
+export declare class Canvas {
+    _renderRequested: boolean;
+    _glyphs: Glyphs;
+    _autoRender: boolean;
+    _node: HTMLCanvasElement;
+    _width: number;
+    _height: number;
+    _gl: GL;
+    _buffers: {
+        position?: WebGLBuffer;
+        uv?: WebGLBuffer;
+        fg?: WebGLBuffer;
+        bg?: WebGLBuffer;
+        glyph?: WebGLBuffer;
+    };
+    layer: Layer;
+    _attribs: Record<string, number>;
+    _uniforms: Record<string, WebGLUniformLocation>;
+    _texture: WebGLTexture;
+    bg: Color.Color;
     constructor(options: Options);
     get node(): HTMLCanvasElement;
     get width(): number;
@@ -28,67 +44,27 @@ export declare abstract class BaseCanvas {
     get pxHeight(): number;
     get glyphs(): Glyphs;
     set glyphs(glyphs: Glyphs);
-    protected _createNode(): HTMLCanvasElement;
-    protected abstract _createContext(): void;
-    private _configure;
-    protected _setGlyphs(glyphs: Glyphs): boolean;
+    _createNode(): HTMLCanvasElement;
+    _configure(options: Options): void;
+    _setGlyphs(glyphs: Glyphs): boolean;
     resize(width: number, height: number): void;
-    protected _requestRender(): void;
-    protected abstract draw(x: number, y: number, glyph: number, fg: number, bg: number): boolean;
-    abstract copy(buffer: DataBuffer): void;
-    abstract copyTo(buffer: DataBuffer): void;
-    abstract render(): void;
+    _requestRender(): void;
     hasXY(x: number, y: number): boolean;
     toX(x: number): number;
     toY(y: number): number;
-}
-export declare class Canvas extends BaseCanvas {
-    private _gl;
-    private _buffers;
-    protected _data: {
-        fg: Uint16Array;
-        bg: Uint16Array;
-        glyph: Uint8Array;
-    };
-    private _attribs;
-    private _uniforms;
-    private _texture;
-    constructor(options: Options);
-    protected _createContext(): void;
-    private _createGeometry;
-    private _createData;
-    protected _setGlyphs(glyphs: Glyphs): boolean;
+    _createContext(): void;
+    _createGeometry(): void;
+    _createData(): void;
     _uploadGlyphs(): void;
-    resize(width: number, height: number): void;
     draw(x: number, y: number, glyph: number, fg: number, bg: number): boolean;
-    copy(buffer: DataBuffer): void;
-    copyTo(buffer: DataBuffer): void;
     render(): void;
-}
-export declare class Canvas2D extends BaseCanvas {
-    private _ctx;
-    private _changed;
-    protected _data: Uint32Array;
-    constructor(options: Options);
-    protected _createContext(): void;
-    draw(x: number, y: number, glyph: number, fg: number, bg: number): boolean;
-    copyTo(buffer: DataBuffer): void;
-    resize(width: number, height: number): void;
-    copy(buffer: DataBuffer): void;
-    render(): void;
-    protected _renderCell(index: number): void;
 }
 export interface ImageOptions extends Options {
     image: HTMLImageElement | string;
 }
 export declare type FontOptions = Options & GlyphOptions;
-export declare function withImage(image: ImageOptions | HTMLImageElement | string): Canvas | Canvas2D;
-export declare function withFont(src: FontOptions | string): Canvas | Canvas2D;
+export declare function withImage(image: ImageOptions | HTMLImageElement | string): Canvas;
+export declare function withFont(src: FontOptions | string): Canvas;
 export declare function createProgram(gl: GL, ...sources: string[]): WebGLProgram;
-export declare function createTexture(gl: GL): WebGLTexture;
 export declare const QUAD: number[];
-export declare function createGeometry(gl: GL, attribs: Record<string, number>, width: number, height: number): {
-    position: WebGLBuffer | null;
-    uv: WebGLBuffer | null;
-};
 export {};

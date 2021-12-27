@@ -1,7 +1,9 @@
 // Based on: https://github.com/ondras/fastiles/blob/master/ts/scene.ts (v2.1.0)
 import * as shaders from "./shaders";
 import { Glyphs } from "./glyphs";
-const VERTICES_PER_TILE = 6;
+import { Layer } from "./layer";
+import * as Color from "./color";
+export const VERTICES_PER_TILE = 6;
 export class NotSupportedError extends Error {
     constructor(...params) {
         // Pass remaining arguments (including vendor specific ones) to parent constructor
@@ -15,7 +17,7 @@ export class NotSupportedError extends Error {
         this.name = "NotSupportedError";
     }
 }
-export class BaseCanvas {
+export class Canvas {
     constructor(options) {
         this._renderRequested = false;
         this._autoRender = true;
@@ -62,6 +64,7 @@ export class BaseCanvas {
         this._height = options.height || this._height;
         this._autoRender = options.render !== false;
         this._setGlyphs(options.glyphs);
+        this.bg = Color.from(options.bg || Color.BLACK);
         if (options.div) {
             let el;
             if (typeof options.div === "string") {
@@ -83,6 +86,10 @@ export class BaseCanvas {
             return false;
         this._glyphs = glyphs;
         this.resize(this._width, this._height);
+        const gl = this._gl;
+        const uniforms = this._uniforms;
+        gl.uniform2uiv(uniforms["tileSize"], [this.tileWidth, this.tileHeight]);
+        this._uploadGlyphs();
         return true;
     }
     resize(width, height) {
@@ -91,6 +98,12 @@ export class BaseCanvas {
         const node = this.node;
         node.width = this._width * this.tileWidth;
         node.height = this._height * this.tileHeight;
+        const gl = this._gl;
+        // const uniforms = this._uniforms;
+        gl.viewport(0, 0, this.node.width, this.node.height);
+        // gl.uniform2ui(uniforms["viewportSize"], this.node.width, this.node.height);
+        this._createGeometry();
+        this._createData();
     }
     _requestRender() {
         if (this._renderRequested)
@@ -108,11 +121,6 @@ export class BaseCanvas {
     }
     toY(y) {
         return Math.floor((this.height * y) / this.node.clientHeight);
-    }
-}
-export class Canvas extends BaseCanvas {
-    constructor(options) {
-        super(options);
     }
     _createContext() {
         let gl = this.node.getContext("webgl2");
@@ -149,15 +157,10 @@ export class Canvas extends BaseCanvas {
     _createData() {
         const gl = this._gl;
         const attribs = this._attribs;
-        const tileCount = this.width * this.height;
         this._buffers.fg && gl.deleteBuffer(this._buffers.fg);
         this._buffers.bg && gl.deleteBuffer(this._buffers.bg);
         this._buffers.glyph && gl.deleteBuffer(this._buffers.glyph);
-        this._data = {
-            fg: new Uint16Array(tileCount * VERTICES_PER_TILE),
-            bg: new Uint16Array(tileCount * VERTICES_PER_TILE),
-            glyph: new Uint8Array(tileCount * VERTICES_PER_TILE),
-        };
+        this.layer = new Layer(this);
         const fg = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, fg);
         gl.vertexAttribIPointer(attribs["fg"], 1, gl.UNSIGNED_SHORT, 0, 0);
@@ -168,15 +171,6 @@ export class Canvas extends BaseCanvas {
         gl.bindBuffer(gl.ARRAY_BUFFER, glyph);
         gl.vertexAttribIPointer(attribs["glyph"], 1, gl.UNSIGNED_BYTE, 0, 0);
         Object.assign(this._buffers, { fg, bg, glyph });
-    }
-    _setGlyphs(glyphs) {
-        if (!super._setGlyphs(glyphs))
-            return false;
-        const gl = this._gl;
-        const uniforms = this._uniforms;
-        gl.uniform2uiv(uniforms["tileSize"], [this.tileWidth, this.tileHeight]);
-        this._uploadGlyphs();
-        return true;
     }
     _uploadGlyphs() {
         if (!this._glyphs.needsUpdate)
@@ -190,86 +184,10 @@ export class Canvas extends BaseCanvas {
         this._requestRender();
         this._glyphs.needsUpdate = false;
     }
-    resize(width, height) {
-        super.resize(width, height);
-        const gl = this._gl;
-        // const uniforms = this._uniforms;
-        gl.viewport(0, 0, this.node.width, this.node.height);
-        // gl.uniform2ui(uniforms["viewportSize"], this.node.width, this.node.height);
-        this._createGeometry();
-        this._createData();
-    }
     draw(x, y, glyph, fg, bg) {
-        glyph = glyph & 0xff;
-        bg = bg & 0xfff;
-        fg = fg & 0xfff;
-        let index = y * this.width + x;
-        index *= VERTICES_PER_TILE;
-        const fd = this._data.fg;
-        const bd = this._data.bg;
-        const gd = this._data.glyph;
-        fd[index + 0] = fg;
-        fd[index + 1] = fg;
-        fd[index + 2] = fg;
-        fd[index + 3] = fg;
-        fd[index + 4] = fg;
-        fd[index + 5] = fg;
-        bd[index + 0] = bg;
-        bd[index + 1] = bg;
-        bd[index + 2] = bg;
-        bd[index + 3] = bg;
-        bd[index + 4] = bg;
-        bd[index + 5] = bg;
-        gd[index + 0] = glyph;
-        gd[index + 1] = glyph;
-        gd[index + 2] = glyph;
-        gd[index + 3] = glyph;
-        gd[index + 4] = glyph;
-        gd[index + 5] = glyph;
+        this.layer.draw(x, y, glyph, fg, bg);
         this._requestRender();
         return true;
-    }
-    copy(buffer) {
-        const fd = this._data.fg;
-        const bd = this._data.bg;
-        const gd = this._data.glyph;
-        buffer.data.forEach((style, i) => {
-            const index = i * VERTICES_PER_TILE;
-            const fg = style & 0xfff;
-            const bg = (style & 0xfff000) >> 12;
-            const gl = (style & 0xff000000) >> 24;
-            fd[index + 0] = fg;
-            fd[index + 1] = fg;
-            fd[index + 2] = fg;
-            fd[index + 3] = fg;
-            fd[index + 4] = fg;
-            fd[index + 5] = fg;
-            bd[index + 0] = bg;
-            bd[index + 1] = bg;
-            bd[index + 2] = bg;
-            bd[index + 3] = bg;
-            bd[index + 4] = bg;
-            bd[index + 5] = bg;
-            gd[index + 0] = gl;
-            gd[index + 1] = gl;
-            gd[index + 2] = gl;
-            gd[index + 3] = gl;
-            gd[index + 4] = gl;
-            gd[index + 5] = gl;
-        });
-        this._requestRender();
-    }
-    copyTo(buffer) {
-        const n = this.width * this.height;
-        const dest = buffer.data;
-        for (let i = 0; i < n; ++i) {
-            const index = i * VERTICES_PER_TILE;
-            const fg = this._data.fg[index];
-            const bg = this._data.bg[index];
-            const gl = this._data.glyph[index];
-            const style = (gl << 24) + (bg << 12) + fg;
-            dest[i] = style;
-        }
     }
     render() {
         const gl = this._gl;
@@ -281,86 +199,21 @@ export class Canvas extends BaseCanvas {
             return;
         }
         this._renderRequested = false;
+        // clear to bg color?
+        gl.clearColor(this.bg.r / 100, this.bg.g / 100, this.bg.b / 100, this.bg.a / 100);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.enable(gl.BLEND);
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+        // loop layers
+        // set depth
         gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.fg);
-        gl.bufferData(gl.ARRAY_BUFFER, this._data.fg, gl.DYNAMIC_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, this.layer.fg, gl.DYNAMIC_DRAW);
         gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.bg);
-        gl.bufferData(gl.ARRAY_BUFFER, this._data.bg, gl.DYNAMIC_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, this.layer.bg, gl.DYNAMIC_DRAW);
         gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.glyph);
-        gl.bufferData(gl.ARRAY_BUFFER, this._data.glyph, gl.DYNAMIC_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, this.layer.glyph, gl.DYNAMIC_DRAW);
         gl.drawArrays(gl.TRIANGLES, 0, this._width * this._height * VERTICES_PER_TILE);
-    }
-}
-export class Canvas2D extends BaseCanvas {
-    constructor(options) {
-        super(options);
-    }
-    _createContext() {
-        const ctx = this.node.getContext("2d");
-        if (!ctx) {
-            throw new NotSupportedError("2d context not supported!");
-        }
-        this._ctx = ctx;
-    }
-    draw(x, y, glyph, fg, bg) {
-        const style = (glyph << 24) + (bg << 12) + fg;
-        let index = y * this.width + x;
-        const current = this._data[index];
-        if (current !== style) {
-            this._data[index] = style;
-            this._changed[y * this.width + x] = 1;
-            this._requestRender();
-            return true;
-        }
-        return false;
-    }
-    copyTo(buffer) {
-        buffer.data.set(this._data);
-    }
-    resize(width, height) {
-        super.resize(width, height);
-        this._data = new Uint32Array(width * height);
-        this._changed = new Int8Array(width * height);
-    }
-    copy(buffer) {
-        for (let i = 0; i < this._data.length; ++i) {
-            if (this._data[i] !== buffer.data[i]) {
-                this._data[i] = buffer.data[i];
-                this._changed[i] = 1;
-            }
-        }
-        this._requestRender();
-    }
-    render() {
-        this._renderRequested = false;
-        for (let i = 0; i < this._changed.length; ++i) {
-            if (this._changed[i])
-                this._renderCell(i);
-            this._changed[i] = 0;
-        }
-    }
-    _renderCell(index) {
-        const x = index % this.width;
-        const y = Math.floor(index / this.width);
-        const style = this._data[index];
-        const glyph = (style / (1 << 24)) >> 0;
-        const bg = (style >> 12) & 0xfff;
-        const fg = style & 0xfff;
-        const px = x * this.tileWidth;
-        const py = y * this.tileHeight;
-        const gx = (glyph % 16) * this.tileWidth;
-        const gy = Math.floor(glyph / 16) * this.tileHeight;
-        const d = this.glyphs.ctx.getImageData(gx, gy, this.tileWidth, this.tileHeight);
-        for (let di = 0; di < d.width * d.height; ++di) {
-            const pct = d.data[di * 4] / 255;
-            const inv = 1.0 - pct;
-            d.data[di * 4 + 0] =
-                pct * (((fg & 0xf00) >> 8) * 17) + inv * (((bg & 0xf00) >> 8) * 17);
-            d.data[di * 4 + 1] =
-                pct * (((fg & 0xf0) >> 4) * 17) + inv * (((bg & 0xf0) >> 4) * 17);
-            d.data[di * 4 + 2] = pct * ((fg & 0xf) * 17) + inv * ((bg & 0xf) * 17);
-            d.data[di * 4 + 3] = 255; // not transparent anymore
-        }
-        this._ctx.putImageData(d, px, py);
+        // end loop
     }
 }
 export function withImage(image) {
@@ -377,36 +230,14 @@ export function withImage(image) {
         Object.assign(opts, image);
         opts.glyphs = Glyphs.fromImage(image.image);
     }
-    let canvas;
-    try {
-        canvas = new Canvas(opts);
-    }
-    catch (e) {
-        if (!(e instanceof NotSupportedError))
-            throw e;
-    }
-    if (!canvas) {
-        canvas = new Canvas2D(opts);
-    }
-    return canvas;
+    return new Canvas(opts);
 }
 export function withFont(src) {
     if (typeof src === "string") {
         src = { font: src };
     }
     src.glyphs = Glyphs.fromFont(src);
-    let canvas;
-    try {
-        canvas = new Canvas(src);
-    }
-    catch (e) {
-        if (!(e instanceof NotSupportedError))
-            throw e;
-    }
-    if (!canvas) {
-        canvas = new Canvas2D(src);
-    }
-    return canvas;
+    return new Canvas(src);
 }
 // Copy of: https://github.com/ondras/fastiles/blob/master/ts/utils.ts (v2.1.0)
 export function createProgram(gl, ...sources) {
@@ -426,7 +257,7 @@ export function createProgram(gl, ...sources) {
     }
     return p;
 }
-export function createTexture(gl) {
+function createTexture(gl) {
     let t = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, t);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
@@ -435,7 +266,7 @@ export function createTexture(gl) {
 }
 // x, y offsets for 6 verticies (2 triangles) in square
 export const QUAD = [0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1];
-export function createGeometry(gl, attribs, width, height) {
+function createGeometry(gl, attribs, width, height) {
     let tileCount = width * height;
     let positionData = new Float32Array(tileCount * QUAD.length);
     let offsetData = new Uint8Array(tileCount * QUAD.length);

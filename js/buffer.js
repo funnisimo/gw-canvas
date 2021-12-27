@@ -1,12 +1,12 @@
-import { Color } from "./color";
+import { Mixer } from "./mixer";
 export class DataBuffer {
     constructor(width, height) {
         this._width = width;
         this._height = height;
-        this._data = new Uint32Array(width * height);
-    }
-    get data() {
-        return this._data;
+        this._data = [];
+        for (let i = 0; i < width * height; ++i) {
+            this._data.push(new Mixer());
+        }
     }
     get width() {
         return this._width;
@@ -16,11 +16,7 @@ export class DataBuffer {
     }
     get(x, y) {
         let index = y * this.width + x;
-        const style = this._data[index] || 0;
-        const glyph = style >> 24;
-        const bg = (style >> 12) & 0xfff;
-        const fg = style & 0xfff;
-        return { glyph, fg, bg };
+        return this._data[index];
     }
     _toGlyph(ch) {
         if (ch === null || ch === undefined)
@@ -29,21 +25,8 @@ export class DataBuffer {
     }
     draw(x, y, glyph = -1, fg = -1, bg = -1) {
         let index = y * this.width + x;
-        const current = this._data[index] || 0;
-        if (typeof glyph !== "number") {
-            glyph = this._toGlyph(glyph);
-        }
-        if (typeof fg !== "number") {
-            fg = Color.from(fg).toInt();
-        }
-        if (typeof bg !== "number") {
-            bg = Color.from(bg).toInt();
-        }
-        glyph = glyph >= 0 ? glyph & 0xff : current >> 24;
-        bg = bg >= 0 ? bg & 0xfff : (current >> 12) & 0xfff;
-        fg = fg >= 0 ? fg & 0xfff : current & 0xfff;
-        const style = (glyph << 24) + (bg << 12) + fg;
-        this._data[index] = style;
+        const current = this._data[index];
+        current.draw(glyph, fg, bg);
         return this;
     }
     // This is without opacity - opacity must be done in Mixer
@@ -64,37 +47,32 @@ export class DataBuffer {
         return this.draw(x, y, 0, 0, 0);
     }
     fill(glyph = 0, fg = 0xfff, bg = 0) {
-        if (typeof glyph == "string") {
-            glyph = this._toGlyph(glyph);
-        }
-        glyph = glyph & 0xff;
-        fg = fg & 0xfff;
-        bg = bg & 0xfff;
-        const style = (glyph << 24) + (bg << 12) + fg;
-        this._data.fill(style);
+        this._data.forEach((m) => m.draw(glyph, fg, bg));
         return this;
     }
     copy(other) {
-        this._data.set(other._data);
+        this._data.forEach((m, i) => {
+            m.copy(other._data[i]);
+        });
         return this;
     }
 }
 export class Buffer extends DataBuffer {
-    constructor(canvas) {
-        super(canvas.width, canvas.height);
-        this._canvas = canvas;
-        canvas.copyTo(this);
+    constructor(layer) {
+        super(layer.width, layer.height);
+        this._layer = layer;
+        layer.copyTo(this);
     }
     // get canvas() { return this._canvas; }
     _toGlyph(ch) {
-        return this._canvas.glyphs.forChar(ch);
+        return this._layer.canvas.glyphs.forChar(ch);
     }
     render() {
-        this._canvas.copy(this);
+        this._layer.copy(this);
         return this;
     }
     copyFromCanvas() {
-        this._canvas.copyTo(this);
+        this._layer.copyTo(this);
         return this;
     }
 }

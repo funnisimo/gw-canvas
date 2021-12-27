@@ -2,10 +2,11 @@
 
 import * as shaders from "./shaders";
 import { Glyphs, Options as GlyphOptions } from "./glyphs";
-import { DataBuffer } from "./buffer";
+import { Layer } from "./layer";
+import * as Color from "./color";
 
 type GL = WebGL2RenderingContext;
-const VERTICES_PER_TILE = 6;
+export const VERTICES_PER_TILE = 6;
 
 export interface Options {
   width?: number;
@@ -13,6 +14,7 @@ export interface Options {
   glyphs: Glyphs;
   div?: HTMLElement | string;
   render?: boolean;
+  bg?: Color.ColorBase;
 }
 
 export class NotSupportedError extends Error {
@@ -31,14 +33,30 @@ export class NotSupportedError extends Error {
   }
 }
 
-export abstract class BaseCanvas {
-  protected _renderRequested: boolean = false;
-  protected _glyphs!: Glyphs;
-  protected _autoRender: boolean = true;
-  protected _node: HTMLCanvasElement;
+export class Canvas {
+  _renderRequested: boolean = false;
+  _glyphs!: Glyphs;
+  _autoRender: boolean = true;
+  _node: HTMLCanvasElement;
 
-  protected _width: number = 50;
-  protected _height: number = 25;
+  _width: number = 50;
+  _height: number = 25;
+
+  _gl!: GL;
+  _buffers!: {
+    position?: WebGLBuffer;
+    uv?: WebGLBuffer;
+    fg?: WebGLBuffer;
+    bg?: WebGLBuffer;
+    glyph?: WebGLBuffer;
+  };
+  layer!: Layer;
+
+  _attribs!: Record<string, number>;
+  _uniforms!: Record<string, WebGLUniformLocation>;
+  _texture!: WebGLTexture;
+
+  bg!: Color.Color;
 
   constructor(options: Options) {
     if (!options.glyphs)
@@ -77,17 +95,16 @@ export abstract class BaseCanvas {
     this._setGlyphs(glyphs);
   }
 
-  protected _createNode() {
+  _createNode() {
     return document.createElement("canvas");
   }
 
-  protected abstract _createContext(): void;
-
-  private _configure(options: Options) {
+  _configure(options: Options) {
     this._width = options.width || this._width;
     this._height = options.height || this._height;
     this._autoRender = options.render !== false;
     this._setGlyphs(options.glyphs);
+    this.bg = Color.from(options.bg || Color.BLACK);
 
     if (options.div) {
       let el;
@@ -105,11 +122,17 @@ export abstract class BaseCanvas {
     }
   }
 
-  protected _setGlyphs(glyphs: Glyphs) {
+  _setGlyphs(glyphs: Glyphs) {
     if (glyphs === this._glyphs) return false;
 
     this._glyphs = glyphs;
     this.resize(this._width, this._height);
+
+    const gl = this._gl;
+    const uniforms = this._uniforms;
+    gl.uniform2uiv(uniforms["tileSize"], [this.tileWidth, this.tileHeight]);
+
+    this._uploadGlyphs();
     return true;
   }
 
@@ -120,25 +143,22 @@ export abstract class BaseCanvas {
     const node = this.node;
     node.width = this._width * this.tileWidth;
     node.height = this._height * this.tileHeight;
+
+    const gl = this._gl;
+    // const uniforms = this._uniforms;
+    gl.viewport(0, 0, this.node.width, this.node.height);
+    // gl.uniform2ui(uniforms["viewportSize"], this.node.width, this.node.height);
+
+    this._createGeometry();
+    this._createData();
   }
 
-  protected _requestRender() {
+  _requestRender() {
     if (this._renderRequested) return;
     this._renderRequested = true;
     if (!this._autoRender) return;
     requestAnimationFrame(() => this.render());
   }
-
-  protected abstract draw(
-    x: number,
-    y: number,
-    glyph: number,
-    fg: number,
-    bg: number
-  ): boolean;
-  abstract copy(buffer: DataBuffer): void;
-  abstract copyTo(buffer: DataBuffer): void;
-  abstract render(): void;
 
   hasXY(x: number, y: number) {
     return x >= 0 && y >= 0 && x < this.width && y < this.height;
@@ -151,31 +171,8 @@ export abstract class BaseCanvas {
   toY(y: number) {
     return Math.floor((this.height * y) / this.node.clientHeight);
   }
-}
 
-export class Canvas extends BaseCanvas {
-  private _gl!: GL;
-  private _buffers!: {
-    position?: WebGLBuffer;
-    uv?: WebGLBuffer;
-    fg?: WebGLBuffer;
-    bg?: WebGLBuffer;
-    glyph?: WebGLBuffer;
-  };
-  protected _data!: {
-    fg: Uint16Array;
-    bg: Uint16Array;
-    glyph: Uint8Array;
-  };
-  private _attribs!: Record<string, number>;
-  private _uniforms!: Record<string, WebGLUniformLocation>;
-  private _texture!: WebGLTexture;
-
-  constructor(options: Options) {
-    super(options);
-  }
-
-  protected _createContext() {
+  _createContext() {
     let gl = this.node.getContext("webgl2");
     if (!gl) {
       throw new NotSupportedError("WebGL 2 not supported");
@@ -205,7 +202,7 @@ export class Canvas extends BaseCanvas {
     this._texture = createTexture(gl);
   }
 
-  private _createGeometry() {
+  _createGeometry() {
     const gl = this._gl;
     this._buffers.position && gl.deleteBuffer(this._buffers.position);
     this._buffers.uv && gl.deleteBuffer(this._buffers.uv);
@@ -213,18 +210,13 @@ export class Canvas extends BaseCanvas {
     Object.assign(this._buffers, buffers);
   }
 
-  private _createData() {
+  _createData() {
     const gl = this._gl;
     const attribs = this._attribs;
-    const tileCount = this.width * this.height;
     this._buffers.fg && gl.deleteBuffer(this._buffers.fg);
     this._buffers.bg && gl.deleteBuffer(this._buffers.bg);
     this._buffers.glyph && gl.deleteBuffer(this._buffers.glyph);
-    this._data = {
-      fg: new Uint16Array(tileCount * VERTICES_PER_TILE),
-      bg: new Uint16Array(tileCount * VERTICES_PER_TILE),
-      glyph: new Uint8Array(tileCount * VERTICES_PER_TILE),
-    };
+    this.layer = new Layer(this);
 
     const fg = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, fg);
@@ -239,16 +231,6 @@ export class Canvas extends BaseCanvas {
     gl.vertexAttribIPointer(attribs["glyph"], 1, gl.UNSIGNED_BYTE, 0, 0);
 
     Object.assign(this._buffers, { fg, bg, glyph });
-  }
-
-  protected _setGlyphs(glyphs: Glyphs) {
-    if (!super._setGlyphs(glyphs)) return false;
-    const gl = this._gl;
-    const uniforms = this._uniforms;
-    gl.uniform2uiv(uniforms["tileSize"], [this.tileWidth, this.tileHeight]);
-
-    this._uploadGlyphs();
-    return true;
   }
 
   _uploadGlyphs() {
@@ -272,103 +254,10 @@ export class Canvas extends BaseCanvas {
     this._glyphs.needsUpdate = false;
   }
 
-  resize(width: number, height: number) {
-    super.resize(width, height);
-    const gl = this._gl;
-    // const uniforms = this._uniforms;
-    gl.viewport(0, 0, this.node.width, this.node.height);
-    // gl.uniform2ui(uniforms["viewportSize"], this.node.width, this.node.height);
-
-    this._createGeometry();
-    this._createData();
-  }
-
   draw(x: number, y: number, glyph: number, fg: number, bg: number): boolean {
-    glyph = glyph & 0xff;
-    bg = bg & 0xfff;
-    fg = fg & 0xfff;
-
-    let index = y * this.width + x;
-    index *= VERTICES_PER_TILE;
-
-    const fd = this._data.fg;
-    const bd = this._data.bg;
-    const gd = this._data.glyph;
-
-    fd[index + 0] = fg;
-    fd[index + 1] = fg;
-    fd[index + 2] = fg;
-    fd[index + 3] = fg;
-    fd[index + 4] = fg;
-    fd[index + 5] = fg;
-
-    bd[index + 0] = bg;
-    bd[index + 1] = bg;
-    bd[index + 2] = bg;
-    bd[index + 3] = bg;
-    bd[index + 4] = bg;
-    bd[index + 5] = bg;
-
-    gd[index + 0] = glyph;
-    gd[index + 1] = glyph;
-    gd[index + 2] = glyph;
-    gd[index + 3] = glyph;
-    gd[index + 4] = glyph;
-    gd[index + 5] = glyph;
-
+    this.layer.draw(x, y, glyph, fg, bg);
     this._requestRender();
     return true;
-  }
-
-  copy(buffer: DataBuffer) {
-    const fd = this._data.fg;
-    const bd = this._data.bg;
-    const gd = this._data.glyph;
-
-    buffer.data.forEach((style, i) => {
-      const index = i * VERTICES_PER_TILE;
-
-      const fg = style & 0xfff;
-      const bg = (style & 0xfff000) >> 12;
-      const gl = (style & 0xff000000) >> 24;
-
-      fd[index + 0] = fg;
-      fd[index + 1] = fg;
-      fd[index + 2] = fg;
-      fd[index + 3] = fg;
-      fd[index + 4] = fg;
-      fd[index + 5] = fg;
-
-      bd[index + 0] = bg;
-      bd[index + 1] = bg;
-      bd[index + 2] = bg;
-      bd[index + 3] = bg;
-      bd[index + 4] = bg;
-      bd[index + 5] = bg;
-
-      gd[index + 0] = gl;
-      gd[index + 1] = gl;
-      gd[index + 2] = gl;
-      gd[index + 3] = gl;
-      gd[index + 4] = gl;
-      gd[index + 5] = gl;
-    });
-    this._requestRender();
-  }
-
-  copyTo(buffer: DataBuffer) {
-    const n = this.width * this.height;
-    const dest = buffer.data;
-    for (let i = 0; i < n; ++i) {
-      const index = i * VERTICES_PER_TILE;
-
-      const fg = this._data.fg[index];
-      const bg = this._data.bg[index];
-      const gl = this._data.glyph[index];
-
-      const style = (gl << 24) + (bg << 12) + fg;
-      dest[i] = style;
-    }
   }
 
   render() {
@@ -382,114 +271,39 @@ export class Canvas extends BaseCanvas {
     }
 
     this._renderRequested = false;
+
+    // clear to bg color?
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+    gl.clearColor(
+      this.bg.r / 100,
+      this.bg.g / 100,
+      this.bg.b / 100,
+      this.bg.a / 100
+    );
+    gl.clear(gl.COLOR_BUFFER_BIT);
+
+    // loop layers
+
+    // set depth
+
     gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.fg!);
-    gl.bufferData(gl.ARRAY_BUFFER, this._data.fg, gl.DYNAMIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, this.layer.fg, gl.DYNAMIC_DRAW);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.bg!);
-    gl.bufferData(gl.ARRAY_BUFFER, this._data.bg, gl.DYNAMIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, this.layer.bg, gl.DYNAMIC_DRAW);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.glyph!);
-    gl.bufferData(gl.ARRAY_BUFFER, this._data.glyph, gl.DYNAMIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, this.layer.glyph, gl.DYNAMIC_DRAW);
 
     gl.drawArrays(
       gl.TRIANGLES,
       0,
       this._width * this._height * VERTICES_PER_TILE
     );
-  }
-}
 
-export class Canvas2D extends BaseCanvas {
-  private _ctx!: CanvasRenderingContext2D;
-  private _changed!: Int8Array;
-  protected _data!: Uint32Array;
-
-  constructor(options: Options) {
-    super(options);
-  }
-
-  protected _createContext() {
-    const ctx = this.node.getContext("2d");
-    if (!ctx) {
-      throw new NotSupportedError("2d context not supported!");
-    }
-    this._ctx = ctx;
-  }
-
-  draw(x: number, y: number, glyph: number, fg: number, bg: number) {
-    const style = (glyph << 24) + (bg << 12) + fg;
-
-    let index = y * this.width + x;
-    const current = this._data[index];
-    if (current !== style) {
-      this._data[index] = style;
-      this._changed[y * this.width + x] = 1;
-      this._requestRender();
-      return true;
-    }
-    return false;
-  }
-
-  copyTo(buffer: DataBuffer) {
-    buffer.data.set(this._data);
-  }
-
-  resize(width: number, height: number) {
-    super.resize(width, height);
-    this._data = new Uint32Array(width * height);
-    this._changed = new Int8Array(width * height);
-  }
-
-  copy(buffer: DataBuffer) {
-    for (let i = 0; i < this._data.length; ++i) {
-      if (this._data[i] !== buffer.data[i]) {
-        this._data[i] = buffer.data[i];
-        this._changed[i] = 1;
-      }
-    }
-    this._requestRender();
-  }
-
-  render() {
-    this._renderRequested = false;
-    for (let i = 0; i < this._changed.length; ++i) {
-      if (this._changed[i]) this._renderCell(i);
-      this._changed[i] = 0;
-    }
-  }
-
-  protected _renderCell(index: number) {
-    const x = index % this.width;
-    const y = Math.floor(index / this.width);
-
-    const style = this._data[index];
-    const glyph = (style / (1 << 24)) >> 0;
-    const bg = (style >> 12) & 0xfff;
-    const fg = style & 0xfff;
-
-    const px = x * this.tileWidth;
-    const py = y * this.tileHeight;
-
-    const gx = (glyph % 16) * this.tileWidth;
-    const gy = Math.floor(glyph / 16) * this.tileHeight;
-
-    const d = this.glyphs.ctx.getImageData(
-      gx,
-      gy,
-      this.tileWidth,
-      this.tileHeight
-    );
-    for (let di = 0; di < d.width * d.height; ++di) {
-      const pct = d.data[di * 4] / 255;
-      const inv = 1.0 - pct;
-      d.data[di * 4 + 0] =
-        pct * (((fg & 0xf00) >> 8) * 17) + inv * (((bg & 0xf00) >> 8) * 17);
-      d.data[di * 4 + 1] =
-        pct * (((fg & 0xf0) >> 4) * 17) + inv * (((bg & 0xf0) >> 4) * 17);
-      d.data[di * 4 + 2] = pct * ((fg & 0xf) * 17) + inv * ((bg & 0xf) * 17);
-      d.data[di * 4 + 3] = 255; // not transparent anymore
-    }
-    this._ctx.putImageData(d, px, py);
+    // end loop
   }
 }
 
@@ -511,18 +325,7 @@ export function withImage(image: ImageOptions | HTMLImageElement | string) {
     opts.glyphs = Glyphs.fromImage(image.image);
   }
 
-  let canvas;
-  try {
-    canvas = new Canvas(opts);
-  } catch (e) {
-    if (!(e instanceof NotSupportedError)) throw e;
-  }
-
-  if (!canvas) {
-    canvas = new Canvas2D(opts);
-  }
-
-  return canvas;
+  return new Canvas(opts);
 }
 
 export function withFont(src: FontOptions | string) {
@@ -530,18 +333,7 @@ export function withFont(src: FontOptions | string) {
     src = { font: src } as FontOptions;
   }
   src.glyphs = Glyphs.fromFont(src);
-  let canvas;
-  try {
-    canvas = new Canvas(src);
-  } catch (e) {
-    if (!(e instanceof NotSupportedError)) throw e;
-  }
-
-  if (!canvas) {
-    canvas = new Canvas2D(src);
-  }
-
-  return canvas;
+  return new Canvas(src);
 }
 
 // Copy of: https://github.com/ondras/fastiles/blob/master/ts/utils.ts (v2.1.0)
@@ -567,7 +359,7 @@ export function createProgram(gl: GL, ...sources: string[]) {
   return p;
 }
 
-export function createTexture(gl: GL) {
+function createTexture(gl: GL) {
   let t = gl.createTexture() as WebGLTexture;
   gl.bindTexture(gl.TEXTURE_2D, t);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
@@ -578,7 +370,7 @@ export function createTexture(gl: GL) {
 // x, y offsets for 6 verticies (2 triangles) in square
 export const QUAD = [0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1];
 
-export function createGeometry(
+function createGeometry(
   gl: GL,
   attribs: Record<string, number>,
   width: number,

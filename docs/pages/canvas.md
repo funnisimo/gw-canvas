@@ -27,7 +27,7 @@ These methods are also available:
 ### Example with Image
 
 ```js
-const canvas = GW.canvas.withImage({ image: "font", width: 40, height: 10 });
+const canvas = GWC.withImage({ image: "font", width: 40, height: 10 });
 SHOW(canvas.node);
 
 for (let x = 0; x < canvas.width; ++x) {
@@ -44,7 +44,7 @@ canvas.draw(0, 0, 65, 0xf00, 0x0f0);
 ### Example with Font
 
 ```js
-const canvas = GW.canvas.withFont({
+const canvas = GWC.withFont({
   font: "arial",
   width: 40,
   height: 10,
