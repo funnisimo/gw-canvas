@@ -88,13 +88,13 @@ export class Color {
         return this.r === O.r && this.g === O.g && this.b === O.b && this.a === O.a;
     }
     toInt() {
-        if (this.isNull())
-            return -1;
+        // if (this.isNull()) return -1;
         const r = Math.max(0, Math.min(15, Math.round((this.r / 100) * 15)));
         const g = Math.max(0, Math.min(15, Math.round((this.g / 100) * 15)));
         const b = Math.max(0, Math.min(15, Math.round((this.b / 100) * 15)));
+        const a = Math.max(0, Math.min(15, Math.round((this.a / 100) * 15)));
         // TODO - alpha
-        return (r << 8) + (g << 4) + b;
+        return (r << 12) + (g << 8) + (b << 4) + a;
     }
     toLight() {
         return this.rgb();

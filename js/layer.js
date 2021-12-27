@@ -14,17 +14,13 @@ export class Layer {
     get height() {
         return this.canvas.height;
     }
-    draw(x, y, glyph, fg = 0xfff, bg = 0x000) {
+    draw(x, y, glyph, fg = 0xfff, bg = -1) {
         const index = x + y * this.canvas.width;
         if (typeof glyph === "string") {
             glyph = this.canvas.glyphs.forChar(glyph);
         }
-        if (typeof fg !== "number") {
-            fg = Color.from(fg).toInt();
-        }
-        if (typeof bg !== "number") {
-            bg = Color.from(bg).toInt();
-        }
+        fg = Color.from(fg).toInt();
+        bg = Color.from(bg).toInt();
         this.set(index, glyph, fg, bg);
     }
     set(index, glyph, fg, bg) {

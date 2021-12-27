@@ -200,10 +200,10 @@ export class Canvas {
         }
         this._renderRequested = false;
         // clear to bg color?
-        gl.clearColor(this.bg.r / 100, this.bg.g / 100, this.bg.b / 100, this.bg.a / 100);
-        gl.clear(gl.COLOR_BUFFER_BIT);
         gl.enable(gl.BLEND);
         gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+        gl.clearColor(this.bg.r / 100, this.bg.g / 100, this.bg.b / 100, this.bg.a / 100);
+        gl.clear(gl.COLOR_BUFFER_BIT);
         // loop layers
         // set depth
         gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.fg);

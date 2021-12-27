@@ -28,18 +28,14 @@ export class Layer {
     y: number,
     glyph: string | number,
     fg: number | Color.ColorData = 0xfff,
-    bg: number | Color.ColorData = 0x000
+    bg: number | Color.ColorData = -1
   ): void {
     const index = x + y * this.canvas.width;
     if (typeof glyph === "string") {
       glyph = this.canvas.glyphs.forChar(glyph);
     }
-    if (typeof fg !== "number") {
-      fg = Color.from(fg).toInt();
-    }
-    if (typeof bg !== "number") {
-      bg = Color.from(bg).toInt();
-    }
+    fg = Color.from(fg).toInt();
+    bg = Color.from(bg).toInt();
 
     this.set(index, glyph, fg, bg);
   }

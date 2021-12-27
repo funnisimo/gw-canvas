@@ -9,22 +9,24 @@ in uint bg;
 in uint glyph;
 
 out vec2 fsOffset;
-out vec3 fgRgb;
-out vec3 bgRgb;
+out vec4 fgRgb;
+out vec4 bgRgb;
 flat out uvec2 fontPos;
 
 void main() {
 	gl_Position = vec4(position, 0.0, 1.0);
 
-	float fgr = float((fg & uint(0xF00)) >> 8);
-	float fgg = float((fg & uint(0x0F0)) >> 4);
-	float fgb = float(fg & uint(0x00F));
-	fgRgb = vec3(fgr, fgg, fgb) / 15.0;
+	float fgr = float((fg & uint(0xF000)) >> 12);
+	float fgg = float((fg & uint(0x0F00)) >> 8);
+	float fgb = float((fg & uint(0x00F0)) >> 4);
+	float fga = float((fg & uint(0x000F)) >> 0);
+	fgRgb = vec4(fgr, fgg, fgb, fga) / 15.0;
   
-	float bgr = float((bg & uint(0xF00)) >> 8);
-	float bgg = float((bg & uint(0x0F0)) >> 4);
-	float bgb = float((bg & uint(0x00F)));
-	bgRgb = vec3(bgr, bgg, bgb) / 15.0;
+	float bgr = float((bg & uint(0xF000)) >> 12);
+	float bgg = float((bg & uint(0x0F00)) >> 8);
+	float bgb = float((bg & uint(0x00F0)) >> 4);
+	float bga = float((bg & uint(0x000F)) >> 0);
+	bgRgb = vec4(bgr, bgg, bgb, bga) / 15.0;
 
 	uint glyphX = (glyph & uint(0xF));
 	uint glyphY = (glyph >> 4);
@@ -37,8 +39,8 @@ const FS = `
 precision highp float;
 
 in vec2 fsOffset;
-in vec3 fgRgb;
-in vec3 bgRgb;
+in vec4 fgRgb;
+in vec4 bgRgb;
 flat in uvec2 fontPos;
 
 out vec4 fragColor;
@@ -48,9 +50,9 @@ uniform uvec2 tileSize;
 
 void main() {
 	uvec2 fontPx = (tileSize * fontPos) + uvec2(vec2(tileSize) * fsOffset);
-	vec3 texel = texelFetch(font, ivec2(fontPx), 0).rgb;
+	vec4 texel = texelFetch(font, ivec2(fontPx), 0).rgba;
 
-	fragColor = vec4(mix(bgRgb, fgRgb, texel), 1.0);
+	fragColor = vec4(mix(bgRgb.rgb, fgRgb.rgb, texel.rgb), mix(bgRgb.a, fgRgb.a, texel.r));
 }`.trim();
 
 class Glyphs {
@@ -279,13 +281,13 @@ class Color {
         return this.r === O.r && this.g === O.g && this.b === O.b && this.a === O.a;
     }
     toInt() {
-        if (this.isNull())
-            return -1;
+        // if (this.isNull()) return -1;
         const r = Math.max(0, Math.min(15, Math.round((this.r / 100) * 15)));
         const g = Math.max(0, Math.min(15, Math.round((this.g / 100) * 15)));
         const b = Math.max(0, Math.min(15, Math.round((this.b / 100) * 15)));
+        const a = Math.max(0, Math.min(15, Math.round((this.a / 100) * 15)));
         // TODO - alpha
-        return (r << 8) + (g << 4) + b;
+        return (r << 12) + (g << 8) + (b << 4) + a;
     }
     toLight() {
         return this.rgb();
@@ -634,17 +636,13 @@ class Layer {
     get height() {
         return this.canvas.height;
     }
-    draw(x, y, glyph, fg = 0xfff, bg = 0x000) {
+    draw(x, y, glyph, fg = 0xfff, bg = -1) {
         const index = x + y * this.canvas.width;
         if (typeof glyph === "string") {
             glyph = this.canvas.glyphs.forChar(glyph);
         }
-        if (typeof fg !== "number") {
-            fg = from(fg).toInt();
-        }
-        if (typeof bg !== "number") {
-            bg = from(bg).toInt();
-        }
+        fg = from(fg).toInt();
+        bg = from(bg).toInt();
         this.set(index, glyph, fg, bg);
     }
     set(index, glyph, fg, bg) {
@@ -883,10 +881,10 @@ class Canvas {
         }
         this._renderRequested = false;
         // clear to bg color?
-        gl.clearColor(this.bg.r / 100, this.bg.g / 100, this.bg.b / 100, this.bg.a / 100);
-        gl.clear(gl.COLOR_BUFFER_BIT);
         gl.enable(gl.BLEND);
         gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+        gl.clearColor(this.bg.r / 100, this.bg.g / 100, this.bg.b / 100, this.bg.a / 100);
+        gl.clear(gl.COLOR_BUFFER_BIT);
         // loop layers
         // set depth
         gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.fg);
