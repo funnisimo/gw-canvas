@@ -1,32 +1,32 @@
-
 ## Mixer
 
-Mixers are objects that let you combine and manipulate a single cell before drawing it into either a buffer or the canvas itself.  They hold the values from a cell:
-  * ch - The character (or glyph)
-  * fg - The foreground color
-  * bg - The background color
-  
-All of the fields are optional.  Unset values will not be used when the sprite is drawn into a buffer.
-  
+Mixers are objects that let you combine and manipulate a single cell before drawing it into either a buffer or the canvas itself. They hold the values from a cell:
+
+- ch - The character (or glyph)
+- fg - The foreground color
+- bg - The background color
+
+All of the fields are optional. Unset values will not be used when the sprite is drawn into a buffer.
+
 ```js
-const canvas = GW.canvas.withFont({ width: 20, height: 5 });
+const canvas = GWC.withFont({ width: 20, height: 5 });
 SHOW(canvas);
 
-const buffer = new GW.canvas.Buffer(canvas);
+const buffer = new GWC.Buffer(canvas.layer());
 
 const tile = {
-  ch: '.', 
-  fg: 0x666, 
+  ch: ".",
+  fg: 0x666,
   bg: 0x333,
-}
-
-const potion = {
-  ch: 'p', 
-  fg: 0xF0C,
 };
 
-const light = GW.canvas.Color.fromArray([50,50,200]);
-const mixer = new GW.canvas.Mixer();
+const potion = {
+  ch: "p",
+  fg: 0xf0c,
+};
+
+const light = GWC.color.fromArray([50, 50, 200]);
+const mixer = new GWC.Mixer();
 
 buffer.drawSprite(3, 1, tile);
 mixer.drawSprite(tile);
@@ -57,7 +57,3 @@ buffer.drawSprite(8, 1, data);
 
 buffer.render();
 ```
-
-
-
-
