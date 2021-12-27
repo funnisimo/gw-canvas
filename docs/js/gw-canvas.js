@@ -4,7 +4,6 @@
 	(global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.GWC = {}));
 })(this, (function (exports) { 'use strict';
 
-	// Based on: https://github.com/ondras/fastiles/blob/master/ts/shaders.ts (v2.1.0)
 	const VS = `
 #version 300 es
 
@@ -19,8 +18,11 @@ out vec4 fgRgb;
 out vec4 bgRgb;
 flat out uvec2 fontPos;
 
+uniform int depth;
+
 void main() {
-	gl_Position = vec4(position, 0.0, 1.0);
+	float fdepth = float(depth) / 255.0;
+	gl_Position = vec4(position, fdepth, 1.0);
 
 	float fgr = float((fg & uint(0xF000)) >> 12);
 	float fgg = float((fg & uint(0x0F00)) >> 8);
@@ -632,18 +634,22 @@ void main() {
 	});
 
 	class Layer {
-	    constructor(canvas) {
+	    constructor(canvas, depth = 0) {
 	        const size = canvas.width * canvas.height * VERTICES_PER_TILE;
 	        this.canvas = canvas;
 	        this.fg = new Uint16Array(size);
 	        this.bg = new Uint16Array(size);
 	        this.glyph = new Uint8Array(size);
+	        this._depth = depth;
 	    }
 	    get width() {
 	        return this.canvas.width;
 	    }
 	    get height() {
 	        return this.canvas.height;
+	    }
+	    get depth() {
+	        return this._depth;
 	    }
 	    draw(x, y, glyph, fg = 0xfff, bg = -1) {
 	        const index = x + y * this.canvas.width;
@@ -850,7 +856,7 @@ void main() {
 	        this._buffers.fg && gl.deleteBuffer(this._buffers.fg);
 	        this._buffers.bg && gl.deleteBuffer(this._buffers.bg);
 	        this._buffers.glyph && gl.deleteBuffer(this._buffers.glyph);
-	        this.layer = new Layer(this);
+	        this.layer = new Layer(this, 0);
 	        const fg = gl.createBuffer();
 	        gl.bindBuffer(gl.ARRAY_BUFFER, fg);
 	        gl.vertexAttribIPointer(attribs["fg"], 1, gl.UNSIGNED_SHORT, 0, 0);
@@ -896,6 +902,7 @@ void main() {
 	        gl.clear(gl.COLOR_BUFFER_BIT);
 	        // loop layers
 	        // set depth
+	        gl.uniform1i(this._uniforms["depth"], this.layer.depth);
 	        gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.fg);
 	        gl.bufferData(gl.ARRAY_BUFFER, this.layer.fg, gl.DYNAMIC_DRAW);
 	        gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.bg);

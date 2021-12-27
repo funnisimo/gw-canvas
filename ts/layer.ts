@@ -5,15 +5,17 @@ import * as Color from "./color";
 export class Layer {
   fg: Uint16Array;
   bg: Uint16Array;
+  _depth: number;
   glyph: Uint8Array;
   canvas: Canvas;
 
-  constructor(canvas: Canvas) {
+  constructor(canvas: Canvas, depth = 0) {
     const size = canvas.width * canvas.height * VERTICES_PER_TILE;
     this.canvas = canvas;
     this.fg = new Uint16Array(size);
     this.bg = new Uint16Array(size);
     this.glyph = new Uint8Array(size);
+    this._depth = depth;
   }
 
   get width(): number {
@@ -21,6 +23,9 @@ export class Layer {
   }
   get height(): number {
     return this.canvas.height;
+  }
+  get depth(): number {
+    return this._depth;
   }
 
   draw(

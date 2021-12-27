@@ -160,7 +160,7 @@ export class Canvas {
         this._buffers.fg && gl.deleteBuffer(this._buffers.fg);
         this._buffers.bg && gl.deleteBuffer(this._buffers.bg);
         this._buffers.glyph && gl.deleteBuffer(this._buffers.glyph);
-        this.layer = new Layer(this);
+        this.layer = new Layer(this, 0);
         const fg = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, fg);
         gl.vertexAttribIPointer(attribs["fg"], 1, gl.UNSIGNED_SHORT, 0, 0);
@@ -206,6 +206,7 @@ export class Canvas {
         gl.clear(gl.COLOR_BUFFER_BIT);
         // loop layers
         // set depth
+        gl.uniform1i(this._uniforms["depth"], this.layer.depth);
         gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.fg);
         gl.bufferData(gl.ARRAY_BUFFER, this.layer.fg, gl.DYNAMIC_DRAW);
         gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.bg);

@@ -216,7 +216,7 @@ export class Canvas {
     this._buffers.fg && gl.deleteBuffer(this._buffers.fg);
     this._buffers.bg && gl.deleteBuffer(this._buffers.bg);
     this._buffers.glyph && gl.deleteBuffer(this._buffers.glyph);
-    this.layer = new Layer(this);
+    this.layer = new Layer(this, 0);
 
     const fg = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, fg);
@@ -287,6 +287,7 @@ export class Canvas {
     // loop layers
 
     // set depth
+    gl.uniform1i(this._uniforms["depth"], this.layer.depth);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.fg!);
     gl.bufferData(gl.ARRAY_BUFFER, this.layer.fg, gl.DYNAMIC_DRAW);

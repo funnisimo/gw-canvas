@@ -229,11 +229,13 @@ declare class Buffer extends DataBuffer {
 declare class Layer {
     fg: Uint16Array;
     bg: Uint16Array;
+    _depth: number;
     glyph: Uint8Array;
     canvas: Canvas;
-    constructor(canvas: Canvas);
+    constructor(canvas: Canvas, depth?: number);
     get width(): number;
     get height(): number;
+    get depth(): number;
     draw(x: number, y: number, glyph: string | number, fg?: number | ColorData, bg?: number | ColorData): void;
     set(index: number, glyph: number, fg: number, bg: number): void;
     copy(buffer: DataBuffer): void;

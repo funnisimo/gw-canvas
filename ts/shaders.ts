@@ -1,5 +1,3 @@
-// Based on: https://github.com/ondras/fastiles/blob/master/ts/shaders.ts (v2.1.0)
-
 export const VS = `
 #version 300 es
 
@@ -14,8 +12,11 @@ out vec4 fgRgb;
 out vec4 bgRgb;
 flat out uvec2 fontPos;
 
+uniform int depth;
+
 void main() {
-	gl_Position = vec4(position, 0.0, 1.0);
+	float fdepth = float(depth) / 255.0;
+	gl_Position = vec4(position, fdepth, 1.0);
 
 	float fgr = float((fg & uint(0xF000)) >> 12);
 	float fgg = float((fg & uint(0x0F00)) >> 8);

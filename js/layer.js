@@ -1,18 +1,22 @@
 import { VERTICES_PER_TILE } from "./canvas";
 import * as Color from "./color";
 export class Layer {
-    constructor(canvas) {
+    constructor(canvas, depth = 0) {
         const size = canvas.width * canvas.height * VERTICES_PER_TILE;
         this.canvas = canvas;
         this.fg = new Uint16Array(size);
         this.bg = new Uint16Array(size);
         this.glyph = new Uint8Array(size);
+        this._depth = depth;
     }
     get width() {
         return this.canvas.width;
     }
     get height() {
         return this.canvas.height;
+    }
+    get depth() {
+        return this._depth;
     }
     draw(x, y, glyph, fg = 0xfff, bg = -1) {
         const index = x + y * this.canvas.width;
