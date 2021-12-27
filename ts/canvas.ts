@@ -50,7 +50,7 @@ export class Canvas {
     bg?: WebGLBuffer;
     glyph?: WebGLBuffer;
   };
-  layer!: Layer;
+  _layers: Layer[] = [];
 
   _attribs!: Record<string, number>;
   _uniforms!: Record<string, WebGLUniformLocation>;
@@ -93,6 +93,28 @@ export class Canvas {
   }
   set glyphs(glyphs: Glyphs) {
     this._setGlyphs(glyphs);
+  }
+
+  layer(depth = 0): Layer {
+    let layer = this._layers.find((l) => l.depth === depth);
+    if (layer) return layer;
+
+    layer = new Layer(this, depth);
+    this._layers.push(layer);
+    this._layers.sort((a, b) => a.depth - b.depth);
+    return layer;
+  }
+
+  clearLayer(depth = 0) {
+    const layer = this._layers.find((l) => l.depth === depth);
+    if (layer) layer.clear();
+  }
+
+  removeLayer(depth = 0) {
+    const index = this._layers.findIndex((l) => l.depth === depth);
+    if (index > -1) {
+      this._layers.splice(index, 1);
+    }
   }
 
   _createNode() {
@@ -216,10 +238,10 @@ export class Canvas {
     this._buffers.fg && gl.deleteBuffer(this._buffers.fg);
     this._buffers.bg && gl.deleteBuffer(this._buffers.bg);
     this._buffers.glyph && gl.deleteBuffer(this._buffers.glyph);
-    if (this.layer) {
-      this.layer.detach();
+    if (this._layers.length) {
+      this._layers.forEach((l) => l.detach());
+      this._layers.length = 0;
     }
-    this.layer = new Layer(this, 0);
 
     const fg = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, fg);
@@ -257,10 +279,8 @@ export class Canvas {
     this._glyphs.needsUpdate = false;
   }
 
-  draw(x: number, y: number, glyph: number, fg: number, bg: number): boolean {
-    this.layer.draw(x, y, glyph, fg, bg);
-    this._requestRender();
-    return true;
+  draw(x: number, y: number, glyph: number, fg: number, bg: number): void {
+    this.layer(0).draw(x, y, glyph, fg, bg);
   }
 
   render() {
@@ -287,29 +307,29 @@ export class Canvas {
     );
     gl.clear(gl.COLOR_BUFFER_BIT);
 
-    // loop layers
+    // sort layers?
 
-    if (!this.layer.empty) {
+    this._layers.forEach((layer) => {
+      if (layer.empty) return;
+
       // set depth
-      gl.uniform1i(this._uniforms["depth"], this.layer.depth);
+      gl.uniform1i(this._uniforms["depth"], layer.depth);
 
       gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.fg!);
-      gl.bufferData(gl.ARRAY_BUFFER, this.layer.fg, gl.DYNAMIC_DRAW);
+      gl.bufferData(gl.ARRAY_BUFFER, layer.fg, gl.DYNAMIC_DRAW);
 
       gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.bg!);
-      gl.bufferData(gl.ARRAY_BUFFER, this.layer.bg, gl.DYNAMIC_DRAW);
+      gl.bufferData(gl.ARRAY_BUFFER, layer.bg, gl.DYNAMIC_DRAW);
 
       gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.glyph!);
-      gl.bufferData(gl.ARRAY_BUFFER, this.layer.glyph, gl.DYNAMIC_DRAW);
+      gl.bufferData(gl.ARRAY_BUFFER, layer.glyph, gl.DYNAMIC_DRAW);
 
       gl.drawArrays(
         gl.TRIANGLES,
         0,
         this._width * this._height * VERTICES_PER_TILE
       );
-    }
-
-    // end loop
+    });
   }
 }
 

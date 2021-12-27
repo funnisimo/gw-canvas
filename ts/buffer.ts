@@ -112,7 +112,7 @@ export class Buffer extends DataBuffer {
     return this;
   }
 
-  copyFromCanvas() {
+  copyFromLayer() {
     this._layer.copyTo(this);
     return this;
   }

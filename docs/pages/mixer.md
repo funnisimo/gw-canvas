@@ -12,7 +12,7 @@ All of the fields are optional. Unset values will not be used when the sprite is
 const canvas = GWC.withFont({ width: 20, height: 5 });
 SHOW(canvas);
 
-const buffer = new GWC.Buffer(canvas.layer);
+const buffer = new GWC.Buffer(canvas.layer());
 
 const tile = {
   ch: ".",

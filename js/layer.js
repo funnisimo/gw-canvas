@@ -45,8 +45,9 @@ export class Layer {
         fg = Color.from(fg).toInt();
         bg = Color.from(bg).toInt();
         this.set(index, glyph, fg, bg);
-        if (glyph || fg || bg) {
+        if (glyph || bg || fg) {
             this._empty = false;
+            this.canvas._requestRender();
         }
     }
     set(index, glyph, fg, bg) {
@@ -82,6 +83,7 @@ export class Layer {
             }
             this.set(i, glyph, mixer.fg.toInt(), mixer.bg.toInt());
         });
+        this._empty = false;
         this.canvas._requestRender();
     }
     copyTo(buffer) {

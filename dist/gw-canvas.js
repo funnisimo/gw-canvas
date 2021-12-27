@@ -678,8 +678,9 @@ void main() {
 	        fg = from(fg).toInt();
 	        bg = from(bg).toInt();
 	        this.set(index, glyph, fg, bg);
-	        if (glyph || fg || bg) {
+	        if (glyph || bg || fg) {
 	            this._empty = false;
+	            this.canvas._requestRender();
 	        }
 	    }
 	    set(index, glyph, fg, bg) {
@@ -715,6 +716,7 @@ void main() {
 	            }
 	            this.set(i, glyph, mixer.fg.toInt(), mixer.bg.toInt());
 	        });
+	        this._empty = false;
 	        this.canvas._requestRender();
 	    }
 	    copyTo(buffer) {
@@ -749,6 +751,7 @@ void main() {
 	        this._autoRender = true;
 	        this._width = 50;
 	        this._height = 25;
+	        this._layers = [];
 	        if (!options.glyphs)
 	            throw new Error("You must supply glyphs for the canvas.");
 	        this._node = this._createNode();
@@ -781,6 +784,26 @@ void main() {
 	    }
 	    set glyphs(glyphs) {
 	        this._setGlyphs(glyphs);
+	    }
+	    layer(depth = 0) {
+	        let layer = this._layers.find((l) => l.depth === depth);
+	        if (layer)
+	            return layer;
+	        layer = new Layer(this, depth);
+	        this._layers.push(layer);
+	        this._layers.sort((a, b) => a.depth - b.depth);
+	        return layer;
+	    }
+	    clearLayer(depth = 0) {
+	        const layer = this._layers.find((l) => l.depth === depth);
+	        if (layer)
+	            layer.clear();
+	    }
+	    removeLayer(depth = 0) {
+	        const index = this._layers.findIndex((l) => l.depth === depth);
+	        if (index > -1) {
+	            this._layers.splice(index, 1);
+	        }
 	    }
 	    _createNode() {
 	        return document.createElement("canvas");
@@ -886,10 +909,10 @@ void main() {
 	        this._buffers.fg && gl.deleteBuffer(this._buffers.fg);
 	        this._buffers.bg && gl.deleteBuffer(this._buffers.bg);
 	        this._buffers.glyph && gl.deleteBuffer(this._buffers.glyph);
-	        if (this.layer) {
-	            this.layer.detach();
+	        if (this._layers.length) {
+	            this._layers.forEach((l) => l.detach());
+	            this._layers.length = 0;
 	        }
-	        this.layer = new Layer(this, 0);
 	        const fg = gl.createBuffer();
 	        gl.bindBuffer(gl.ARRAY_BUFFER, fg);
 	        gl.vertexAttribIPointer(attribs["fg"], 1, gl.UNSIGNED_SHORT, 0, 0);
@@ -914,9 +937,7 @@ void main() {
 	        this._glyphs.needsUpdate = false;
 	    }
 	    draw(x, y, glyph, fg, bg) {
-	        this.layer.draw(x, y, glyph, fg, bg);
-	        this._requestRender();
-	        return true;
+	        this.layer(0).draw(x, y, glyph, fg, bg);
 	    }
 	    render() {
 	        const gl = this._gl;
@@ -933,19 +954,20 @@ void main() {
 	        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 	        gl.clearColor(this.bg.r / 100, this.bg.g / 100, this.bg.b / 100, this.bg.a / 100);
 	        gl.clear(gl.COLOR_BUFFER_BIT);
-	        // loop layers
-	        if (!this.layer.empty) {
+	        // sort layers?
+	        this._layers.forEach((layer) => {
+	            if (layer.empty)
+	                return;
 	            // set depth
-	            gl.uniform1i(this._uniforms["depth"], this.layer.depth);
+	            gl.uniform1i(this._uniforms["depth"], layer.depth);
 	            gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.fg);
-	            gl.bufferData(gl.ARRAY_BUFFER, this.layer.fg, gl.DYNAMIC_DRAW);
+	            gl.bufferData(gl.ARRAY_BUFFER, layer.fg, gl.DYNAMIC_DRAW);
 	            gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.bg);
-	            gl.bufferData(gl.ARRAY_BUFFER, this.layer.bg, gl.DYNAMIC_DRAW);
+	            gl.bufferData(gl.ARRAY_BUFFER, layer.bg, gl.DYNAMIC_DRAW);
 	            gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.glyph);
-	            gl.bufferData(gl.ARRAY_BUFFER, this.layer.glyph, gl.DYNAMIC_DRAW);
+	            gl.bufferData(gl.ARRAY_BUFFER, layer.glyph, gl.DYNAMIC_DRAW);
 	            gl.drawArrays(gl.TRIANGLES, 0, this._width * this._height * VERTICES_PER_TILE);
-	        }
-	        // end loop
+	        });
 	    }
 	}
 	function withImage(image) {
@@ -1239,7 +1261,7 @@ void main() {
 	        this._layer.copy(this);
 	        return this;
 	    }
-	    copyFromCanvas() {
+	    copyFromLayer() {
 	        this._layer.copyTo(this);
 	        return this;
 	    }

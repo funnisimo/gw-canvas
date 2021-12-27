@@ -8,16 +8,16 @@ SHOW(canvas);
 
 canvas.draw(1, 2, 65, 0xf00);
 
-const buffer = new GWC.Buffer(canvas.layer);
+const buffer = new GWC.Buffer(canvas.layer());
 
 // draw a bunch of A's
 for (let i = 0; i < 20; ++i) {
-  canvas.layer.draw(i, 3, 65, 0xfff);
+  canvas.draw(i, 3, 65, 0xfff);
 }
 
 // undo drawing after a few seconds
 setTimeout(() => {
-  canvas.layer.copy(buffer);
+  canvas.layer().copy(buffer);
 }, 2000);
 ```
 
@@ -28,7 +28,7 @@ You can fill a buffer with glyph+colors.
 ```js
 const canvas = GWC.withFont({ width: 20, height: 5 });
 SHOW(canvas);
-const buffer = new GWC.Buffer(canvas.layer);
+const buffer = new GWC.Buffer(canvas.layer());
 buffer.fill(0, 0, 0x333); //  glyph, fg, bg
 buffer.draw(2, 2, 65, 0xf00);
 buffer.draw(3, 2, 66, 0x0f0);
@@ -46,7 +46,7 @@ Buffers allow you to draw based on chars that are converted to glyphs via the ca
 ```js
 const canvas = GWC.withFont({ width: 20, height: 5 });
 SHOW(canvas);
-const buffer = new GWC.Buffer(canvas.layer);
+const buffer = new GWC.Buffer(canvas.layer());
 buffer.fill(0, 0, 0x333);
 buffer.draw(2, 2, "t", 0xf00);
 buffer.draw(3, 2, "e", 0x0f0);
@@ -65,11 +65,11 @@ SHOW(canvas);
 
 canvas.draw(2, 2, 70, 0xf00, 0x333);
 
-const buffer = new GWC.Buffer(canvas.layer);
+const buffer = new GWC.Buffer(canvas.layer());
 buffer.fill(0, 0, 0x333);
 buffer.draw(2, 2, "t", 0xf00);
 SHOW(buffer.get(2, 2));
 
-buffer.copyFromCanvas();
+buffer.copyFromLayer();
 SHOW(buffer.get(2, 2));
 ```

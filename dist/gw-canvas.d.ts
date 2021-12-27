@@ -224,7 +224,7 @@ declare class Buffer extends DataBuffer {
     constructor(layer: Layer);
     _toGlyph(ch: string): number;
     render(): this;
-    copyFromCanvas(): this;
+    copyFromLayer(): this;
 }
 
 declare class Layer {
@@ -275,7 +275,7 @@ declare class Canvas {
         bg?: WebGLBuffer;
         glyph?: WebGLBuffer;
     };
-    layer: Layer;
+    _layers: Layer[];
     _attribs: Record<string, number>;
     _uniforms: Record<string, WebGLUniformLocation>;
     _texture: WebGLTexture;
@@ -290,6 +290,9 @@ declare class Canvas {
     get pxHeight(): number;
     get glyphs(): Glyphs;
     set glyphs(glyphs: Glyphs);
+    layer(depth?: number): Layer;
+    clearLayer(depth?: number): void;
+    removeLayer(depth?: number): void;
     _createNode(): HTMLCanvasElement;
     _configure(options: Options): void;
     _setGlyphs(glyphs: Glyphs): boolean;
@@ -302,7 +305,7 @@ declare class Canvas {
     _createGeometry(): void;
     _createData(): void;
     _uploadGlyphs(): void;
-    draw(x: number, y: number, glyph: number, fg: number, bg: number): boolean;
+    draw(x: number, y: number, glyph: number, fg: number, bg: number): void;
     render(): void;
 }
 interface ImageOptions extends Options {

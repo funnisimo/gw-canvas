@@ -28,5 +28,5 @@ export declare class Buffer extends DataBuffer {
     constructor(layer: Layer);
     _toGlyph(ch: string): number;
     render(): this;
-    copyFromCanvas(): this;
+    copyFromLayer(): this;
 }

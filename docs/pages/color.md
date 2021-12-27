@@ -13,7 +13,7 @@ const canvas = GWC.withFont({
   tileHeight: 12,
 });
 SHOW(canvas.node);
-const buffer = new GWC.Buffer(canvas.layer);
+const buffer = new GWC.Buffer(canvas.layer());
 buffer.fill(" ", 0x00f, 0x660);
 buffer.render();
 
@@ -79,7 +79,7 @@ const canvas = GWC.withFont({
   size: 10,
 });
 SHOW(canvas.node);
-const buffer = new GWC.Buffer(canvas.layer);
+const buffer = new GWC.Buffer(canvas.layer());
 buffer.fill(" ", 0x000, 0x000);
 buffer.render();
 
