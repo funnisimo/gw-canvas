@@ -31,8 +31,8 @@ describe("Mixer", () => {
 
     b.copy({});
     expect(b.ch).toEqual(-1);
-    expect(b.fg.css()).toEqual("transparent");
-    expect(b.bg.css()).toEqual("transparent");
+    expect(b.fg.css()).toEqual("#0000");
+    expect(b.bg.css()).toEqual("#0000");
   });
 
   test("clone", () => {
@@ -57,8 +57,8 @@ describe("Mixer", () => {
 
     a.nullify();
     expect(a.ch).toEqual(-1);
-    expect(a.fg.toInt()).toEqual(-1);
-    expect(a.bg.toInt()).toEqual(-1);
+    expect(a.fg.toInt()).toEqual(0x0000);
+    expect(a.bg.toInt()).toEqual(0x0000);
   });
 
   test("blackOut", () => {
@@ -70,8 +70,8 @@ describe("Mixer", () => {
 
     a.blackOut();
     expect(a.ch).toEqual(-1);
-    expect(a.fg.toInt()).toEqual(0);
-    expect(a.bg.toInt()).toEqual(0);
+    expect(a.fg.css()).toEqual("#000");
+    expect(a.bg.css()).toEqual("#000");
   });
 
   test("draw", () => {

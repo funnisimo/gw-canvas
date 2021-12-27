@@ -175,8 +175,8 @@ describe("Sprite", () => {
   test("from", () => {
     const made = Sprite.from({ ch: "A", fg: 0xf00 });
     expect(made.ch).toEqual("A");
-    expect(made.fg.toInt()).toEqual(0xf00);
-    expect(made.bg.toInt()).toEqual(-1);
+    expect(made.fg.toInt()).toEqual(0xf00f);
+    expect(made.bg.toInt()).toEqual(0x0000);
     expect(made.opacity).toEqual(100);
 
     expect(() => Sprite.from("UNKNOWN")).toThrow();

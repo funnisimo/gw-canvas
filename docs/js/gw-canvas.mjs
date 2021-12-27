@@ -270,8 +270,8 @@ class Color {
                 return true;
         }
         else if (typeof other === "number") {
-            if (other < 0x1000)
-                return this.toInt() === other;
+            const O = from(other);
+            return this.css() === O.css();
         }
         const O = from(other);
         if (this.isNull())
@@ -390,16 +390,19 @@ class Color {
      * @param base256 - Show in base 256 (#abcdef) instead of base 16 (#abc)
      */
     css() {
+        if (this.a !== 100) {
+            const v = this.toInt();
+            // if (v < 0) return "transparent";
+            return "#" + v.toString(16).padStart(4, "0");
+        }
         const v = this.toInt();
-        if (v < 0)
-            return "transparent";
-        return "#" + v.toString(16).padStart(3, "0");
+        // if (v < 0) return "transparent";
+        return "#" + v.toString(16).padStart(4, "0").substring(0, 3);
     }
     toString() {
         if (this.name)
             return this.name;
-        if (this.isNull())
-            return "null color";
+        // if (this.isNull()) return "null color";
         return this.css();
     }
 }

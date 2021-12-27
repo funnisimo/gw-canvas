@@ -143,7 +143,7 @@ describe("Color", () => {
     expect(a.equals(d)).toBeFalsy();
     expect(d.equals(a)).toBeFalsy();
 
-    expect(a.toInt()).toEqual(0xf80);
+    expect(a.toInt()).toEqual(0xf80f);
     expect(a.equals(0xf80)).toBeTruthy();
 
     expect(Color.colors.black.equals("black")).toBeTruthy();
@@ -153,16 +153,16 @@ describe("Color", () => {
 
   test("toInt", () => {
     const c = new Color.Color(100, 47, 0);
-    expect(c.toInt()).toEqual(0xf70);
+    expect(c.toInt()).toEqual(0xf70f);
     // expect(c.toInt(true)).toEqual(0xff7800);
 
     const d = new Color.Color(100, 50, 0);
-    expect(d.toInt()).toEqual(0xf80);
+    expect(d.toInt()).toEqual(0xf80f);
     // expect(d.toInt(true)).toEqual(0xff8000);
 
     const e = new Color.Color();
     expect(e.isNull()).toBeTruthy();
-    expect(e.toInt()).toEqual(-1);
+    expect(e.toInt()).toEqual(0x0000);
   });
 
   // test('fromInt', () => {
@@ -272,7 +272,7 @@ describe("Color", () => {
     const e = new Color.Color();
     expect(e.isNull()).toBeTruthy();
     const ed = e.add(d, 50);
-    expect(ed.toString()).toEqual("#111");
+    expect(ed.toString()).toEqual("#1118");
     expect(ed.isNull()).toBeFalsy();
   });
 
@@ -319,7 +319,7 @@ describe("Color", () => {
   test("toString", () => {
     const c = new Color.Color();
     expect(c.isNull()).toBeTruthy();
-    expect(c.toString()).toEqual("null color");
+    expect(c.toString()).toEqual("#0000");
 
     const d = Color.colors.teal;
     expect(d.toString()).toEqual("teal");
@@ -328,7 +328,7 @@ describe("Color", () => {
 
   test("css", () => {
     const c = Color.from(-1);
-    expect(c.css()).toEqual("transparent");
+    expect(c.css()).toEqual("#0000");
   });
 
   test("rgb hsl", () => {
