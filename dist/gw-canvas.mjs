@@ -629,11 +629,9 @@ var color = /*#__PURE__*/Object.freeze({
 
 class Layer {
     constructor(canvas, depth = 0) {
-        const size = canvas.width * canvas.height * VERTICES_PER_TILE;
+        this._empty = true;
         this.canvas = canvas;
-        this.fg = new Uint16Array(size);
-        this.bg = new Uint16Array(size);
-        this.glyph = new Uint8Array(size);
+        this.resize(canvas.width, canvas.height);
         this._depth = depth;
     }
     get width() {
@@ -645,6 +643,27 @@ class Layer {
     get depth() {
         return this._depth;
     }
+    get empty() {
+        return this._empty;
+    }
+    detach() {
+        // @ts-ignore
+        this.canvas = null;
+    }
+    resize(width, height) {
+        const size = width * height * VERTICES_PER_TILE;
+        if (!this.fg || this.fg.length !== size) {
+            this.fg = new Uint16Array(size);
+            this.bg = new Uint16Array(size);
+            this.glyph = new Uint8Array(size);
+        }
+    }
+    clear() {
+        this.fg.fill(0);
+        this.bg.fill(0);
+        this.glyph.fill(0);
+        this._empty = true;
+    }
     draw(x, y, glyph, fg = 0xfff, bg = -1) {
         const index = x + y * this.canvas.width;
         if (typeof glyph === "string") {
@@ -653,6 +672,9 @@ class Layer {
         fg = from(fg).toInt();
         bg = from(bg).toInt();
         this.set(index, glyph, fg, bg);
+        if (glyph || fg || bg) {
+            this._empty = false;
+        }
     }
     set(index, glyph, fg, bg) {
         index *= VERTICES_PER_TILE;
@@ -673,6 +695,13 @@ class Layer {
     //     }
     //   }
     copy(buffer) {
+        if (buffer.width !== this.width || buffer.height !== this.height) {
+            console.log("auto resizing buffer");
+            buffer.resize(this.width, this.height);
+        }
+        if (!this.canvas) {
+            throw new Error("Layer is detached.  Did you resize the canvas?");
+        }
         buffer._data.forEach((mixer, i) => {
             let glyph = mixer.ch;
             if (typeof glyph === "string") {
@@ -683,6 +712,7 @@ class Layer {
         this.canvas._requestRender();
     }
     copyTo(buffer) {
+        buffer.resize(this.width, this.height);
         for (let y = 0; y < this.height; ++y) {
             for (let x = 0; x < this.width; ++x) {
                 const index = (x + y * this.width) * VERTICES_PER_TILE;
@@ -850,6 +880,9 @@ class Canvas {
         this._buffers.fg && gl.deleteBuffer(this._buffers.fg);
         this._buffers.bg && gl.deleteBuffer(this._buffers.bg);
         this._buffers.glyph && gl.deleteBuffer(this._buffers.glyph);
+        if (this.layer) {
+            this.layer.detach();
+        }
         this.layer = new Layer(this, 0);
         const fg = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, fg);
@@ -895,15 +928,17 @@ class Canvas {
         gl.clearColor(this.bg.r / 100, this.bg.g / 100, this.bg.b / 100, this.bg.a / 100);
         gl.clear(gl.COLOR_BUFFER_BIT);
         // loop layers
-        // set depth
-        gl.uniform1i(this._uniforms["depth"], this.layer.depth);
-        gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.fg);
-        gl.bufferData(gl.ARRAY_BUFFER, this.layer.fg, gl.DYNAMIC_DRAW);
-        gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.bg);
-        gl.bufferData(gl.ARRAY_BUFFER, this.layer.bg, gl.DYNAMIC_DRAW);
-        gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.glyph);
-        gl.bufferData(gl.ARRAY_BUFFER, this.layer.glyph, gl.DYNAMIC_DRAW);
-        gl.drawArrays(gl.TRIANGLES, 0, this._width * this._height * VERTICES_PER_TILE);
+        if (!this.layer.empty) {
+            // set depth
+            gl.uniform1i(this._uniforms["depth"], this.layer.depth);
+            gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.fg);
+            gl.bufferData(gl.ARRAY_BUFFER, this.layer.fg, gl.DYNAMIC_DRAW);
+            gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.bg);
+            gl.bufferData(gl.ARRAY_BUFFER, this.layer.bg, gl.DYNAMIC_DRAW);
+            gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.glyph);
+            gl.bufferData(gl.ARRAY_BUFFER, this.layer.glyph, gl.DYNAMIC_DRAW);
+            gl.drawArrays(gl.TRIANGLES, 0, this._width * this._height * VERTICES_PER_TILE);
+        }
         // end loop
     }
 }
@@ -1122,18 +1157,24 @@ class Mixer {
 
 class DataBuffer {
     constructor(width, height) {
-        this._width = width;
-        this._height = height;
         this._data = [];
-        for (let i = 0; i < width * height; ++i) {
-            this._data.push(new Mixer());
-        }
+        this.resize(width, height);
     }
     get width() {
         return this._width;
     }
     get height() {
         return this._height;
+    }
+    resize(width, height) {
+        if (this._width === width && this._height === height)
+            return;
+        this._width = width;
+        this._height = height;
+        while (this._data.length < width * height) {
+            this._data.push(new Mixer());
+        }
+        this._data.length = width * height; // truncate if was too large
     }
     get(x, y) {
         let index = y * this.width + x;

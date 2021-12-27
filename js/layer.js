@@ -2,11 +2,9 @@ import { VERTICES_PER_TILE } from "./canvas";
 import * as Color from "./color";
 export class Layer {
     constructor(canvas, depth = 0) {
-        const size = canvas.width * canvas.height * VERTICES_PER_TILE;
+        this._empty = true;
         this.canvas = canvas;
-        this.fg = new Uint16Array(size);
-        this.bg = new Uint16Array(size);
-        this.glyph = new Uint8Array(size);
+        this.resize(canvas.width, canvas.height);
         this._depth = depth;
     }
     get width() {
@@ -18,6 +16,27 @@ export class Layer {
     get depth() {
         return this._depth;
     }
+    get empty() {
+        return this._empty;
+    }
+    detach() {
+        // @ts-ignore
+        this.canvas = null;
+    }
+    resize(width, height) {
+        const size = width * height * VERTICES_PER_TILE;
+        if (!this.fg || this.fg.length !== size) {
+            this.fg = new Uint16Array(size);
+            this.bg = new Uint16Array(size);
+            this.glyph = new Uint8Array(size);
+        }
+    }
+    clear() {
+        this.fg.fill(0);
+        this.bg.fill(0);
+        this.glyph.fill(0);
+        this._empty = true;
+    }
     draw(x, y, glyph, fg = 0xfff, bg = -1) {
         const index = x + y * this.canvas.width;
         if (typeof glyph === "string") {
@@ -26,6 +45,9 @@ export class Layer {
         fg = Color.from(fg).toInt();
         bg = Color.from(bg).toInt();
         this.set(index, glyph, fg, bg);
+        if (glyph || fg || bg) {
+            this._empty = false;
+        }
     }
     set(index, glyph, fg, bg) {
         index *= VERTICES_PER_TILE;
@@ -46,6 +68,13 @@ export class Layer {
     //     }
     //   }
     copy(buffer) {
+        if (buffer.width !== this.width || buffer.height !== this.height) {
+            console.log("auto resizing buffer");
+            buffer.resize(this.width, this.height);
+        }
+        if (!this.canvas) {
+            throw new Error("Layer is detached.  Did you resize the canvas?");
+        }
         buffer._data.forEach((mixer, i) => {
             let glyph = mixer.ch;
             if (typeof glyph === "string") {
@@ -56,6 +85,7 @@ export class Layer {
         this.canvas._requestRender();
     }
     copyTo(buffer) {
+        buffer.resize(this.width, this.height);
         for (let y = 0; y < this.height; ++y) {
             for (let x = 0; x < this.width; ++x) {
                 const index = (x + y * this.width) * VERTICES_PER_TILE;

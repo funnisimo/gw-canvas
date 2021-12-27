@@ -11,16 +11,12 @@ export interface DrawInfo {
 
 export class DataBuffer {
   _data: Mixer[];
-  _width: number;
-  _height: number;
+  _width!: number;
+  _height!: number;
 
   constructor(width: number, height: number) {
-    this._width = width;
-    this._height = height;
     this._data = [];
-    for (let i = 0; i < width * height; ++i) {
-      this._data.push(new Mixer());
-    }
+    this.resize(width, height);
   }
 
   get width() {
@@ -28,6 +24,17 @@ export class DataBuffer {
   }
   get height() {
     return this._height;
+  }
+
+  resize(width: number, height: number) {
+    if (this._width === width && this._height === height) return;
+
+    this._width = width;
+    this._height = height;
+    while (this._data.length < width * height) {
+      this._data.push(new Mixer());
+    }
+    this._data.length = width * height; // truncate if was too large
   }
 
   get(x: number, y: number) {

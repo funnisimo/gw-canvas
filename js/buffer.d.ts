@@ -14,6 +14,7 @@ export declare class DataBuffer {
     constructor(width: number, height: number);
     get width(): number;
     get height(): number;
+    resize(width: number, height: number): void;
     get(x: number, y: number): Mixer;
     _toGlyph(ch: string): number;
     draw(x: number, y: number, glyph?: number | string, fg?: Color.ColorBase, bg?: Color.ColorBase): this;

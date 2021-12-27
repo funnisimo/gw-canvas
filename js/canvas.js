@@ -160,6 +160,9 @@ export class Canvas {
         this._buffers.fg && gl.deleteBuffer(this._buffers.fg);
         this._buffers.bg && gl.deleteBuffer(this._buffers.bg);
         this._buffers.glyph && gl.deleteBuffer(this._buffers.glyph);
+        if (this.layer) {
+            this.layer.detach();
+        }
         this.layer = new Layer(this, 0);
         const fg = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, fg);
@@ -205,15 +208,17 @@ export class Canvas {
         gl.clearColor(this.bg.r / 100, this.bg.g / 100, this.bg.b / 100, this.bg.a / 100);
         gl.clear(gl.COLOR_BUFFER_BIT);
         // loop layers
-        // set depth
-        gl.uniform1i(this._uniforms["depth"], this.layer.depth);
-        gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.fg);
-        gl.bufferData(gl.ARRAY_BUFFER, this.layer.fg, gl.DYNAMIC_DRAW);
-        gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.bg);
-        gl.bufferData(gl.ARRAY_BUFFER, this.layer.bg, gl.DYNAMIC_DRAW);
-        gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.glyph);
-        gl.bufferData(gl.ARRAY_BUFFER, this.layer.glyph, gl.DYNAMIC_DRAW);
-        gl.drawArrays(gl.TRIANGLES, 0, this._width * this._height * VERTICES_PER_TILE);
+        if (!this.layer.empty) {
+            // set depth
+            gl.uniform1i(this._uniforms["depth"], this.layer.depth);
+            gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.fg);
+            gl.bufferData(gl.ARRAY_BUFFER, this.layer.fg, gl.DYNAMIC_DRAW);
+            gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.bg);
+            gl.bufferData(gl.ARRAY_BUFFER, this.layer.bg, gl.DYNAMIC_DRAW);
+            gl.bindBuffer(gl.ARRAY_BUFFER, this._buffers.glyph);
+            gl.bufferData(gl.ARRAY_BUFFER, this.layer.glyph, gl.DYNAMIC_DRAW);
+            gl.drawArrays(gl.TRIANGLES, 0, this._width * this._height * VERTICES_PER_TILE);
+        }
         // end loop
     }
 }

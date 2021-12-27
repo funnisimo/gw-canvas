@@ -210,6 +210,7 @@ declare class DataBuffer {
     constructor(width: number, height: number);
     get width(): number;
     get height(): number;
+    resize(width: number, height: number): void;
     get(x: number, y: number): Mixer;
     _toGlyph(ch: string): number;
     draw(x: number, y: number, glyph?: number | string, fg?: ColorBase, bg?: ColorBase): this;
@@ -227,15 +228,20 @@ declare class Buffer extends DataBuffer {
 }
 
 declare class Layer {
+    canvas: Canvas;
     fg: Uint16Array;
     bg: Uint16Array;
-    _depth: number;
     glyph: Uint8Array;
-    canvas: Canvas;
+    _depth: number;
+    _empty: boolean;
     constructor(canvas: Canvas, depth?: number);
     get width(): number;
     get height(): number;
     get depth(): number;
+    get empty(): boolean;
+    detach(): void;
+    resize(width: number, height: number): void;
+    clear(): void;
     draw(x: number, y: number, glyph: string | number, fg?: number | ColorData, bg?: number | ColorData): void;
     set(index: number, glyph: number, fg: number, bg: number): void;
     copy(buffer: DataBuffer): void;
